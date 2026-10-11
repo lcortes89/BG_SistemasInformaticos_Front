@@ -1,9 +1,34 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import logoHeader from '@/assets/logo/logo_header.png'
+
+const isHidden = ref(false)
+const scrollThreshold = 100
+let lastScrollY = 0
+
+function handleScroll() {
+  const currentScrollY = window.scrollY
+
+  if (currentScrollY > lastScrollY && currentScrollY > scrollThreshold) {
+    isHidden.value = true
+  } else if (currentScrollY < lastScrollY) {
+    isHidden.value = false
+  }
+
+  lastScrollY = currentScrollY
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
-  <header class="header">
+  <header class="header" :class="{ 'header--hidden': isHidden }">
     <div class="header__container">
       <RouterLink to="/" class="header__logo-link">
         <img :src="logoHeader" alt="BG Sistemas Informáticos" class="header__logo" />
@@ -22,8 +47,18 @@ import logoHeader from '@/assets/logo/logo_header.png'
 
 <style scoped>
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   background-color: var(--color-navy, #1a2b4c);
   padding: 1rem 2rem;
+  transition: transform 0.3s ease;
+}
+
+.header--hidden {
+  transform: translateY(-100%);
 }
 
 .header__container {
