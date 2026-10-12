@@ -14,4 +14,9 @@ export const contactMapper = {
   name: (dto) => dto.name,
   status: (dto) => dto.status,
   createdAt: (dto) => dto.createdAt,
+  email: (dto) => dto.email ?? null,
+  phone: (dto) => dto.phone ?? null,
+  interestedService: (dto) => dto.interestedService ?? null,
+  message: (dto) => dto.message ?? null,
+  note: (dto) => dto.note ?? null,
 }

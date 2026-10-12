@@ -12,9 +12,12 @@ export const routes = [
   { path: '/admin/login', name: 'admin-login', component: () => import('@/views/admin/AdminLoginView.vue') },
   {
     path: '/admin',
-    name: 'admin-dashboard',
-    component: () => import('@/views/admin/AdminDashboardView.vue'),
-    meta: { requiresAuth: true },
+    component: () => import('@/views/admin/AdminLayout.vue'),
+    meta: { requiresAuth: true }, // the children inherit it
+    children: [
+      { path: '', name: 'admin-dashboard', component: () => import('@/views/admin/AdminDashboardView.vue') },
+      { path: 'contactos', name: 'admin-contacts', component: () => import('@/views/admin/AdminContactsView.vue') },
+    ],
   },
   // 404: any route that does not exist
   { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue') },
