@@ -19,6 +19,7 @@ export const routes = [
       { path: 'contactos', name: 'admin-contacts', component: () => import('@/views/admin/AdminContactsView.vue') },
       { path: 'marcas', name: 'admin-brands', component: () => import('@/views/admin/AdminBrandsView.vue') },
       { path: 'productos', name: 'admin-services', component: () => import('@/views/admin/AdminServicesView.vue') },
+      { path: 'clientes', name: 'admin-clients', component: () => import('@/views/admin/AdminClientsView.vue') },
     ],
   },
   // 404: any route that does not exist

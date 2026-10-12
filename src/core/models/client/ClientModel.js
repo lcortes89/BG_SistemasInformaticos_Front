@@ -1,12 +1,13 @@
 export default class ClientModel {
 
-  constructor(id, name, businessType, testimonial, logoUrl, rating) {
+  constructor(id, name, businessType, testimonial, logoUrl, rating, published = true) {
     this.id = id
     this.name = name
     this.businessType = businessType
     this.testimonial = testimonial
     this.logoUrl = logoUrl
     this.rating = rating
+    this.published = published
   }
 
   getInitials() {
@@ -26,6 +27,7 @@ export default class ClientModel {
       mapper.testimonial(dto),
       mapper.logoUrl(dto),
       mapper.rating(dto),
+      mapper.published(dto),
     )
   }
 }
