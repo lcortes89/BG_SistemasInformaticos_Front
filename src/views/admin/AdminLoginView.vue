@@ -1,5 +1,8 @@
 <script setup>
+import { useRoute } from 'vue-router'
 import AdminLoginForm from '@/components/admin/AdminLoginForm.vue'
+
+const route = useRoute()
 </script>
 
 <template>
@@ -7,6 +10,11 @@ import AdminLoginForm from '@/components/admin/AdminLoginForm.vue'
     <div class="admin-login__card">
       <h1>Acceso administración</h1>
       <p>Introduce tus credenciales para gestionar la web.</p>
+      <Transition name="slide-fade" appear>
+        <p v-if="route.query.expired" class="admin-login__notice" role="status">
+          Tu sesión ha caducado. Vuelve a iniciar sesión.
+        </p>
+      </Transition>
       <AdminLoginForm />
     </div>
   </section>
@@ -28,7 +36,15 @@ import AdminLoginForm from '@/components/admin/AdminLoginForm.vue'
     box-shadow: 0 4px 20px rgba(11, 31, 58, 0.08);
 
     h1 { margin: 0 0 0.5rem; font-size: 1.6rem; color: var(--color-navy); }
-    p { margin: 0 0 2rem; color: var(--color-muted); }
+    > p { margin: 0 0 2rem; color: var(--color-muted); }
+  }
+
+  &__notice {
+    margin: -1rem 0 1.5rem !important;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius);
+    color: #78350f !important;
+    background: #fef3c7;
   }
 }
 </style>

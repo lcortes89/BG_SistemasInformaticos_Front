@@ -5,6 +5,10 @@ export const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
 })
 
+const FORBIDDEN_MESSAGE = 'No tienes permiso para realizar esta acción.'
+const SERVER_ERROR_MESSAGE = 'Ha ocurrido un error en el servidor. Inténtalo más tarde.'
+const NETWORK_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Inténtalo más tarde.'
+
 export default class BaseRepository {
 
   constructor(resource) {
@@ -20,17 +24,24 @@ export default class BaseRepository {
     return this.#request(() => http.post(`${this.resource}${path}`, body, config))
   }
 
-  // Keeps the message sent by the backend (ApiErrorDTO) instead of a generic one
+  // Keeps the message sent by the backend (ApiErrorDTO), except for 403 and 5xx
   async #request(call) {
     try {
       const response = await call()
       return response.data
     } catch (error) {
+      const status = error.response?.status
       const apiError = error.response?.data
-      const wrapped = new Error(apiError?.message || 'No se pudo conectar con el servidor. Inténtalo más tarde.')
-      wrapped.status = error.response?.status
+      const wrapped = new Error(BaseRepository.messageFor(status, apiError?.message))
+      wrapped.status = status
       wrapped.details = apiError?.details || null
       throw wrapped
     }
+  }
+
+  static messageFor(status, backendMessage) {
+    if (status === 403) return FORBIDDEN_MESSAGE
+    if (status >= 500) return SERVER_ERROR_MESSAGE
+    return backendMessage || NETWORK_ERROR_MESSAGE
   }
 }
