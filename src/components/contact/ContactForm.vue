@@ -17,7 +17,9 @@ const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContac
       <label for="contact-name">Nombre *</label>
       <input id="contact-name" v-model="form.name" type="text" autocomplete="name"
              :aria-invalid="!!errors.name" aria-describedby="contact-name-error" />
-      <p v-if="errors.name" id="contact-name-error" class="contact-form__error">{{ errors.name }}</p>
+      <Transition name="slide-fade">
+        <p v-if="errors.name" id="contact-name-error" class="contact-form__error">{{ errors.name }}</p>
+      </Transition>
     </div>
 
     <div class="contact-form__row">
@@ -25,14 +27,18 @@ const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContac
         <label for="contact-email">Email *</label>
         <input id="contact-email" v-model="form.email" type="email" autocomplete="email"
                :aria-invalid="!!errors.email" aria-describedby="contact-email-error" />
-        <p v-if="errors.email" id="contact-email-error" class="contact-form__error">{{ errors.email }}</p>
+        <Transition name="slide-fade">
+          <p v-if="errors.email" id="contact-email-error" class="contact-form__error">{{ errors.email }}</p>
+        </Transition>
       </div>
 
       <div class="contact-form__field">
         <label for="contact-phone">Teléfono</label>
         <input id="contact-phone" v-model="form.phone" type="tel" autocomplete="tel"
                :aria-invalid="!!errors.phone" aria-describedby="contact-phone-error" />
-        <p v-if="errors.phone" id="contact-phone-error" class="contact-form__error">{{ errors.phone }}</p>
+        <Transition name="slide-fade">
+          <p v-if="errors.phone" id="contact-phone-error" class="contact-form__error">{{ errors.phone }}</p>
+        </Transition>
       </div>
     </div>
 
@@ -50,7 +56,9 @@ const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContac
       <label for="contact-message">Mensaje *</label>
       <textarea id="contact-message" v-model="form.message" rows="5"
                 :aria-invalid="!!errors.message" aria-describedby="contact-message-error"></textarea>
-      <p v-if="errors.message" id="contact-message-error" class="contact-form__error">{{ errors.message }}</p>
+      <Transition name="slide-fade">
+        <p v-if="errors.message" id="contact-message-error" class="contact-form__error">{{ errors.message }}</p>
+      </Transition>
     </div>
 
     <div class="contact-form__field">
@@ -61,13 +69,19 @@ const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContac
           He leído y acepto la <RouterLink to="/privacidad" target="_blank">política de privacidad</RouterLink> *
         </span>
       </label>
-      <p v-if="errors.gdprConsent" id="contact-gdpr-error" class="contact-form__error">{{ errors.gdprConsent }}</p>
+      <Transition name="slide-fade">
+        <p v-if="errors.gdprConsent" id="contact-gdpr-error" class="contact-form__error">{{ errors.gdprConsent }}</p>
+      </Transition>
     </div>
 
-    <p v-if="submitError" class="contact-form__alert contact-form__alert--error" role="alert">{{ submitError }}</p>
-    <p v-if="isSuccess" class="contact-form__alert contact-form__alert--success" role="status">
-      ¡Gracias! Hemos recibido tu mensaje y te contactaremos lo antes posible.
-    </p>
+    <Transition name="slide-fade">
+      <p v-if="submitError" class="contact-form__alert contact-form__alert--error" role="alert">{{ submitError }}</p>
+    </Transition>
+    <Transition name="slide-fade">
+      <p v-if="isSuccess" class="contact-form__alert contact-form__alert--success" role="status">
+        ¡Gracias! Hemos recibido tu mensaje y te contactaremos lo antes posible.
+      </p>
+    </Transition>
 
     <button type="submit" class="btn btn--primary contact-form__submit" :disabled="isSubmitting">
       <span v-if="isSubmitting" class="contact-form__spinner" aria-hidden="true"></span>
