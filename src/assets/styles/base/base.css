@@ -1,0 +1,30 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+}
+
+img { max-width: 100%; }
+
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+.btn {
+  display: inline-block;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius);
+  border: 2px solid transparent;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.btn--primary { background: var(--color-orange); color: #fff; }
+.btn--primary:hover { background: var(--color-orange-dark); }
+.btn--outline { border-color: #fff; color: #fff; background: transparent; }
