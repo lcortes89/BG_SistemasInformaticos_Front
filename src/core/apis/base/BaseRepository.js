@@ -15,8 +15,9 @@ export default class BaseRepository {
     return this.#request(() => http.get(`${this.resource}${path}`, { params }))
   }
 
-  async post(path = '', body = {}) {
-    return this.#request(() => http.post(`${this.resource}${path}`, body))
+  // config: extra axios options, e.g. { auth: { username, password } } for HTTP Basic
+  async post(path = '', body = {}, config = {}) {
+    return this.#request(() => http.post(`${this.resource}${path}`, body, config))
   }
 
   // Keeps the message sent by the backend (ApiErrorDTO) instead of a generic one

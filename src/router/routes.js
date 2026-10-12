@@ -10,6 +10,7 @@ export const routes = [
   { path: '/cookies', name: 'cookies', component: () => import('@/views/public/LegalView.vue') },
   // Admin area: reached by typing the URL, no public link
   { path: '/admin/login', name: 'admin-login', component: () => import('@/views/admin/AdminLoginView.vue') },
+  { path: '/admin', name: 'admin-dashboard', component: () => import('@/views/admin/AdminDashboardView.vue') },
   // 404: any route that does not exist
   { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue') },
 ]
