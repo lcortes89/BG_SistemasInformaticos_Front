@@ -1,13 +1,14 @@
 // Frontend representation of a service (what the views work with)
 export default class ServiceModel {
 
-  constructor(id, name, description, imageUrl, brandId, brandName) {
+  constructor(id, name, description, imageUrl, brandId, brandName, featured = false) {
     this.id = id
     this.name = name
     this.description = description
     this.imageUrl = imageUrl
     this.brandId = brandId
     this.brandName = brandName
+    this.featured = featured
   }
 
   static create(dto, mapper) {
@@ -18,6 +19,7 @@ export default class ServiceModel {
       mapper.imageUrl(dto),
       mapper.brandId(dto),
       mapper.brandName(dto),
+      mapper.featured(dto),
     )
   }
 }
