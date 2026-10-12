@@ -24,6 +24,11 @@ export default class BaseRepository {
     return this.#request(() => http.post(`${this.resource}${path}`, body, config))
   }
 
+  // PATCH: changes only some fields of a resource
+  async patch(path = '', body = {}) {
+    return this.#request(() => http.patch(`${this.resource}${path}`, body))
+  }
+
   // Keeps the message sent by the backend (ApiErrorDTO), except for 403 and 5xx
   async #request(call) {
     try {

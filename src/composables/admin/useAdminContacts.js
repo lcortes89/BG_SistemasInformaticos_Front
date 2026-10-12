@@ -9,6 +9,8 @@ export function useAdminContacts(service = new AdminContactService(), pageSize =
   const totalElements = ref(0)
   const isLoading = ref(false)
   const error = ref(null)
+  const feedback = ref(null) // success message after an action
+  const actionError = ref(null) // error message after an action
 
   async function loadPage(pageNumber = 0) {
     isLoading.value = true
@@ -32,5 +34,23 @@ export function useAdminContacts(service = new AdminContactService(), pageSize =
     await loadPage(0)
   }
 
-  return { contacts, status, page, totalPages, totalElements, isLoading, error, loadPage, changeStatus }
+  // Saves the change and reloads the page (the contact may leave the current filter)
+  async function updateContact(id, changes, successMessage = 'Contacto actualizado') {
+    feedback.value = null
+    actionError.value = null
+    try {
+      await service.update(id, changes)
+      feedback.value = successMessage
+      await loadPage(page.value)
+      return true
+    } catch (e) {
+      actionError.value = e.message
+      return false
+    }
+  }
+
+  return {
+    contacts, status, page, totalPages, totalElements, isLoading, error, feedback, actionError,
+    loadPage, changeStatus, updateContact,
+  }
 }

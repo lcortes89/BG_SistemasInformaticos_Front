@@ -4,6 +4,7 @@ import { useAdminContacts } from '@/composables/admin/useAdminContacts'
 function fakeService() {
   return {
     getPage: vi.fn().mockResolvedValue({ items: [{ id: 1 }], page: 0, totalPages: 3, totalElements: 25 }),
+    update: vi.fn().mockResolvedValue({ id: 1 }),
   }
 }
 
@@ -38,5 +39,28 @@ describe('useAdminContacts', () => {
     await loadPage(0)
 
     expect(error.value).toBe('No tienes permiso para realizar esta acción.')
+  })
+
+  it('updates a contact, shows a success message and reloads the page', async () => {
+    const service = fakeService()
+    const { feedback, updateContact } = useAdminContacts(service)
+
+    const ok = await updateContact(1, { status: 'ARCHIVED' }, 'Contacto archivado')
+
+    expect(ok).toBe(true)
+    expect(service.update).toHaveBeenCalledWith(1, { status: 'ARCHIVED' })
+    expect(service.getPage).toHaveBeenCalled()
+    expect(feedback.value).toBe('Contacto archivado')
+  })
+
+  it('shows the error when the update fails', async () => {
+    const service = { ...fakeService(), update: vi.fn().mockRejectedValue(new Error('Contact with id 9 not found')) }
+    const { feedback, actionError, updateContact } = useAdminContacts(service)
+
+    const ok = await updateContact(9, { status: 'ARCHIVED' })
+
+    expect(ok).toBe(false)
+    expect(feedback.value).toBeNull()
+    expect(actionError.value).toBe('Contact with id 9 not found')
   })
 })
