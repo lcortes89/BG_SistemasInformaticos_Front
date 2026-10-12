@@ -12,4 +12,9 @@ export default class AdminContactRepository extends BaseRepository {
     if (status) params.status = status
     return this.get('', params)
   }
+
+  // PATCH /api/admin/contacts/{id}  { status?, note? }
+  async update(id, changes) {
+    return this.patch(`/${id}`, changes)
+  }
 }

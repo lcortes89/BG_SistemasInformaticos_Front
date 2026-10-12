@@ -20,4 +20,10 @@ export default class AdminContactService {
       totalElements: response.totalElements,
     }
   }
+
+  // changes: { status } and/or { note }
+  async update(id, changes) {
+    const dto = await this.#repo.update(id, changes)
+    return ContactModel.create(dto, contactMapper)
+  }
 }
