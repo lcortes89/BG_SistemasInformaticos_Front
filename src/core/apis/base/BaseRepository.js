@@ -24,9 +24,18 @@ export default class BaseRepository {
     return this.#request(() => http.post(`${this.resource}${path}`, body, config))
   }
 
+  // PUT: replaces the whole resource
+  async put(path = '', body = {}) {
+    return this.#request(() => http.put(`${this.resource}${path}`, body))
+  }
+
   // PATCH: changes only some fields of a resource
   async patch(path = '', body = {}) {
     return this.#request(() => http.patch(`${this.resource}${path}`, body))
+  }
+
+  async delete(path = '') {
+    return this.#request(() => http.delete(`${this.resource}${path}`))
   }
 
   // Keeps the message sent by the backend (ApiErrorDTO), except for 403 and 5xx

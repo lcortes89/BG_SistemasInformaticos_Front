@@ -24,7 +24,7 @@ describe('AdminLoginForm', () => {
 
   it('goes to the dashboard after a successful login', async () => {
     const { wrapper, router } = await mountForm({ login: vi.fn().mockResolvedValue() })
-    const push = vi.spyOn(router, 'push')
+    const push = vi.spyOn(router, 'push').mockResolvedValue()
     await wrapper.find('#login-email').setValue('admin@bg.es')
     await wrapper.find('#login-password').setValue('secret123')
 

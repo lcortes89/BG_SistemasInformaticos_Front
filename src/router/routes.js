@@ -17,6 +17,8 @@ export const routes = [
     children: [
       { path: '', name: 'admin-dashboard', component: () => import('@/views/admin/AdminDashboardView.vue') },
       { path: 'contactos', name: 'admin-contacts', component: () => import('@/views/admin/AdminContactsView.vue') },
+      { path: 'marcas', name: 'admin-brands', component: () => import('@/views/admin/AdminBrandsView.vue') },
+      { path: 'productos', name: 'admin-services', component: () => import('@/views/admin/AdminServicesView.vue') },
     ],
   },
   // 404: any route that does not exist

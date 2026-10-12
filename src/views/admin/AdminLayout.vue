@@ -9,6 +9,8 @@ const router = useRouter()
 const links = [
   { to: { name: 'admin-dashboard' }, label: 'Resumen' },
   { to: { name: 'admin-contacts' }, label: 'Contactos' },
+  { to: { name: 'admin-brands' }, label: 'Marcas' },
+  { to: { name: 'admin-services' }, label: 'Productos' },
 ]
 
 function logout() {
