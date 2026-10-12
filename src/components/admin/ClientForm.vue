@@ -1,5 +1,6 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { reactive } from 'vue'
+import ImageUrlField from '@/shared/ImageUrlField.vue'
 
 const TESTIMONIAL_MAX = 1000
 
@@ -20,9 +21,6 @@ const form = reactive({
   published: props.client?.published ?? true,
 })
 const errors = reactive({})
-const imageFailed = ref(false)
-
-watch(() => form.logoUrl, () => { imageFailed.value = false })
 
 // Same rules as the backend (ClientRequestDTO) - BGSI-137 required fields
 function validate() {
@@ -76,15 +74,7 @@ function submit() {
       <p v-if="errors.rating" class="admin-form__error">{{ errors.rating }}</p>
     </div>
 
-    <div class="admin-form__field">
-      <label for="client-logo">URL del logo</label>
-      <input id="client-logo" v-model="form.logoUrl" type="url" placeholder="https://..." :aria-invalid="!!errors.logoUrl" />
-      <p v-if="errors.logoUrl" class="admin-form__error">{{ errors.logoUrl }}</p>
-      <div v-if="form.logoUrl" class="admin-form__preview">
-        <img v-if="!imageFailed" :src="form.logoUrl" alt="Vista previa del logo" @error="imageFailed = true" />
-        <span v-else>No se puede mostrar la imagen. Revisa la URL.</span>
-      </div>
-    </div>
+    <ImageUrlField id="client-logo" v-model="form.logoUrl" label="Logo del cliente" :error="errors.logoUrl" />
 
     <label class="admin-form__check">
       <input id="client-published" v-model="form.published" type="checkbox" />
