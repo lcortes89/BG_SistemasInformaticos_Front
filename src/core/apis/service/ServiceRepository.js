@@ -6,6 +6,11 @@ export default class ServiceRepository extends BaseRepository {
     super('/services')
   }
 
+  // GET /api/services
+  async findAll() {
+    return this.get()
+  }
+
   // GET /api/services?featured=true
   async findFeatured() {
     return this.get('', { featured: true })
