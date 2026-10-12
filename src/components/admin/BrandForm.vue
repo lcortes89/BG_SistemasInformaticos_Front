@@ -1,5 +1,6 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { reactive } from 'vue'
+import ImageUrlField from '@/shared/ImageUrlField.vue'
 
 const props = defineProps({
   brand: { type: Object, default: null }, // BrandModel when editing, null when creating
@@ -17,9 +18,6 @@ const form = reactive({
   active: props.brand?.active ?? true,
 })
 const errors = reactive({})
-const imageFailed = ref(false)
-
-watch(() => form.logoUrl, () => { imageFailed.value = false })
 
 // Same rules as the backend (BrandRequestDTO)
 function validate() {
@@ -59,15 +57,7 @@ function submit() {
       <p v-if="errors.description" class="admin-form__error">{{ errors.description }}</p>
     </div>
 
-    <div class="admin-form__field">
-      <label for="brand-logo">URL del logo</label>
-      <input id="brand-logo" v-model="form.logoUrl" type="url" placeholder="https://..." :aria-invalid="!!errors.logoUrl" />
-      <p v-if="errors.logoUrl" class="admin-form__error">{{ errors.logoUrl }}</p>
-      <div v-if="form.logoUrl" class="admin-form__preview">
-        <img v-if="!imageFailed" :src="form.logoUrl" alt="Vista previa del logo" @error="imageFailed = true" />
-        <span v-else>No se puede mostrar la imagen. Revisa la URL.</span>
-      </div>
-    </div>
+    <ImageUrlField id="brand-logo" v-model="form.logoUrl" label="Logo" :error="errors.logoUrl" />
 
     <label class="admin-form__check">
       <input id="brand-active" v-model="form.active" type="checkbox" />

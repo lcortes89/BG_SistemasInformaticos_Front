@@ -1,5 +1,6 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { reactive } from 'vue'
+import ImageUrlField from '@/shared/ImageUrlField.vue'
 
 const props = defineProps({
   service: { type: Object, default: null }, // ServiceModel when editing, null when creating
@@ -18,9 +19,6 @@ const form = reactive({
   featured: props.service?.featured ?? false,
 })
 const errors = reactive({})
-const imageFailed = ref(false)
-
-watch(() => form.imageUrl, () => { imageFailed.value = false })
 
 // Same rules as the backend (ServiceRequestDTO)
 function validate() {
@@ -61,15 +59,7 @@ function submit() {
       <p v-if="errors.description" class="admin-form__error">{{ errors.description }}</p>
     </div>
 
-    <div class="admin-form__field">
-      <label for="service-image">URL de la imagen</label>
-      <input id="service-image" v-model="form.imageUrl" type="url" placeholder="https://..." :aria-invalid="!!errors.imageUrl" />
-      <p v-if="errors.imageUrl" class="admin-form__error">{{ errors.imageUrl }}</p>
-      <div v-if="form.imageUrl" class="admin-form__preview">
-        <img v-if="!imageFailed" :src="form.imageUrl" alt="Vista previa de la imagen" @error="imageFailed = true" />
-        <span v-else>No se puede mostrar la imagen. Revisa la URL.</span>
-      </div>
-    </div>
+    <ImageUrlField id="service-image" v-model="form.imageUrl" label="Imagen del producto" :error="errors.imageUrl" />
 
     <label class="admin-form__check">
       <input id="service-featured" v-model="form.featured" type="checkbox" />
