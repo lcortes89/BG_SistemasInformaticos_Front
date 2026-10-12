@@ -40,13 +40,16 @@ onMounted(loadBrands)
           />
         </div>
 
-        <BrandServices
-          v-if="selectedBrand"
-          :brand="selectedBrand"
-          :services="services"
-          :is-loading="isLoadingServices"
-          :error="servicesError"
-        />
+        <Transition name="slide-fade" mode="out-in">
+          <BrandServices
+            v-if="selectedBrand"
+            :key="selectedBrand.id"
+            :brand="selectedBrand"
+            :services="services"
+            :is-loading="isLoadingServices"
+            :error="servicesError"
+          />
+        </Transition>
       </template>
     </div>
   </section>
@@ -68,6 +71,31 @@ onMounted(loadBrands)
   &__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
   &__message { text-align: center; color: var(--color-muted); }
   &__message--error { color: #b91c1c; }
+}
+
+.slide-fade-enter-active {
+  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: opacity 0.25s ease-in, transform 0.25s ease-in;
+}
+
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide-fade-enter-active,
+  .slide-fade-leave-active {
+    transition: none;
+  }
 }
 
 @media (max-width: 1024px) {
