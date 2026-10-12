@@ -123,7 +123,14 @@ function closeMenu() {
 
     &.is-open {
       display: flex;
+      animation: slide-fade-in 0.3s ease-out;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-header__nav.is-open {
+    animation: none;
   }
 }
 </style>
