@@ -11,6 +11,7 @@ const links = [
   { to: { name: 'admin-contacts' }, label: 'Contactos' },
   { to: { name: 'admin-brands' }, label: 'Marcas' },
   { to: { name: 'admin-services' }, label: 'Productos' },
+  { to: { name: 'admin-clients' }, label: 'Clientes' },
 ]
 
 function logout() {
