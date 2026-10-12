@@ -1,6 +1,8 @@
 <script setup>
 import heroImage from '@/assets/images/hero.png'
 import RateWizard from '@/components/rates/RateWizard.vue'
+import RatesFaq from '@/components/rates/RatesFaq.vue'
+import { RATE_FAQ } from '@/core/models/rate/rate-faq'
 </script>
 
 <template>
@@ -17,6 +19,8 @@ import RateWizard from '@/components/rates/RateWizard.vue'
       <div class="rates__card">
         <RateWizard />
       </div>
+
+      <RatesFaq :items="RATE_FAQ" />
     </div>
   </section>
 </template>
