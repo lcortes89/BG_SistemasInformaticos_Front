@@ -6,32 +6,22 @@ const RouterLinkStub = {
   template: '<a><slot /></a>',
 }
 
+const mountHero = () => mount(Hero, { global: { stubs: { RouterLink: RouterLinkStub } } })
+
 describe('Hero', () => {
   it('renders the title', () => {
-    const wrapper = mount(Hero, {
-      global: { stubs: { RouterLink: RouterLinkStub } },
-    })
-    expect(wrapper.text()).toContain('Digitaliza tu negocio hostelero')
+    expect(mountHero().text()).toContain('Digitaliza tu negocio hostelero')
   })
 
-  it('renders the subtitle', () => {
-    const wrapper = mount(Hero, {
-      global: { stubs: { RouterLink: RouterLinkStub } },
-    })
-    expect(wrapper.text()).toContain('Empresa especializada en el sector hostelero')
+  it('renders the new subtitle (BGSI-222)', () => {
+    expect(mountHero().text()).toContain('Transformamos la gestión de tu restaurante o PYME')
   })
 
   it('renders the Ver Soluciones button', () => {
-    const wrapper = mount(Hero, {
-      global: { stubs: { RouterLink: RouterLinkStub } },
-    })
-    expect(wrapper.text()).toContain('Ver Soluciones')
+    expect(mountHero().text()).toContain('Ver Soluciones')
   })
 
   it('renders only one call-to-action link', () => {
-    const wrapper = mount(Hero, {
-      global: { stubs: { RouterLink: RouterLinkStub } },
-    })
-    expect(wrapper.findAll('a').length).toBe(1)
+    expect(mountHero().findAll('a').length).toBe(1)
   })
 })

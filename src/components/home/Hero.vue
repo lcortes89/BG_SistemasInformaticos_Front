@@ -8,9 +8,8 @@ import heroImage from '@/assets/images/hero.png'
     <div class="hero__content">
       <h1 class="hero__title">Digitaliza tu negocio hostelero</h1>
       <p class="hero__subtitle">
-        Empresa especializada en el sector hostelero con la cual puedes transformar tu
-        restaurante o PYME con sistemas inteligentes que optimizan cada proceso y mejoran
-        la experiencia de tus clientes
+        Transformamos la gestión de tu restaurante o PYME con sistemas inteligentes que optimizan
+        cada proceso y mejoran la experiencia de tus clientes.
       </p>
       <RouterLink to="/soluciones" class="hero__cta">Ver Soluciones</RouterLink>
     </div>
@@ -18,14 +17,15 @@ import heroImage from '@/assets/images/hero.png'
 </template>
 
 <style scoped>
+/* BGSI-211: lower than before (it used to fill the whole screen) */
 .hero {
   position: relative;
-  min-height: 100vh;
+  min-height: min(70vh, 620px);
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
-  padding: 0 2rem;
+  padding: 4rem 2rem;
 }
 
 .hero__overlay {
@@ -63,5 +63,10 @@ import heroImage from '@/assets/images/hero.png'
   border-radius: 4px;
   text-decoration: none;
   font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .hero { min-height: 0; padding: 3.5rem 1rem; }
+  .hero__title { font-size: 2rem; }
 }
 </style>
