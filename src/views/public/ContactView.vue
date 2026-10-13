@@ -13,12 +13,6 @@ const route = useRoute()
 const initialMessage = computed(() =>
   route.query.interes === 'demo' ? 'Hola, me gustaría solicitar una demo de vuestros sistemas.' : '')
 
-const route = useRoute()
-
-// /contacto?interes=demo -> the message is already written
-const initialMessage = computed(() =>
-  route.query.interes === 'demo' ? 'Hola, me gustaría solicitar una demo de vuestros sistemas.' : '')
-
 onMounted(loadOptions)
 </script>
 
