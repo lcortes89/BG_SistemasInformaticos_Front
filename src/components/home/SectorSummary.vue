@@ -1,21 +1,14 @@
-<script setup>
-const offers = [
-  { title: 'Software TPV y de gestión', text: 'BDP para hostelería y AHORA One como ERP para tu empresa.' },
-  { title: 'Cobro automático', text: 'Máquinas CashGuard: efectivo seguro y sin descuadres de caja.' },
-  { title: 'Robots de servicio', text: 'Robots PUDU que llevan los platos a las mesas.' },
-]
-</script>
-
 <template>
-  <section class="summary">
-    <div class="container">
-      <h2 class="summary__title">Lo que ofrecemos al sector</h2>
-      <div class="summary__grid">
-        <div v-for="offer in offers" :key="offer.title" class="summary__item">
-          <h3>{{ offer.title }}</h3>
-          <p>{{ offer.text }}</p>
-        </div>
-      </div>
+  <!-- BGSI-223: value proposition under the Hero (text from the prototype) -->
+  <section class="summary" aria-labelledby="summary-title">
+    <div class="container summary__content">
+      <p class="summary__eyebrow">Propuesta de valor</p>
+      <h2 id="summary-title" class="summary__title">Resumen que ofrecemos al sector</h2>
+      <p class="summary__text">
+        Soluciones integrales de digitalización y gestión adaptadas a hostelería y comercio.
+        Automatizamos cobros, optimizamos la toma de pedidos y sincronizamos la administración
+        de tu negocio para multiplicar la rentabilidad y el control.
+      </p>
     </div>
   </section>
 </template>
@@ -24,16 +17,34 @@ const offers = [
 .summary {
   padding: 4rem 0;
 
-  &__title { margin: 0 0 2rem; text-align: center; color: var(--color-navy); }
-  &__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
-
-  &__item {
-    h3 { margin: 0 0 0.5rem; color: var(--color-navy); }
-    p { margin: 0; color: var(--color-muted); }
+  &__content {
+    max-width: 760px;
+    text-align: center;
   }
-}
 
-@media (max-width: 768px) {
-  .summary__grid { grid-template-columns: 1fr; }
+  // Orange label with a line on each side
+  &__eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 0;
+    color: var(--color-orange);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    &::before,
+    &::after {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--color-orange);
+    }
+  }
+
+  &__title { margin: 0.5rem 0 1rem; color: var(--color-navy); }
+  &__text { margin: 0; color: var(--color-muted); line-height: 1.7; }
 }
 </style>
