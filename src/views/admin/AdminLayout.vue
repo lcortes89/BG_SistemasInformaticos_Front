@@ -12,6 +12,7 @@ const links = [
   { to: { name: 'admin-brands' }, label: 'Marcas' },
   { to: { name: 'admin-services' }, label: 'Productos' },
   { to: { name: 'admin-clients' }, label: 'Clientes' },
+  { to: { name: 'admin-rates' }, label: 'Tarifas' },
 ]
 
 function logout() {
