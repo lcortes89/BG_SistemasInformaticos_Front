@@ -5,13 +5,17 @@ import { onMounted, onUnmounted, ref } from 'vue'
 //  - after translucentAt px -> translucent
 //  - going down past hideAt -> hidden
 //  - going up (any amount)  -> visible again
-export function createScrollState({ translucentAt = 10, hideAt = 200 } = {}) {
+//  - near the top (atTopUntil px) -> isAtTop: the header snaps into place without animation,
+//    otherwise the empty space it leaves at the top of the page shows as a white line
+export function createScrollState({ translucentAt = 10, hideAt = 200, atTopUntil = 80 } = {}) {
   const isTranslucent = ref(false)
   const isHidden = ref(false)
+  const isAtTop = ref(true)
   let lastY = 0
 
   function update(y) {
     isTranslucent.value = y > translucentAt
+    isAtTop.value = y <= atTopUntil
 
     if (y <= hideAt || y < lastY) {
       isHidden.value = false
@@ -21,7 +25,7 @@ export function createScrollState({ translucentAt = 10, hideAt = 200 } = {}) {
     lastY = y
   }
 
-  return { isTranslucent, isHidden, update }
+  return { isTranslucent, isHidden, isAtTop, update }
 }
 
 // Hook for components: listens to the window scroll while the component is on screen

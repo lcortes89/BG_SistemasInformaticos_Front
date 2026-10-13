@@ -14,7 +14,7 @@ const links = [
 const isMenuOpen = ref(false)
 
 // Smart header: translucent when scrolling, hidden going down, back when going up
-const { isTranslucent, isHidden } = useScrollHeader()
+const { isTranslucent, isHidden, isAtTop } = useScrollHeader()
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
@@ -27,7 +27,7 @@ function closeMenu() {
 
 <template>
   <header class="app-header"
-          :class="{ 'is-translucent': isTranslucent, 'is-hidden': isHidden && !isMenuOpen }">
+          :class="{ 'is-translucent': isTranslucent, 'is-hidden': isHidden && !isMenuOpen, 'is-at-top': isAtTop }">
     <div class="container app-header__inner">
       <RouterLink to="/" class="app-header__brand" @click="closeMenu">
         <img :src="logo" alt="BG Sistemas Informáticos" class="app-header__logo" />
@@ -72,6 +72,11 @@ function closeMenu() {
   // BGSI-210: slides up out of the screen
   &.is-hidden {
     transform: translateY(-100%);
+  }
+
+  // Back at the top of the page: appear at once (no white line under the header)
+  &.is-at-top {
+    transition: none;
   }
 
   &__inner {
