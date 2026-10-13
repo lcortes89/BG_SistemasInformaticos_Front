@@ -39,4 +39,16 @@ describe('createScrollState (smart header)', () => {
     expect(state.isHidden.value).toBe(false)
     expect(state.isTranslucent.value).toBe(true)
   })
+
+  it('snaps back without animation when jumping to the top of the page', () => {
+    const state = createScrollState()
+
+    state.update(1500)
+    expect(state.isAtTop.value).toBe(false)
+
+    state.update(0)
+
+    expect(state.isAtTop.value).toBe(true)
+    expect(state.isHidden.value).toBe(false)
+  })
 })
