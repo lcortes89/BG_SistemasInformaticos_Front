@@ -8,6 +8,7 @@ import { useRateWizard } from '@/composables/rates/useRateWizard'
 const props = defineProps({
   // Optional: lets the tests pass a fake RateService
   rateService: { type: Object, default: undefined },
+  contactService: { type: Object, default: undefined },
 })
 
 const {
@@ -24,7 +25,8 @@ const {
     <LoadingSpinner v-if="isLoading" label="Calculando tu tarifa..." />
 
     <Transition v-else name="slide-fade" mode="out-in">
-      <RateResult v-if="quote" key="result" :quote="quote" @restart="restart" />
+      <RateResult v-if="quote" key="result" :quote="quote" :answers="answers"
+                  :contact-service="contactService" @restart="restart" />
 
       <div v-else :key="currentStep.key" class="wizard__step">
         <p class="wizard__counter">Paso {{ stepIndex + 1 }} de {{ steps.length }}</p>

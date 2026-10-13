@@ -43,7 +43,7 @@ describe('RateWizard', () => {
     expect(wrapper.find('.option.is-selected').text()).toContain('Restaurante')
   })
 
-  it('shows the price and the link to Contacto after the 5 steps', async () => {
+  it('shows the price and the proposal button after the 5 steps', async () => {
     const service = { calculate: vi.fn().mockResolvedValue(new RateQuoteModel(123.2, 49, 1.8, 35)) }
     const wrapper = mountWizard(service)
 
@@ -51,6 +51,6 @@ describe('RateWizard', () => {
 
     expect(service.calculate).toHaveBeenCalledTimes(1)
     expect(wrapper.text()).toContain('123,20')
-    expect(wrapper.find('a[href="/contacto"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Quiero esta propuesta')
   })
 })
