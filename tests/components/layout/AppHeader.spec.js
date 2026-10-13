@@ -43,3 +43,41 @@ describe('AppHeader', () => {
     expect(nav.classes()).not.toContain('is-open')
   })
 })
+
+describe('AppHeader on scroll (BGSI-210)', () => {
+  async function scrollTo(y) {
+    Object.defineProperty(window, 'scrollY', { value: y, writable: true, configurable: true })
+    window.dispatchEvent(new Event('scroll'))
+    await Promise.resolve()
+  }
+
+  it('hides when scrolling down and comes back when scrolling up', async () => {
+    const wrapper = mountHeader()
+    const header = wrapper.find('header')
+
+    await scrollTo(100)
+    expect(header.classes()).toContain('is-translucent')
+
+    await scrollTo(500)
+    expect(header.classes()).toContain('is-hidden')
+
+    await scrollTo(450)
+    expect(header.classes()).not.toContain('is-hidden')
+
+    await scrollTo(0)
+    wrapper.unmount()
+  })
+
+  it('never hides while the mobile menu is open', async () => {
+    const wrapper = mountHeader()
+
+    await wrapper.find('[data-test="menu-toggle"]').trigger('click')
+    await scrollTo(300)
+    await scrollTo(700)
+
+    expect(wrapper.find('header').classes()).not.toContain('is-hidden')
+
+    await scrollTo(0)
+    wrapper.unmount()
+  })
+})
