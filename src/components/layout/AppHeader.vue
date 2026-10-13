@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import logo from '@/assets/logo/logo_header.png'
+import { useScrollHeader } from '@/composables/layout/useScrollHeader'
 
 const links = [
   { to: '/soluciones', label: 'Soluciones' },
@@ -11,6 +12,9 @@ const links = [
 
 // Mobile menu: closed by default
 const isMenuOpen = ref(false)
+
+// Smart header: translucent when scrolling, hidden going down, back when going up
+const { isTranslucent, isHidden } = useScrollHeader()
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
@@ -22,7 +26,8 @@ function closeMenu() {
 </script>
 
 <template>
-  <header class="app-header">
+  <header class="app-header"
+          :class="{ 'is-translucent': isTranslucent, 'is-hidden': isHidden && !isMenuOpen }">
     <div class="container app-header__inner">
       <RouterLink to="/" class="app-header__brand" @click="closeMenu">
         <img :src="logo" alt="BG Sistemas Informáticos" class="app-header__logo" />
@@ -56,6 +61,18 @@ function closeMenu() {
   top: 0;
   z-index: 100;
   background: var(--color-navy);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+
+  // BGSI-210: semi-transparent navy with the page blurred behind it
+  &.is-translucent {
+    background: rgba(11, 31, 58, 0.82);
+    backdrop-filter: blur(8px);
+  }
+
+  // BGSI-210: slides up out of the screen
+  &.is-hidden {
+    transform: translateY(-100%);
+  }
 
   &__inner {
     display: flex;
@@ -129,6 +146,10 @@ function closeMenu() {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .app-header {
+    transition: none;
+  }
+
   .app-header__nav.is-open {
     animation: none;
   }
