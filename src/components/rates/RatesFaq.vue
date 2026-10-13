@@ -14,34 +14,40 @@ function toggle(id) {
 </script>
 
 <template>
+  <!-- BGSI-224: own light section, so opening an answer never resizes the blurred block above -->
   <section class="faq" aria-labelledby="faq-title">
-    <p class="faq__eyebrow">Dudas frecuentes</p>
-    <h2 id="faq-title" class="faq__title">Preguntas sobre la contratación y tarifas</h2>
+    <div class="container faq__content">
+      <p class="faq__eyebrow">Dudas frecuentes</p>
+      <h2 id="faq-title" class="faq__title">Preguntas sobre la contratación y tarifas</h2>
 
-    <ul class="faq__list">
-      <li v-for="item in items" :key="item.id" class="faq__item" :class="{ 'is-open': openId === item.id }">
-        <button type="button" class="faq__question" :id="`faq-question-${item.id}`"
-                :aria-expanded="openId === item.id" :aria-controls="`faq-answer-${item.id}`"
-                @click="toggle(item.id)">
-          <span>{{ item.question }}</span>
-          <span class="faq__icon" aria-hidden="true">+</span>
-        </button>
+      <ul class="faq__list">
+        <li v-for="item in items" :key="item.id" class="faq__item" :class="{ 'is-open': openId === item.id }">
+          <button type="button" class="faq__question" :id="`faq-question-${item.id}`"
+                  :aria-expanded="openId === item.id" :aria-controls="`faq-answer-${item.id}`"
+                  @click="toggle(item.id)">
+            <span>{{ item.question }}</span>
+            <span class="faq__icon" aria-hidden="true">+</span>
+          </button>
 
-        <Transition name="slide-fade">
-          <div v-if="openId === item.id" :id="`faq-answer-${item.id}`" class="faq__answer"
-               role="region" :aria-labelledby="`faq-question-${item.id}`">
-            <p>{{ item.answer }}</p>
+          <!-- The answer is always in the page; the grid row grows from 0 to its real height -->
+          <div :id="`faq-answer-${item.id}`" class="faq__panel" :class="{ 'is-open': openId === item.id }"
+               role="region" :aria-labelledby="`faq-question-${item.id}`" :aria-hidden="openId !== item.id">
+            <div class="faq__panel-inner">
+              <p class="faq__answer">{{ item.answer }}</p>
+            </div>
           </div>
-        </Transition>
-      </li>
-    </ul>
+        </li>
+      </ul>
+    </div>
   </section>
 </template>
 
 <style scoped lang="scss">
 .faq {
-  max-width: 900px;
-  margin: 3rem auto 0;
+  padding: 4rem 0;
+  background: var(--color-bg-alt);
+
+  &__content { max-width: 900px; }
 
   &__eyebrow {
     margin: 0;
@@ -53,16 +59,17 @@ function toggle(id) {
     letter-spacing: 0.05em;
   }
 
-  &__title { margin: 0.5rem 0 2rem; text-align: center; color: #fff; }
+  &__title { margin: 0.5rem 0 2rem; text-align: center; color: var(--color-navy); }
 
   &__list { display: flex; flex-direction: column; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
 
   &__item {
     border-radius: var(--radius);
     background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     border-left: 4px solid transparent;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.35s ease;
 
     &.is-open { border-left-color: var(--color-orange); }
   }
@@ -90,20 +97,32 @@ function toggle(id) {
     font-size: 1.5rem;
     line-height: 1;
     color: var(--color-orange);
-    transition: transform 0.2s ease;
+    transition: transform 0.35s ease;
   }
 
   .is-open &__icon { transform: rotate(45deg); } // "+" becomes "×"
 
+  // Smooth height: the row goes from 0fr (closed) to 1fr (its real height)
+  &__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 0.35s ease, visibility 0.35s;
+
+    &.is-open { grid-template-rows: 1fr; visibility: visible; }
+  }
+
+  &__panel-inner { overflow: hidden; }
+
   &__answer {
+    margin: 0;
     padding: 0 1.25rem 1.1rem;
     color: var(--color-muted);
-
-    p { margin: 0; line-height: 1.6; }
+    line-height: 1.6;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .faq__icon, .faq__item { transition: none; }
+  .faq__icon, .faq__item, .faq__panel { transition: none; }
 }
 </style>

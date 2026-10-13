@@ -8,6 +8,7 @@ const items = [
 ]
 
 const questions = (wrapper) => wrapper.findAll('.faq__question')
+const panel = (wrapper, id) => wrapper.find(`#faq-answer-${id}`)
 
 describe('RatesFaq', () => {
   it('shows every question with all the answers closed', () => {
@@ -15,7 +16,8 @@ describe('RatesFaq', () => {
 
     expect(wrapper.text()).toContain('Preguntas sobre la contratación y tarifas')
     expect(questions(wrapper)).toHaveLength(2)
-    expect(wrapper.text()).not.toContain('Respuesta A')
+    expect(panel(wrapper, 'a').classes()).not.toContain('is-open')
+    expect(panel(wrapper, 'a').attributes('aria-hidden')).toBe('true')
     expect(questions(wrapper)[0].attributes('aria-expanded')).toBe('false')
   })
 
@@ -23,13 +25,13 @@ describe('RatesFaq', () => {
     const wrapper = mount(RatesFaq, { props: { items } })
 
     await questions(wrapper)[0].trigger('click')
-    expect(wrapper.text()).toContain('Respuesta A')
-    expect(questions(wrapper)[0].attributes('aria-expanded')).toBe('true')
+    expect(panel(wrapper, 'a').classes()).toContain('is-open')
+    expect(panel(wrapper, 'a').attributes('aria-hidden')).toBe('false')
     expect(questions(wrapper)[0].attributes('aria-controls')).toBe('faq-answer-a')
 
     await questions(wrapper)[1].trigger('click')
-    expect(wrapper.find('#faq-answer-a').exists()).toBe(false)
-    expect(wrapper.text()).toContain('Respuesta B')
+    expect(panel(wrapper, 'a').classes()).not.toContain('is-open')
+    expect(panel(wrapper, 'b').classes()).toContain('is-open')
   })
 
   it('closes the answer when the same question is clicked again', async () => {
@@ -38,7 +40,7 @@ describe('RatesFaq', () => {
     await questions(wrapper)[0].trigger('click')
     await questions(wrapper)[0].trigger('click')
 
-    expect(wrapper.find('#faq-answer-a').exists()).toBe(false)
+    expect(panel(wrapper, 'a').classes()).not.toContain('is-open')
     expect(questions(wrapper)[0].attributes('aria-expanded')).toBe('false')
   })
 })

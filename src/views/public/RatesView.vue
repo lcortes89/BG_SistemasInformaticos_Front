@@ -19,10 +19,11 @@ import { RATE_FAQ } from '@/core/models/rate/rate-faq'
       <div class="rates__card">
         <RateWizard />
       </div>
-
-      <RatesFaq :items="RATE_FAQ" />
     </div>
   </section>
+
+  <!-- BGSI-224: the FAQ lives outside the blurred block -->
+  <RatesFaq :items="RATE_FAQ" />
 </template>
 
 <style scoped lang="scss">
