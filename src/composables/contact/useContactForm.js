@@ -12,8 +12,8 @@ const emptyForm = () => ({
   gdprConsent: false,
 })
 
-export function useContactForm(service = new ContactService()) {
-  const form = reactive(emptyForm())
+export function useContactForm(service = new ContactService(), initial = {}) {
+  const form = reactive({ ...emptyForm(), ...initial })
   const errors = reactive({})
   const isSubmitting = ref(false)
   const isSuccess = ref(false)

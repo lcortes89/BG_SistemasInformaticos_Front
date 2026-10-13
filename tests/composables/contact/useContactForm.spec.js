@@ -57,3 +57,12 @@ describe('useContactForm', () => {
     expect(errors.email).toBe('Email format is not valid')
   })
 })
+
+describe('useContactForm with initial values', () => {
+  it('starts with the message already written', () => {
+    const { form } = useContactForm({ send: () => {} }, { message: 'Quiero una demo' })
+
+    expect(form.message).toBe('Quiero una demo')
+    expect(form.name).toBe('')
+  })
+})

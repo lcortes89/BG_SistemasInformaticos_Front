@@ -6,9 +6,13 @@ const props = defineProps({
   services: { type: Array, default: () => [] },
   // Optional: lets the tests pass a fake ContactService
   contactService: { type: Object, default: undefined },
+  // Optional: text that appears already written in "Mensaje" (e.g. from Solicita tu demo)
+  initialMessage: { type: String, default: '' },
+  // Optional: text that appears already written in "Mensaje" (e.g. from Solicita tu demo)
+  initialMessage: { type: String, default: '' },
 })
 
-const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContactForm(props.contactService)
+const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContactForm(props.contactService, props.initialMessage ? { message: props.initialMessage } : {})
 </script>
 
 <template>
