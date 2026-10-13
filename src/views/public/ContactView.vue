@@ -1,10 +1,23 @@
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import ContactForm from '@/components/contact/ContactForm.vue'
 import ContactInfo from '@/components/contact/ContactInfo.vue'
 import { useServiceOptions } from '@/composables/contact/useServiceOptions'
 
 const { options, loadOptions } = useServiceOptions()
+
+const route = useRoute()
+
+// /contacto?interes=demo -> the message is already written
+const initialMessage = computed(() =>
+  route.query.interes === 'demo' ? 'Hola, me gustaría solicitar una demo de vuestros sistemas.' : '')
+
+const route = useRoute()
+
+// /contacto?interes=demo -> the message is already written
+const initialMessage = computed(() =>
+  route.query.interes === 'demo' ? 'Hola, me gustaría solicitar una demo de vuestros sistemas.' : '')
 
 onMounted(loadOptions)
 </script>
@@ -18,7 +31,7 @@ onMounted(loadOptions)
       </header>
 
       <div class="contact__grid">
-        <ContactForm :services="options" />
+        <ContactForm :services="options" :initial-message="initialMessage" />
         <ContactInfo />
       </div>
     </div>
