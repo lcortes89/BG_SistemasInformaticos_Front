@@ -81,3 +81,48 @@ describe('AppHeader on scroll (BGSI-210)', () => {
     wrapper.unmount()
   })
 })
+
+describe('AppHeader transparent over the hero (BGSI-225)', () => {
+  it('is transparent on pages with hero and solid on the others', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    const overHero = mount(AppHeader, { props: { overlay: true }, global: { plugins: [router] } })
+    const normal = mount(AppHeader, { props: { overlay: false }, global: { plugins: [router] } })
+
+    expect(overHero.find('header').classes()).not.toContain('is-solid')
+    expect(normal.find('header').classes()).toContain('is-solid')
+
+    overHero.unmount()
+    normal.unmount()
+  })
+})
+
+describe('AppHeader divider line (BGSI-226)', () => {
+  async function scrollTo(y) {
+    Object.defineProperty(window, 'scrollY', { value: y, writable: true, configurable: true })
+    window.dispatchEvent(new Event('scroll'))
+    await Promise.resolve()
+  }
+
+  it('shows the line over the hero and hides it when the page scrolls', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    const wrapper = mount(AppHeader, { props: { overlay: true }, global: { plugins: [router] } })
+    const header = wrapper.find('header')
+
+    expect(header.classes()).toContain('has-divider')
+
+    await scrollTo(100)
+    expect(header.classes()).not.toContain('has-divider')
+
+    await scrollTo(0)
+    expect(header.classes()).toContain('has-divider')
+    wrapper.unmount()
+  })
+
+  it('never shows the line on pages without hero', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    const wrapper = mount(AppHeader, { props: { overlay: false }, global: { plugins: [router] } })
+
+    expect(wrapper.find('header').classes()).not.toContain('has-divider')
+    wrapper.unmount()
+  })
+})

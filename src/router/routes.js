@@ -1,10 +1,11 @@
 // Routes live in their own file so the tests can reuse them
+// meta.overlayHeader: the page starts with a hero, so the transparent header floats over it
 export const routes = [
-  { path: '/', name: 'home', component: () => import('@/views/public/HomeView.vue') },
-  { path: '/soluciones', name: 'solutions', component: () => import('@/views/public/SolutionsView.vue') },
-  { path: '/tarifas', name: 'rates', component: () => import('@/views/public/RatesView.vue') },
-  { path: '/clientes', name: 'clients', component: () => import('@/views/public/ClientsView.vue') },
-  { path: '/contacto', name: 'contact', component: () => import('@/views/public/ContactView.vue'), meta: { hideDemoCta: true } },
+  { path: '/', name: 'home', component: () => import('@/views/public/HomeView.vue'), meta: { overlayHeader: true } },
+  { path: '/soluciones', name: 'solutions', component: () => import('@/views/public/SolutionsView.vue'), meta: { overlayHeader: true } },
+  { path: '/tarifas', name: 'rates', component: () => import('@/views/public/RatesView.vue'), meta: { overlayHeader: true } },
+  { path: '/clientes', name: 'clients', component: () => import('@/views/public/ClientsView.vue'), meta: { overlayHeader: true } },
+  { path: '/contacto', name: 'contact', component: () => import('@/views/public/ContactView.vue'), meta: { hideDemoCta: true, overlayHeader: true } },
   { path: '/aviso-legal', name: 'legal-notice', component: () => import('@/views/public/LegalView.vue') },
   { path: '/privacidad', name: 'privacy', component: () => import('@/views/public/LegalView.vue') },
   { path: '/cookies', name: 'cookies', component: () => import('@/views/public/LegalView.vue') },
