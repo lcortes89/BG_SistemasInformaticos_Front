@@ -45,7 +45,8 @@ function toggle(id) {
 <style scoped lang="scss">
 .faq {
   padding: 4rem 0;
-  background: var(--color-bg-alt);
+  // Grey only in the middle: soft white edges, no hard line with the photo or the demo CTA (BGSI-227)
+  background: linear-gradient(to bottom, #fff 0, var(--color-bg-alt) 160px, var(--color-bg-alt) calc(100% - 160px), #fff 100%);
 
   &__content { max-width: 900px; }
 

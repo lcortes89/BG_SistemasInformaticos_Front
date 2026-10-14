@@ -33,8 +33,12 @@ import { RouterLink } from 'vue-router'
   position: relative;
   z-index: 1;
   padding-top: 2rem;
-  // Bottom half navy = same colour as the footer, so the card looks "on top" of it
-  background: linear-gradient(to bottom, transparent 50%, var(--color-navy) 50%);
+  // White that melts into the navy of the footer behind the card (BGSI-227)
+  background: linear-gradient(to bottom,
+    rgba(11, 31, 58, 0) 0%,
+    rgba(11, 31, 58, 0.25) 30%,
+    rgba(11, 31, 58, 0.85) 55%,
+    var(--color-navy) 70%);
 
   &__card {
     display: flex;
