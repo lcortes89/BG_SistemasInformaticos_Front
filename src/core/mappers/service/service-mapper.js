@@ -13,6 +13,7 @@ export const serviceMapper = {
   longDescription: (dto) => dto.longDescription ?? '',
   features: (dto) => dto.features ?? [],
   sectors: (dto) => dto.sectors ?? [],
+  officialUrl: (dto) => dto.officialUrl ?? null,
 
   // Admin form -> body of POST/PUT /api/admin/services (ServiceRequestDTO)
   toRequest: (form) => ({
@@ -24,5 +25,6 @@ export const serviceMapper = {
     longDescription: (form.longDescription ?? '').trim() || null,
     features: linesToList(form.featuresText),
     sectors: linesToList(form.sectorsText),
+    officialUrl: (form.officialUrl ?? '').trim() || null,
   }),
 }

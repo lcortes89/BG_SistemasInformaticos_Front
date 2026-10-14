@@ -48,10 +48,19 @@ const initials = computed(() => props.service.name
         </ul>
       </div>
 
-      <!-- BGSI-207: Contacto opens with this product already chosen -->
-      <RouterLink :to="{ name: 'contact', query: { producto: service.name } }" class="btn btn--primary product__cta">
-        Solicitar información
-      </RouterLink>
+      <div class="product__actions">
+        <!-- BGSI-207: Contacto opens with this product already chosen -->
+        <RouterLink :to="{ name: 'contact', query: { producto: service.name } }" class="btn btn--primary">
+          Solicitar información
+        </RouterLink>
+
+        <!-- Maker's page, in a new tab. Only when the admin has filled it in -->
+        <a v-if="service.officialUrl" :href="service.officialUrl" target="_blank" rel="noopener noreferrer"
+           class="product__official">
+          Ver ficha oficial <span aria-hidden="true">↗</span>
+          <span class="sr-only">(se abre en otra pestaña)</span>
+        </a>
+      </div>
     </div>
   </article>
 </template>
@@ -141,7 +150,24 @@ const initials = computed(() => props.service.name
     }
   }
 
-  &__cta { align-self: flex-start; margin-top: 0.25rem; }
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    margin-top: 0.25rem;
+  }
+
+  // Secondary link: navy text, orange on hover
+  &__official {
+    font-weight: 600;
+    color: var(--color-navy);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+
+    &:hover,
+    &:focus-visible { color: var(--color-orange-dark); }
+  }
 }
 
 // Mobile: image on top, one column

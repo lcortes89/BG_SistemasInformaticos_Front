@@ -53,3 +53,31 @@ describe('ServiceForm: full product sheet (BGSI-205)', () => {
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 })
+
+describe('ServiceForm: official page of the maker', () => {
+  async function fillRequired(wrapper) {
+    await wrapper.find('#service-name').setValue('BellaBot')
+    await wrapper.find('#service-brand').setValue(4)
+  }
+
+  it('sends the official link', async () => {
+    const wrapper = mount(ServiceForm, { props: { brands } })
+    await fillRequired(wrapper)
+    await wrapper.find('#service-official').setValue('https://www.pudurobotics.com/bellabot')
+
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.emitted('submit')[0][0]).toMatchObject({ officialUrl: 'https://www.pudurobotics.com/bellabot' })
+  })
+
+  it('does not allow a link without http:// or https://', async () => {
+    const wrapper = mount(ServiceForm, { props: { brands } })
+    await fillRequired(wrapper)
+    await wrapper.find('#service-official').setValue('www.pudurobotics.com')
+
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.text()).toContain('Debe empezar por http:// o https://')
+    expect(wrapper.emitted('submit')).toBeUndefined()
+  })
+})

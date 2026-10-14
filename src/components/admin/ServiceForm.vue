@@ -5,6 +5,7 @@ import { linesToList } from '@/core/mappers/service/service-mapper'
 
 // Same limits as the backend (ServiceRequestDTO, BGSI-205)
 const MAX_ITEMS = 6
+const WEB_ADDRESS = /^https?:\/\/\S+$/
 
 const props = defineProps({
   service: { type: Object, default: null }, // ServiceModel when editing, null when creating
@@ -25,6 +26,7 @@ const form = reactive({
   longDescription: props.service?.longDescription ?? '',
   featuresText: (props.service?.features ?? []).join('\n'),
   sectorsText: (props.service?.sectors ?? []).join('\n'),
+  officialUrl: props.service?.officialUrl ?? '',
 })
 const errors = reactive({})
 
@@ -43,6 +45,9 @@ function validate() {
   const sectors = linesToList(form.sectorsText)
   if (sectors.length > MAX_ITEMS) errors.sectors = `Máximo ${MAX_ITEMS} sectores`
   else if (sectors.some((line) => line.length > 40)) errors.sectors = 'Cada sector: máximo 40 caracteres'
+  const officialUrl = form.officialUrl.trim()
+  if (officialUrl.length > 255) errors.officialUrl = 'Máximo 255 caracteres'
+  else if (officialUrl && !WEB_ADDRESS.test(officialUrl)) errors.officialUrl = 'Debe empezar por http:// o https://'
   return Object.keys(errors).length === 0
 }
 
@@ -96,6 +101,13 @@ function submit() {
       <textarea id="service-sectors" v-model="form.sectorsText" rows="3"
                 placeholder="Bares&#10;Restaurantes" :aria-invalid="!!errors.sectors"></textarea>
       <p v-if="errors.sectors" class="admin-form__error">{{ errors.sectors }}</p>
+    </div>
+
+    <div class="admin-form__field">
+      <label for="service-official">Ficha oficial del fabricante (enlace)</label>
+      <input id="service-official" v-model="form.officialUrl" type="url"
+             placeholder="https://..." :aria-invalid="!!errors.officialUrl" />
+      <p v-if="errors.officialUrl" class="admin-form__error">{{ errors.officialUrl }}</p>
     </div>
 
     <label class="admin-form__check">
