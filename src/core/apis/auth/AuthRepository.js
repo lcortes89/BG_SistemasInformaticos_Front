@@ -10,4 +10,9 @@ export default class AuthRepository extends BaseRepository {
   async login(email, password) {
     return this.post('/login', {}, { auth: { username: email, password } })
   }
+
+  // POST /api/auth/register (only an ADMIN, with its JWT) -> { id, email, role } (BGSI-197)
+  async register(email, password) {
+    return this.post('/register', { email, password })
+  }
 }
