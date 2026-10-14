@@ -11,9 +11,15 @@ const { options, loadOptions } = useServiceOptions()
 
 const route = useRoute()
 
-// /contacto?interes=demo -> the message is already written
-const initialMessage = computed(() =>
-  route.query.interes === 'demo' ? 'Hola, me gustaría solicitar una demo de vuestros sistemas.' : '')
+// /contacto?producto=BDP One -> that product is already chosen (BGSI-207)
+const initialService = computed(() => (typeof route.query.producto === 'string' ? route.query.producto : ''))
+
+// /contacto?interes=demo or ?producto=... -> the message is already written
+const initialMessage = computed(() => {
+  if (route.query.interes === 'demo') return 'Hola, me gustaría solicitar una demo de vuestros sistemas.'
+  if (initialService.value) return `Hola, me gustaría recibir información sobre ${initialService.value}.`
+  return ''
+})
 
 // Row of advantages over the photo
 const advantages = ['Respuesta < 24h', 'Soporte 365 días', 'Certificados oficiales', 'In situ & remoto']
@@ -39,7 +45,7 @@ onMounted(loadOptions)
 
         <!-- White card like the one of Tarifas -->
         <div class="contact__card">
-          <ContactForm :services="options" :initial-message="initialMessage" />
+          <ContactForm :services="options" :initial-message="initialMessage" :initial-service="initialService" />
           <ContactInfo />
         </div>
       </div>

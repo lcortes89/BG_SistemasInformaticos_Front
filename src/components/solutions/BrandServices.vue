@@ -1,6 +1,6 @@
 <script setup>
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
-import ServiceCard from '@/shared/ServiceCard.vue'
+import ProductDetailCard from '@/components/solutions/ProductDetailCard.vue'
 
 defineProps({
   brand: { type: Object, required: true },
@@ -23,7 +23,7 @@ defineProps({
     </p>
 
     <div v-else class="brand-services__grid">
-      <ServiceCard v-for="service in services" :key="service.id" :service="service" />
+      <ProductDetailCard v-for="service in services" :key="service.id" :service="service" />
     </div>
   </section>
 </template>
@@ -36,17 +36,13 @@ defineProps({
   border-radius: var(--radius);
 
   &__title { margin: 0 0 1.5rem; color: var(--color-navy); }
-  &__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  // BGSI-206: one full product sheet under the other
+  &__grid { display: flex; flex-direction: column; gap: 1.5rem; }
   &__message { color: var(--color-muted); }
   &__message--error { color: #b91c1c; }
 }
 
-@media (max-width: 900px) {
-  .brand-services__grid { grid-template-columns: repeat(2, 1fr); }
-}
-
 @media (max-width: 560px) {
   .brand-services { padding: 1.25rem; }
-  .brand-services__grid { grid-template-columns: 1fr; }
 }
 </style>

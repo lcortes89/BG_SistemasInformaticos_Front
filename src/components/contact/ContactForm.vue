@@ -8,9 +8,15 @@ const props = defineProps({
   contactService: { type: Object, default: undefined },
   // Optional: text that appears already written in "Mensaje" (e.g. from Solicita tu demo)
   initialMessage: { type: String, default: '' },
+  // Optional: product already chosen in "Servicio de interés" (from the product sheet, BGSI-207)
+  initialService: { type: String, default: '' },
 })
 
-const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContactForm(props.contactService, props.initialMessage ? { message: props.initialMessage } : {})
+const initial = {}
+if (props.initialMessage) initial.message = props.initialMessage
+if (props.initialService) initial.interestedService = props.initialService
+
+const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContactForm(props.contactService, initial)
 </script>
 
 <template>

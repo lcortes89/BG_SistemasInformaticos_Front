@@ -58,3 +58,13 @@ describe('ContactForm', () => {
     expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeUndefined()
   })
 })
+
+describe('ContactForm with a product already chosen (BGSI-207)', () => {
+  it('selects the product that comes from its sheet', () => {
+    const services = [{ id: 2, name: 'BDP One', brandName: 'BDP' }]
+
+    const wrapper = mount(ContactForm, { props: { services, initialService: 'BDP One' }, global: { plugins: [createRouter({ history: createMemoryHistory(), routes })] } })
+
+    expect(wrapper.find('#contact-service').element.value).toBe('BDP One')
+  })
+})
