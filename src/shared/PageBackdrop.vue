@@ -55,6 +55,17 @@ defineProps({
       rgba(245, 248, 252, 0.55) 100%);
   }
 
+  // Soft white edge at the bottom: no hard line before the next section
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 140px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+  }
+
   &__content { position: relative; z-index: 1; }
 }
 
