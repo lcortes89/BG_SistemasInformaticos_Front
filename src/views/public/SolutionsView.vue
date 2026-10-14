@@ -16,7 +16,6 @@ onMounted(loadBrands)
 
 <template>
   <PageHero
-    breadcrumb="Nuestras Soluciones"
     title="Nuestras Soluciones"
     subtitle="Distribuidores oficiales de la tecnología líder para digitalizar hostelería y comercio: gestión de efectivo, software TPV, ERP y robótica de servicio."
     centered

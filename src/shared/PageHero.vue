@@ -1,25 +1,32 @@
 <script setup>
-import { RouterLink } from 'vue-router'
+import { ref } from 'vue'
 
-// Introduction band at the top of every public view (BGSI-212)
+// Introduction band at the top of every public view (BGSI-212, BGSI-225)
 defineProps({
-  breadcrumb: { type: String, required: true }, // name of the current page, e.g. "Nuestras Soluciones"
-  eyebrow: { type: String, default: '' },       // small orange label above the title
+  eyebrow: { type: String, default: '' }, // small orange label above the title
   title: { type: String, required: true },
   subtitle: { type: String, default: '' },
   centered: { type: Boolean, default: false },
 })
+
+const hero = ref(null)
+
+// The spotlight follows the cursor: we only store its position in two CSS variables
+function moveSpotlight(event) {
+  const box = hero.value.getBoundingClientRect()
+  hero.value.style.setProperty('--spot-x', `${event.clientX - box.left}px`)
+  hero.value.style.setProperty('--spot-y', `${event.clientY - box.top}px`)
+}
 </script>
 
 <template>
-  <section class="page-hero" :class="{ 'page-hero--centered': centered }">
-    <div class="container page-hero__content">
-      <nav class="page-hero__breadcrumb" aria-label="Migas de pan">
-        <RouterLink to="/">Inicio</RouterLink>
-        <span aria-hidden="true">›</span>
-        <span aria-current="page">{{ breadcrumb }}</span>
-      </nav>
+  <section ref="hero" class="page-hero" :class="{ 'page-hero--centered': centered }" @mousemove="moveSpotlight">
+    <!-- Decorative layers: dot grid, light that drifts by itself, spotlight under the cursor -->
+    <div class="page-hero__dots" aria-hidden="true"></div>
+    <div class="page-hero__drift" aria-hidden="true"></div>
+    <div class="page-hero__spot" aria-hidden="true"></div>
 
+    <div class="container page-hero__content">
       <p v-if="eyebrow" class="page-hero__eyebrow">{{ eyebrow }}</p>
       <h1 class="page-hero__title">{{ title }}</h1>
       <p v-if="subtitle" class="page-hero__subtitle">{{ subtitle }}</p>
@@ -34,24 +41,48 @@ defineProps({
 
 <style scoped lang="scss">
 .page-hero {
+  position: relative;
+  overflow: hidden;
   padding: 3.5rem 0 3rem;
-  background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-light) 100%);
+  background: #0d2445;
   color: #fff;
 
-  &__content { max-width: 1100px; }
-
-  &__breadcrumb {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-    font-size: 0.85rem;
-    color: #cbd5e1;
-
-    a { color: #cbd5e1; text-decoration: none; }
-    a:hover { color: var(--color-orange); }
-    [aria-current='page'] { color: #fff; }
+  // Subtle grid of dots (prototype)
+  &__dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.4px);
+    background-size: 18px 18px;
   }
+
+  // Round light that moves slowly from side to side
+  &__drift {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 520px;
+    height: 520px;
+    margin: -260px 0 0 -260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(90, 140, 230, 0.5), transparent 65%);
+    animation: page-hero-drift 9s ease-in-out infinite alternate;
+    transition: opacity 0.4s ease;
+  }
+
+  // Light that follows the cursor (only while hovering)
+  &__spot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: radial-gradient(circle 180px at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgba(120, 170, 255, 0.45), rgba(60, 110, 200, 0.15) 45%, transparent 70%);
+    transition: opacity 0.4s ease;
+  }
+
+  &:hover &__drift { animation-play-state: paused; opacity: 0.35; }
+  &:hover &__spot { opacity: 1; }
+
+  &__content { position: relative; z-index: 1; max-width: 1100px; }
 
   // Orange dot + label
   &__eyebrow {
@@ -83,13 +114,24 @@ defineProps({
   &--centered {
     text-align: center;
 
-    .page-hero__breadcrumb { justify-content: center; }
     .page-hero__subtitle { margin: 0 auto; }
   }
+}
+
+@keyframes page-hero-drift {
+  0% { transform: translate(-280px, -30px); }
+  50% { transform: translate(40px, 40px); }
+  100% { transform: translate(300px, -20px); }
 }
 
 @media (max-width: 560px) {
   .page-hero { padding: 2.5rem 0 2.25rem; }
   .page-hero__title { font-size: 1.9rem; }
+}
+
+// Without animations the light stays still in the centre
+@media (prefers-reduced-motion: reduce) {
+  .page-hero__drift { animation: none; }
+  .page-hero__spot, .page-hero__drift { transition: none; }
 }
 </style>
