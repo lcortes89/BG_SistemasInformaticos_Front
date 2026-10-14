@@ -23,7 +23,7 @@ describe('AdminServiceService', () => {
 
     expect(repo.create).toHaveBeenCalledWith({
       name: 'BDP One', brandId: 1, description: null, imageUrl: null, featured: true,
-      longDescription: null, features: [], sectors: [],
+      longDescription: null, features: [], sectors: [], officialUrl: null,
     })
   })
 })

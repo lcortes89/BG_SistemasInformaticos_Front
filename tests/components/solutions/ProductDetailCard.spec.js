@@ -53,3 +53,17 @@ describe('ProductDetailCard (BGSI-206)', () => {
     expect(href).toBe('/contacto?producto=BDP+One')
   })
 })
+
+describe('ProductDetailCard: official page of the maker', () => {
+  it('opens the official page in a new tab when there is one', () => {
+    const link = mountCard({ ...bdpOne, officialUrl: 'https://www.bdp-software.com/bdp-one' }).find('.product__official')
+
+    expect(link.attributes('href')).toBe('https://www.bdp-software.com/bdp-one')
+    expect(link.attributes('target')).toBe('_blank')
+    expect(link.attributes('rel')).toContain('noopener')
+  })
+
+  it('hides the link when the admin has not filled it in', () => {
+    expect(mountCard(bdpOne).find('.product__official').exists()).toBe(false)
+  })
+})

@@ -2,7 +2,7 @@
 export default class ServiceModel {
 
   constructor(id, name, description, imageUrl, brandId, brandName, featured = false,
-              longDescription = '', features = [], sectors = []) {
+              longDescription = '', features = [], sectors = [], officialUrl = null) {
     this.id = id
     this.name = name
     this.description = description
@@ -13,6 +13,7 @@ export default class ServiceModel {
     this.longDescription = longDescription
     this.features = features
     this.sectors = sectors
+    this.officialUrl = officialUrl
   }
 
   static create(dto, mapper) {
@@ -27,6 +28,7 @@ export default class ServiceModel {
       mapper.longDescription(dto),
       mapper.features(dto),
       mapper.sectors(dto),
+      mapper.officialUrl(dto),
     )
   }
 }
