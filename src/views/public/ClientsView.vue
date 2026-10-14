@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
+import PageHero from '@/shared/PageHero.vue'
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
 import Pagination from '@/shared/Pagination.vue'
 import ClientCard from '@/components/clients/ClientCard.vue'
@@ -16,13 +17,17 @@ onMounted(() => loadPage(0))
 </script>
 
 <template>
+  <PageHero
+    breadcrumb="Nuestros Clientes"
+    eyebrow="Casos reales de transformación digital"
+    title="Nuestros Clientes"
+    subtitle="Negocios de hostelería y retail que ya confían en nosotros para digitalizar su día a día."
+  >
+    <span class="clients__badge">✓ Instalaciones homologadas en Asturias y Norte de España</span>
+  </PageHero>
+
   <section class="clients">
     <div class="container">
-      <header class="clients__header">
-        <h1>Nuestros Clientes</h1>
-        <p>Negocios de hostelería y pymes que ya confían en nosotros.</p>
-      </header>
-
       <LoadingSpinner v-if="isLoading" label="Cargando clientes..." />
 
       <p v-else-if="error" class="clients__message clients__message--error" role="alert">{{ error }}</p>
@@ -43,15 +48,16 @@ onMounted(() => loadPage(0))
 
 <style scoped lang="scss">
 .clients {
-  padding: 4rem 0;
+  padding: 3rem 0 4rem;
 
-  &__header {
-    max-width: 720px;
-    margin: 0 auto 3rem;
-    text-align: center;
-
-    h1 { margin: 0 0 1rem; color: var(--color-navy); }
-    p { margin: 0; color: var(--color-muted); }
+  &__badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: rgba(242, 140, 40, 0.15);
+    color: #ffd7b0;
+    font-size: 0.9rem;
+    font-weight: 600;
   }
 
   &__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }

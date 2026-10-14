@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import PageHero from '@/shared/PageHero.vue'
 import ContactForm from '@/components/contact/ContactForm.vue'
 import ContactInfo from '@/components/contact/ContactInfo.vue'
 import { useServiceOptions } from '@/composables/contact/useServiceOptions'
@@ -13,17 +14,26 @@ const route = useRoute()
 const initialMessage = computed(() =>
   route.query.interes === 'demo' ? 'Hola, me gustaría solicitar una demo de vuestros sistemas.' : '')
 
+// Row of advantages under the title (prototype)
+const advantages = ['Respuesta < 24h', 'Soporte 365 días', 'Certificados oficiales', 'In situ & remoto']
+
 onMounted(loadOptions)
 </script>
 
 <template>
+  <PageHero
+    breadcrumb="Contacto"
+    eyebrow="Atención personalizada · Consultoría directa"
+    title="Hablemos de tu negocio"
+    subtitle="Cuéntanos qué necesitas y uno de nuestros consultores especializados te contactará en menos de 24 horas laborables."
+  >
+    <ul class="contact__advantages">
+      <li v-for="advantage in advantages" :key="advantage">{{ advantage }}</li>
+    </ul>
+  </PageHero>
+
   <section class="contact">
     <div class="container">
-      <header class="contact__header">
-        <h1>Contacto</h1>
-        <p>Rellena el formulario y nos pondremos en contacto contigo.</p>
-      </header>
-
       <div class="contact__grid">
         <ContactForm :services="options" :initial-message="initialMessage" />
         <ContactInfo />
@@ -34,15 +44,25 @@ onMounted(loadOptions)
 
 <style scoped lang="scss">
 .contact {
-  padding: 4rem 0;
+  padding: 3rem 0 4rem;
 
-  &__header {
-    max-width: 720px;
-    margin: 0 auto 3rem;
-    text-align: center;
+  &__advantages {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 
-    h1 { margin: 0 0 1rem; color: var(--color-navy); }
-    p { margin: 0; color: var(--color-muted); }
+    li {
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius);
+      font-weight: 600;
+      text-align: center;
+
+      &::before { content: '✓ '; color: var(--color-orange); }
+    }
   }
 
   &__grid {
@@ -55,5 +75,10 @@ onMounted(loadOptions)
 
 @media (max-width: 900px) {
   .contact__grid { grid-template-columns: 1fr; }
+  .contact__advantages { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 420px) {
+  .contact__advantages li { padding: 0.6rem 0.5rem; font-size: 0.85rem; }
 }
 </style>
