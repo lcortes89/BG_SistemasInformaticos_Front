@@ -36,3 +36,12 @@ describe('PageHero', () => {
     expect(wrapper.classes()).toContain('page-hero--centered')
   })
 })
+
+describe('PageHero transparent (BGSI-226)', () => {
+  it('drops its own background and the warm light so the view background shows', () => {
+    const wrapper = mount(PageHero, { props: { title: 'X', transparent: true } })
+
+    expect(wrapper.classes()).toContain('page-hero--transparent')
+    expect(wrapper.findAll('.page-hero__light')).toHaveLength(1)
+  })
+})
