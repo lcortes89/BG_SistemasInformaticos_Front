@@ -24,14 +24,21 @@ defineProps({
 .page-backdrop {
   position: relative;
   overflow: hidden;
+  background: #fff; // same colour as the page below
 
-  // Blurred photo
+  // Blurred photo. It never grows taller than 1000px (so it does not stretch
+  // when there are many brands or clients) and it melts into white at the bottom,
+  // so there is no hard edge before the next section (BGSI-227).
   &__image {
     position: absolute;
-    inset: -20px; // hides the soft edges of the blur
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    height: min(calc(100% + 40px), 1000px);
     background-size: cover;
     background-position: center top;
     filter: blur(8px) brightness(0.95) saturate(1.05);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
   }
 
   // Navy behind the hero that becomes transparent and ends in a white veil
