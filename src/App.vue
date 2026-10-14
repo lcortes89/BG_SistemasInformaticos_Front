@@ -1,11 +1,12 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import DemoCta from '@/components/layout/DemoCta.vue'
 import DemoSideTab from '@/components/layout/DemoSideTab.vue'
 import { useElementReached } from '@/composables/layout/useElementReached'
+import { useHeroImage } from '@/composables/layout/useHeroImage'
 
 const route = useRoute()
 
@@ -21,6 +22,10 @@ const showDemoCta = computed(() => !isAdminPanel.value && !route.meta.hideDemoCt
 // BGSI-236: the side tab hides once the visitor reaches the orange card at the bottom
 const demoCta = ref(null)
 const { isReached: isDemoCtaReached } = useElementReached(demoCta)
+
+// BGSI-231: the photo of the public heroes is read once, when the app starts
+const { loadHeroImage } = useHeroImage()
+onMounted(loadHeroImage)
 </script>
 
 <template>

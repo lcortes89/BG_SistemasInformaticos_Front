@@ -16,3 +16,15 @@ describe('PageBackdrop (BGSI-227)', () => {
     expect(wrapper.find('.page-backdrop__image').attributes('style')).toContain('/fotos/otra.jpg')
   })
 })
+
+describe('PageBackdrop with the photo of "Apariencia" (BGSI-231)', () => {
+  it('uses the photo chosen by the admin', async () => {
+    const { useHeroImage } = await import('@/composables/layout/useHeroImage')
+    useHeroImage().setHeroImage('http://x.com/admin.jpg')
+
+    const wrapper = mount(PageBackdrop)
+
+    expect(wrapper.find('.page-backdrop__image').attributes('style')).toContain('http://x.com/admin.jpg')
+    useHeroImage().setHeroImage(null)
+  })
+})
