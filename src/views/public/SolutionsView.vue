@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
+import PageHero from '@/shared/PageHero.vue'
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
 import BrandCard from '@/components/solutions/BrandCard.vue'
 import BrandServices from '@/components/solutions/BrandServices.vue'
@@ -14,13 +15,15 @@ onMounted(loadBrands)
 </script>
 
 <template>
+  <PageHero
+    breadcrumb="Nuestras Soluciones"
+    title="Nuestras Soluciones"
+    subtitle="Distribuidores oficiales de la tecnología líder para digitalizar hostelería y comercio: gestión de efectivo, software TPV, ERP y robótica de servicio."
+    centered
+  />
+
   <section class="solutions">
     <div class="container">
-      <header class="solutions__header">
-        <h1>Nuestras Soluciones</h1>
-        <p>Trabajamos con marcas líderes en software y hardware para hostelería y pymes. Elige una marca para ver sus productos.</p>
-      </header>
-
       <LoadingSpinner v-if="isLoadingBrands" label="Cargando marcas..." />
 
       <p v-else-if="brandsError" class="solutions__message solutions__message--error" role="alert">{{ brandsError }}</p>
@@ -30,6 +33,8 @@ onMounted(loadBrands)
       </p>
 
       <template v-else>
+        <p class="solutions__hint">Elige una marca para ver sus productos.</p>
+
         <div class="solutions__grid">
           <BrandCard
             v-for="brand in brands"
@@ -57,17 +62,9 @@ onMounted(loadBrands)
 
 <style scoped lang="scss">
 .solutions {
-  padding: 4rem 0;
+  padding: 3rem 0 4rem;
 
-  &__header {
-    max-width: 720px;
-    margin: 0 auto 3rem;
-    text-align: center;
-
-    h1 { margin: 0 0 1rem; color: var(--color-navy); }
-    p { margin: 0; color: var(--color-muted); }
-  }
-
+  &__hint { margin: 0 0 1.5rem; text-align: center; color: var(--color-muted); }
   &__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
   &__message { text-align: center; color: var(--color-muted); }
   &__message--error { color: #b91c1c; }

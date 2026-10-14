@@ -1,21 +1,24 @@
 <script setup>
 import heroImage from '@/assets/images/hero.png'
+import PageHero from '@/shared/PageHero.vue'
 import RateWizard from '@/components/rates/RateWizard.vue'
 import RatesFaq from '@/components/rates/RatesFaq.vue'
 import { RATE_FAQ } from '@/core/models/rate/rate-faq'
 </script>
 
 <template>
+  <PageHero
+    breadcrumb="Tarifas"
+    eyebrow="Calculador inteligente de soluciones"
+    title="Calcula tu tarifa"
+    subtitle="Respóndenos unas preguntas sobre tu negocio y te ayudamos a encontrar la solución tecnológica y la tarifa mensual que mejor se ajusta a tus necesidades."
+  />
+
   <section class="rates">
     <!-- Blurred background image behind the wizard card (prototype) -->
     <div class="rates__background" :style="{ backgroundImage: `url(${heroImage})` }" aria-hidden="true"></div>
 
     <div class="container rates__content">
-      <header class="rates__header">
-        <h1>Calcula tu tarifa</h1>
-        <p>Responde 5 preguntas rápidas y obtén un precio orientativo para tu negocio.</p>
-      </header>
-
       <div class="rates__card">
         <RateWizard />
       </div>
@@ -30,7 +33,7 @@ import { RATE_FAQ } from '@/core/models/rate/rate-faq'
 .rates {
   position: relative;
   overflow: hidden;
-  padding: 4rem 0;
+  padding: 3rem 0;
 
   &__background {
     position: absolute;
@@ -41,16 +44,6 @@ import { RATE_FAQ } from '@/core/models/rate/rate-faq'
   }
 
   &__content { position: relative; z-index: 1; }
-
-  &__header {
-    max-width: 720px;
-    margin: 0 auto 2rem;
-    text-align: center;
-    color: #fff;
-
-    h1 { margin: 0 0 0.75rem; }
-    p { margin: 0; opacity: 0.9; }
-  }
 
   &__card {
     max-width: 900px;
@@ -63,7 +56,7 @@ import { RATE_FAQ } from '@/core/models/rate/rate-faq'
 }
 
 @media (max-width: 560px) {
-  .rates { padding: 2.5rem 0; }
+  .rates { padding: 2rem 0; }
   .rates__card { padding: 1.5rem 1rem; }
 }
 </style>
