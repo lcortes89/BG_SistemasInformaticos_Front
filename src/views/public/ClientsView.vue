@@ -18,7 +18,6 @@ onMounted(() => loadPage(0))
 
 <template>
   <PageHero
-    breadcrumb="Nuestros Clientes"
     eyebrow="Casos reales de transformación digital"
     title="Nuestros Clientes"
     subtitle="Negocios de hostelería y retail que ya confían en nosotros para digitalizar su día a día."
