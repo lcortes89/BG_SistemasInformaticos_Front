@@ -13,6 +13,7 @@ const links = [
   { to: { name: 'admin-services' }, label: 'Productos' },
   { to: { name: 'admin-clients' }, label: 'Clientes' },
   { to: { name: 'admin-rates' }, label: 'Tarifas' },
+  { to: { name: 'admin-appearance' }, label: 'Apariencia' },
   { to: { name: 'admin-users' }, label: 'Administradores' },
 ]
 

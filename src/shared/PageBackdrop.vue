@@ -1,17 +1,23 @@
 <script setup>
+import { computed } from 'vue'
 import defaultImage from '@/assets/images/hero.png'
+import { useHeroImage } from '@/composables/layout/useHeroImage'
 
 // BGSI-227: same background for every public view.
 // Navy at the top (behind the PageHero) that fades into a blurred photo.
-defineProps({
-  // Ready to receive another photo (e.g. one chosen from the admin panel)
-  image: { type: String, default: defaultImage },
+const props = defineProps({
+  // Optional: forces a photo (e.g. in a test). Without it, the one chosen in "Apariencia"
+  image: { type: String, default: '' },
 })
+
+// BGSI-231: photo chosen by the admin, or the default one
+const { heroImageUrl } = useHeroImage()
+const photo = computed(() => props.image || heroImageUrl.value || defaultImage)
 </script>
 
 <template>
   <div class="page-backdrop">
-    <div class="page-backdrop__image" :style="{ backgroundImage: `url(${image})` }" aria-hidden="true"></div>
+    <div class="page-backdrop__image" :style="{ backgroundImage: `url(${photo})` }" aria-hidden="true"></div>
     <div class="page-backdrop__fade" aria-hidden="true"></div>
 
     <div class="page-backdrop__content">
