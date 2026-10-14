@@ -14,4 +14,15 @@ describe('AuthService', () => {
     expect(session).toBeInstanceOf(SessionModel)
     expect(session.isAdmin()).toBe(true)
   })
+
+  it('registers a new admin with the trimmed email and returns that email (BGSI-197)', async () => {
+    const fakeRepository = {
+      register: vi.fn().mockResolvedValue({ id: 2, email: 'maria@bg.es', role: 'ADMIN' }),
+    }
+
+    const email = await new AuthService(fakeRepository).registerAdmin(' maria@bg.es ', 'Segura2026')
+
+    expect(fakeRepository.register).toHaveBeenCalledWith('maria@bg.es', 'Segura2026')
+    expect(email).toBe('maria@bg.es')
+  })
 })
