@@ -81,3 +81,17 @@ describe('AppHeader on scroll (BGSI-210)', () => {
     wrapper.unmount()
   })
 })
+
+describe('AppHeader transparent over the hero (BGSI-225)', () => {
+  it('is transparent on pages with hero and solid on the others', () => {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    const overHero = mount(AppHeader, { props: { overlay: true }, global: { plugins: [router] } })
+    const normal = mount(AppHeader, { props: { overlay: false }, global: { plugins: [router] } })
+
+    expect(overHero.find('header').classes()).not.toContain('is-solid')
+    expect(normal.find('header').classes()).toContain('is-solid')
+
+    overHero.unmount()
+    normal.unmount()
+  })
+})

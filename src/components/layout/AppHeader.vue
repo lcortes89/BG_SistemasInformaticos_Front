@@ -4,6 +4,11 @@ import { RouterLink } from 'vue-router'
 import logo from '@/assets/logo/logo_header.png'
 import { useScrollHeader } from '@/composables/layout/useScrollHeader'
 
+defineProps({
+  // true on pages with a hero: transparent at the top of the page
+  overlay: { type: Boolean, default: false },
+})
+
 const links = [
   { to: '/soluciones', label: 'Soluciones' },
   { to: '/tarifas', label: 'Tarifas' },
@@ -13,7 +18,7 @@ const links = [
 // Mobile menu: closed by default
 const isMenuOpen = ref(false)
 
-// Smart header: translucent when scrolling, hidden going down, back when going up
+// Smart header: glass when scrolling, hidden going down, back when going up
 const { isTranslucent, isHidden, isAtTop } = useScrollHeader()
 
 function toggleMenu() {
@@ -27,7 +32,12 @@ function closeMenu() {
 
 <template>
   <header class="app-header"
-          :class="{ 'is-translucent': isTranslucent, 'is-hidden': isHidden && !isMenuOpen, 'is-at-top': isAtTop }">
+          :class="{
+            'is-solid': !overlay && !isTranslucent,
+            'is-translucent': isTranslucent || isMenuOpen,
+            'is-hidden': isHidden && !isMenuOpen,
+            'is-at-top': isAtTop,
+          }">
     <div class="container app-header__inner">
       <RouterLink to="/" class="app-header__brand" @click="closeMenu">
         <img :src="logo" alt="BG Sistemas Informáticos" class="app-header__logo" />
@@ -57,27 +67,29 @@ function closeMenu() {
 
 <style scoped lang="scss">
 .app-header {
-  position: sticky;
+  // Fixed: it floats over the hero instead of taking its own band of colour
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
-  background: var(--color-navy);
+  background: transparent;
   transition: transform 0.3s ease, background-color 0.3s ease;
 
-  // BGSI-210: semi-transparent navy with the page blurred behind it
+  // Pages without hero (legal, 404, login): normal navy header
+  &.is-solid { background: var(--color-navy); }
+
+  // When scrolling: light "glass" so the white menu is always readable
   &.is-translucent {
-    background: rgba(11, 31, 58, 0.82);
-    backdrop-filter: blur(8px);
+    background: rgba(11, 31, 58, 0.55);
+    backdrop-filter: blur(10px);
   }
 
   // BGSI-210: slides up out of the screen
-  &.is-hidden {
-    transform: translateY(-100%);
-  }
+  &.is-hidden { transform: translateY(-100%); }
 
-  // Back at the top of the page: appear at once (no white line under the header)
-  &.is-at-top {
-    transition: none;
-  }
+  // Back at the top of the page: change at once, without animation
+  &.is-at-top { transition: none; }
 
   &__inner {
     display: flex;

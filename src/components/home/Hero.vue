@@ -20,12 +20,12 @@ import heroImage from '@/assets/images/hero.png'
 /* BGSI-211: lower than before (it used to fill the whole screen) */
 .hero {
   position: relative;
-  min-height: min(70vh, 620px);
+  min-height: calc(min(70vh, 620px) + 72px);
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
-  padding: 4rem 2rem;
+  padding: calc(72px + 4rem) 2rem 4rem;
 }
 
 .hero__overlay {
@@ -66,7 +66,7 @@ import heroImage from '@/assets/images/hero.png'
 }
 
 @media (max-width: 560px) {
-  .hero { min-height: 0; padding: 3.5rem 1rem; }
+  .hero { min-height: 0; padding: calc(72px + 3rem) 1rem 3.5rem; }
   .hero__title { font-size: 2rem; }
 }
 </style>

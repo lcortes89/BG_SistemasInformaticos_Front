@@ -22,7 +22,6 @@ onMounted(loadOptions)
 
 <template>
   <PageHero
-    breadcrumb="Contacto"
     eyebrow="Atención personalizada · Consultoría directa"
     title="Hablemos de tu negocio"
     subtitle="Cuéntanos qué necesitas y uno de nuestros consultores especializados te contactará en menos de 24 horas laborables."

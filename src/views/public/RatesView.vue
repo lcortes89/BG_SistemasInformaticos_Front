@@ -8,7 +8,6 @@ import { RATE_FAQ } from '@/core/models/rate/rate-faq'
 
 <template>
   <PageHero
-    breadcrumb="Tarifas"
     eyebrow="Calculador inteligente de soluciones"
     title="Calcula tu tarifa"
     subtitle="Respóndenos unas preguntas sobre tu negocio y te ayudamos a encontrar la solución tecnológica y la tarifa mensual que mejor se ajusta a tus necesidades."
