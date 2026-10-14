@@ -103,6 +103,7 @@ defineProps({
   // BGSI-226: no colour of its own, the dots fade out towards the bottom
   &--transparent {
     overflow: visible;
+    min-height: 328px;
     background: transparent;
 
     .page-hero__dots {
@@ -124,6 +125,7 @@ defineProps({
 
 @media (max-width: 560px) {
   .page-hero { padding: calc(72px + 2rem) 0 2.5rem; }
+  .page-hero--transparent { min-height: 338px; }
   .page-hero__title { font-size: 1.9rem; }
 }
 
