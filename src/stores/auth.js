@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import AuthService from '@/core/apis/auth/AuthService'
 import SessionModel from '@/core/models/auth/SessionModel'
 
-const STORAGE_KEY = 'bgsi-session'
+export const STORAGE_KEY = 'bgsi-session'
 
 function readStoredSession() {
   try {
@@ -41,5 +41,10 @@ export const useAuthStore = defineStore('auth', () => {
     storeSession(null)
   }
 
-  return { session, isAuthenticated, isAdmin, token, email, login, logout }
+  // Another tab logged in or out: read the session again from localStorage (BGSI-257)
+  function syncFromStorage() {
+    session.value = readStoredSession()
+  }
+
+  return { session, isAuthenticated, isAdmin, token, email, login, logout, syncFromStorage }
 })

@@ -25,3 +25,11 @@ describe('AdminLoginView', () => {
     expect(wrapper.find('[role="status"]').exists()).toBe(false)
   })
 })
+
+describe('AdminLoginView: logout from another tab (BGSI-257)', () => {
+  it('explains that the session was closed in another tab', async () => {
+    const wrapper = await mountAt('/admin/login?loggedOut=1')
+
+    expect(wrapper.find('[role="status"]').text()).toContain('Se ha cerrado la sesión desde otra pestaña')
+  })
+})
