@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import PageHero from '@/shared/PageHero.vue'
 import PageBackdrop from '@/shared/PageBackdrop.vue'
-import LoadingSpinner from '@/shared/LoadingSpinner.vue'
+import SkeletonCard from '@/shared/SkeletonCard.vue'
 import BrandCard from '@/components/solutions/BrandCard.vue'
 import BrandServices from '@/components/solutions/BrandServices.vue'
 import { useSolutions } from '@/composables/solutions/useSolutions'
@@ -26,7 +26,10 @@ onMounted(loadBrands)
 
     <section class="solutions">
       <div class="container">
-        <LoadingSpinner v-if="isLoadingBrands" label="Cargando marcas..." />
+        <!-- BGSI-243: grey cards while the brands load -->
+        <div v-if="isLoadingBrands" class="solutions__grid" role="status" aria-busy="true" aria-label="Cargando marcas...">
+          <SkeletonCard v-for="n in 4" :key="n" variant="brand" />
+        </div>
 
         <p v-else-if="brandsError" class="solutions__message solutions__message--error" role="alert">{{ brandsError }}</p>
 
