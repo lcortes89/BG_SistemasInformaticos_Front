@@ -2,11 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Hero from '@/components/home/Hero.vue'
 
-const RouterLinkStub = {
-  template: '<a><slot /></a>',
-}
-
-const mountHero = () => mount(Hero, { global: { stubs: { RouterLink: RouterLinkStub } } })
+const mountHero = () => mount(Hero)
 
 describe('Hero', () => {
   it('renders the title', () => {
@@ -17,11 +13,10 @@ describe('Hero', () => {
     expect(mountHero().text()).toContain('Transformamos la gestión de tu restaurante o PYME')
   })
 
-  it('renders the Ver Soluciones button', () => {
-    expect(mountHero().text()).toContain('Ver Soluciones')
-  })
+  it('has no "Ver Soluciones" button: the menu already links to Soluciones', () => {
+    const wrapper = mountHero()
 
-  it('renders only one call-to-action link', () => {
-    expect(mountHero().findAll('a').length).toBe(1)
+    expect(wrapper.text()).not.toContain('Ver Soluciones')
+    expect(wrapper.findAll('a')).toHaveLength(0)
   })
 })
