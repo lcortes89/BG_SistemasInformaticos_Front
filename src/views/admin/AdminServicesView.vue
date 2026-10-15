@@ -4,6 +4,7 @@ import LoadingSpinner from '@/shared/LoadingSpinner.vue'
 import Pagination from '@/shared/Pagination.vue'
 import ModalDialog from '@/shared/ModalDialog.vue'
 import ConfirmDialog from '@/shared/ConfirmDialog.vue'
+import ExportMenu from '@/shared/ExportMenu.vue'
 import ServicesTable from '@/components/admin/ServicesTable.vue'
 import ServiceForm from '@/components/admin/ServiceForm.vue'
 import AdminServiceService from '@/core/apis/service/AdminServiceService'
@@ -69,6 +70,8 @@ onMounted(async () => {
           <option value="">Todas las marcas</option>
           <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
         </select>
+        <!-- BGSI-254: exports what the table shows (same brand filter) -->
+        <ExportMenu resource="services" :params="filters.brandId ? { brandId: filters.brandId } : {}" />
         <button type="button" class="btn btn--primary admin-page__new" @click="openForm()">+ Nuevo producto</button>
       </div>
     </header>

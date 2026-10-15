@@ -4,6 +4,7 @@ import LoadingSpinner from '@/shared/LoadingSpinner.vue'
 import Pagination from '@/shared/Pagination.vue'
 import ModalDialog from '@/shared/ModalDialog.vue'
 import ConfirmDialog from '@/shared/ConfirmDialog.vue'
+import ExportMenu from '@/shared/ExportMenu.vue'
 import BrandsTable from '@/components/admin/BrandsTable.vue'
 import BrandForm from '@/components/admin/BrandForm.vue'
 import AdminBrandService from '@/core/apis/brand/AdminBrandService'
@@ -54,7 +55,10 @@ onMounted(() => loadPage(0))
         <h1>Marcas</h1>
         <p>{{ totalElements }} {{ totalElements === 1 ? 'marca' : 'marcas' }}</p>
       </div>
-      <button type="button" class="btn btn--primary admin-page__new" @click="openForm()">+ Nueva marca</button>
+      <div class="admin-page__tools">
+        <ExportMenu resource="brands" />
+        <button type="button" class="btn btn--primary admin-page__new" @click="openForm()">+ Nueva marca</button>
+      </div>
     </header>
 
     <Transition name="slide-fade">
