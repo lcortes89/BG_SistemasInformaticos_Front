@@ -126,3 +126,20 @@ describe('AppHeader divider line (BGSI-226)', () => {
     wrapper.unmount()
   })
 })
+
+describe('AppHeader: admin login (BGSI-256)', () => {
+  function mountWithoutNav() {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    return mount(AppHeader, { props: { showNav: false }, global: { plugins: [router] } })
+  }
+
+  it('keeps the logo but hides the public menu and the mobile button', () => {
+    const wrapper = mountWithoutNav()
+
+    expect(wrapper.find('img').attributes('alt')).toBe('BG Sistemas Informáticos')
+    expect(wrapper.find('nav').exists()).toBe(false)
+    expect(wrapper.find('[data-test="menu-toggle"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Soluciones')
+    expect(wrapper.text()).not.toContain('Contacto')
+  })
+})

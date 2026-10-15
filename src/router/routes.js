@@ -10,7 +10,7 @@ export const routes = [
   { path: '/privacidad', name: 'privacy', component: () => import('@/views/public/LegalView.vue') },
   { path: '/cookies', name: 'cookies', component: () => import('@/views/public/LegalView.vue') },
   // Admin area: reached by typing the URL, no public link
-  { path: '/admin/login', name: 'admin-login', component: () => import('@/views/admin/AdminLoginView.vue'), meta: { hideDemoCta: true } },
+  { path: '/admin/login', name: 'admin-login', component: () => import('@/views/admin/AdminLoginView.vue'), meta: { hideDemoCta: true, hideNav: true } },
   {
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),

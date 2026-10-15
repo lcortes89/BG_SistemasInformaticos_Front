@@ -29,7 +29,7 @@ onMounted(loadHeroImage)
 </script>
 
 <template>
-  <AppHeader v-if="!isAdminPanel" :overlay="overlayHeader" />
+  <AppHeader v-if="!isAdminPanel" :overlay="overlayHeader" :show-nav="!route.meta.hideNav" />
   <!-- The header is fixed: pages without hero leave its space free at the top -->
   <main :class="{ 'has-header-space': !isAdminPanel && !overlayHeader }">
     <RouterView />
