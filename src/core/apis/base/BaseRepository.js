@@ -38,6 +38,19 @@ export default class BaseRepository {
     return this.#request(() => http.delete(`${this.resource}${path}`))
   }
 
+  // GET that returns a file instead of JSON (BGSI-254): the answer is a Blob
+  async getFile(path = '', params = {}) {
+    return this.#request(async () => {
+      try {
+        return await http.get(`${this.resource}${path}`, { params, responseType: 'blob' })
+      } catch (error) {
+        // The error body also comes as a Blob: read it as JSON to keep the backend message
+        if (error.response?.data instanceof Blob) error.response.data = await BaseRepository.readJson(error.response.data)
+        throw error
+      }
+    })
+  }
+
   // Keeps the message sent by the backend (ApiErrorDTO), except for 403 and 5xx
   async #request(call) {
     try {
@@ -50,6 +63,14 @@ export default class BaseRepository {
       wrapped.status = status
       wrapped.details = apiError?.details || null
       throw wrapped
+    }
+  }
+
+  static async readJson(blob) {
+    try {
+      return JSON.parse(await blob.text())
+    } catch {
+      return null
     }
   }
 
