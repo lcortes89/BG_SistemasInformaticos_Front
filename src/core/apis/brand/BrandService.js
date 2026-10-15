@@ -17,8 +17,14 @@ export default class BrandService {
     return dtos.map((dto) => BrandModel.create(dto, brandMapper))
   }
 
-  async getServices(brandId) {
-    const dtos = await this.#repo.findServicesByBrand(brandId)
-    return dtos.map((dto) => ServiceModel.create(dto, serviceMapper))
+  // Returns the products of one page + the pagination info (BGSI-248)
+  async getServices(brandId, page = 0, size = 4) {
+    const response = await this.#repo.findServicesByBrand(brandId, page, size)
+    return {
+      items: response.content.map((dto) => ServiceModel.create(dto, serviceMapper)),
+      page: response.page,
+      totalPages: response.totalPages,
+      totalElements: response.totalElements,
+    }
   }
 }

@@ -1,16 +1,46 @@
 <script setup>
-import { onMounted } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import PageHero from '@/shared/PageHero.vue'
 import PageBackdrop from '@/shared/PageBackdrop.vue'
 import SkeletonCard from '@/shared/SkeletonCard.vue'
 import BrandCard from '@/components/solutions/BrandCard.vue'
 import BrandServices from '@/components/solutions/BrandServices.vue'
+import BrandStickyBar from '@/components/solutions/BrandStickyBar.vue'
 import { useSolutions } from '@/composables/solutions/useSolutions'
+import { useElementPassed } from '@/composables/layout/useElementPassed'
 
 const {
   brands, isLoadingBrands, brandsError, loadBrands,
   selectedBrand, services, isLoadingServices, servicesError, selectBrand,
+  servicesPage, servicesTotalPages, servicesTotal, pageSize, loadServicesPage,
 } = useSolutions()
+
+// BGSI-247: the brand bar appears once the brand cards have gone up, out of the screen
+const brandGrid = ref(null)
+const { isPassed: isBrandGridPassed } = useElementPassed(brandGrid, 72)
+
+const productsSection = ref(null)
+
+// Scroll up only to the title of the products, not to the top of the page
+async function scrollToProducts() {
+  await nextTick()
+  const element = productsSection.value?.$el ?? productsSection.value
+  element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+async function changeBrandFromBar(brand) {
+  await selectBrand(brand)
+  scrollToProducts()
+}
+
+async function changePage(pageIndex) {
+  await loadServicesPage(pageIndex)
+  scrollToProducts()
+}
+
+function showAllBrands() {
+  brandGrid.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
 
 onMounted(loadBrands)
 </script>
@@ -40,7 +70,7 @@ onMounted(loadBrands)
         <template v-else>
           <p class="solutions__hint">Elige una marca para ver sus productos.</p>
 
-          <div class="solutions__grid">
+          <div ref="brandGrid" class="solutions__grid">
             <BrandCard
               v-for="brand in brands"
               :key="brand.id"
@@ -53,16 +83,30 @@ onMounted(loadBrands)
           <Transition name="slide-fade" mode="out-in">
             <BrandServices
               v-if="selectedBrand"
+              ref="productsSection"
               :key="selectedBrand.id"
               :brand="selectedBrand"
               :services="services"
               :is-loading="isLoadingServices"
               :error="servicesError"
+              :page="servicesPage"
+              :total-pages="servicesTotalPages"
+              :total-elements="servicesTotal"
+              :page-size="pageSize"
+              @page-change="changePage"
             />
           </Transition>
         </template>
       </div>
     </section>
+
+    <BrandStickyBar
+      :brands="brands"
+      :selected-id="selectedBrand?.id ?? null"
+      :visible="!!selectedBrand && isBrandGridPassed"
+      @select="changeBrandFromBar"
+      @show-all="showAllBrands"
+    />
   </PageBackdrop>
 </template>
 

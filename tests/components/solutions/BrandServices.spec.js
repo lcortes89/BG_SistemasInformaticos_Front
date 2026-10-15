@@ -37,3 +37,22 @@ describe('BrandServices', () => {
     expect(wrapper.text()).toContain('todavía no tiene productos')
   })
 })
+
+describe('BrandServices: pagination (BGSI-248)', () => {
+  const services = [1, 2, 3, 4].map((id) => ({ id, name: `Module ${id}`, description: '', brandName: 'AHORA' }))
+
+  it('shows the counter and the pages when there is more than one page', async () => {
+    const wrapper = mountServices({ services, page: 0, totalPages: 2, totalElements: 6 })
+
+    expect(wrapper.text()).toContain('Mostrando 1–4 de 6 productos')
+    await wrapper.findAll('.pagination__button').find((button) => button.text() === '2').trigger('click')
+    expect(wrapper.emitted('page-change')[0]).toEqual([1])
+  })
+
+  it('hides the pages when everything fits in one page', () => {
+    const wrapper = mountServices({ services: services.slice(0, 2), page: 0, totalPages: 1, totalElements: 2 })
+
+    expect(wrapper.find('.pagination').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Mostrando')
+  })
+})

@@ -11,8 +11,8 @@ export default class BrandRepository extends BaseRepository {
     return this.get()
   }
 
-  // GET /api/brands/{id}/services
-  async findServicesByBrand(brandId) {
-    return this.get(`/${brandId}/services`)
+  // GET /api/brands/{id}/services?page=0&size=4 -> PageResponseDTO from the backend (BGSI-248)
+  async findServicesByBrand(brandId, page, size) {
+    return this.get(`/${brandId}/services`, { page, size })
   }
 }

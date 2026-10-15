@@ -7,9 +7,10 @@ const fakeRepository = {
   findAll: vi.fn().mockResolvedValue([
     { id: 1, name: 'BDP', description: 'TPV', category: 'Software', logoUrl: null },
   ]),
-  findServicesByBrand: vi.fn().mockResolvedValue([
-    { id: 2, name: 'BDP One', description: 'Multiplatform', brandId: 1, brandName: 'BDP' },
-  ]),
+  findServicesByBrand: vi.fn().mockResolvedValue({
+    content: [{ id: 2, name: 'BDP One', description: 'Multiplatform', brandId: 1, brandName: 'BDP' }],
+    page: 1, size: 4, totalElements: 6, totalPages: 2, last: true,
+  }),
 }
 
 describe('BrandService', () => {
@@ -20,11 +21,12 @@ describe('BrandService', () => {
     expect(brands[0].getInitials()).toBe('BD')
   })
 
-  it('returns the services of a brand as ServiceModel objects', async () => {
-    const services = await new BrandService(fakeRepository).getServices(1)
+  it('returns one page of services of a brand as ServiceModel objects (BGSI-248)', async () => {
+    const result = await new BrandService(fakeRepository).getServices(1, 1, 4)
 
-    expect(fakeRepository.findServicesByBrand).toHaveBeenCalledWith(1)
-    expect(services[0]).toBeInstanceOf(ServiceModel)
-    expect(services[0].name).toBe('BDP One')
+    expect(fakeRepository.findServicesByBrand).toHaveBeenCalledWith(1, 1, 4)
+    expect(result.items[0]).toBeInstanceOf(ServiceModel)
+    expect(result.items[0].name).toBe('BDP One')
+    expect(result).toMatchObject({ page: 1, totalPages: 2, totalElements: 6 })
   })
 })
