@@ -10,7 +10,13 @@ export default class RateService {
     this.#repo = repository
   }
 
-  // answers: the 5 option codes chosen in the wizard
+  // The questions the admin has published (BGSI-235)
+  async getSteps() {
+    const dtos = await this.#repo.findSteps()
+    return dtos.map(rateMapper.step)
+  }
+
+  // answers: { questionId: optionId } chosen in the wizard
   async calculate(answers) {
     const dto = await this.#repo.calculate(rateMapper.toRequest(answers))
     return RateQuoteModel.create(dto, rateMapper)

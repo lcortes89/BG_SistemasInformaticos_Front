@@ -1,4 +1,5 @@
 <script setup>
+import { onMounted } from 'vue'
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
 import RateStepper from '@/components/rates/RateStepper.vue'
 import RateOptionCard from '@/components/rates/RateOptionCard.vue'
@@ -12,20 +13,32 @@ const props = defineProps({
 })
 
 const {
-  steps, stepIndex, answers, quote, isLoading, error,
+  steps, isLoadingSteps, stepsError, loadSteps,
+  stepIndex, answers, quote, isLoading, error,
   currentStep, isFirstStep, isLastStep, canContinue,
   select, next, back, restart,
 } = useRateWizard(props.rateService)
+
+// BGSI-235: the questions come from the API
+onMounted(loadSteps)
 </script>
 
 <template>
-  <div class="wizard">
+  <LoadingSpinner v-if="isLoadingSteps" label="Cargando preguntas..." />
+
+  <p v-else-if="stepsError" class="wizard__error" role="alert">{{ stepsError }}</p>
+
+  <p v-else-if="steps.length === 0" class="wizard__hint">
+    La calculadora no está disponible en este momento. Escríbenos y te preparamos una propuesta.
+  </p>
+
+  <div v-else class="wizard">
     <RateStepper :steps="steps" :current="quote ? steps.length : stepIndex" />
 
     <LoadingSpinner v-if="isLoading" label="Calculando tu tarifa..." />
 
     <Transition v-else name="slide-fade" mode="out-in">
-      <RateResult v-if="quote" key="result" :quote="quote" :answers="answers"
+      <RateResult v-if="quote" key="result" :quote="quote" :answers="answers" :steps="steps"
                   :contact-service="contactService" @restart="restart" />
 
       <div v-else :key="currentStep.key" class="wizard__step">
