@@ -4,6 +4,7 @@ import { useRateProposal } from '@/composables/rates/useRateProposal'
 
 const props = defineProps({
   answers: { type: Object, required: true },
+  steps: { type: Array, default: () => [] }, // questions of the wizard (BGSI-235)
   quote: { type: Object, required: true }, // RateQuoteModel
   // Optional: lets the tests pass a fake ContactService
   contactService: { type: Object, default: undefined },
@@ -17,7 +18,7 @@ const { form, errors, isSubmitting, isSuccess, submitError, submit } = useRatePr
     ¡Gracias! Hemos recibido tus respuestas y te enviaremos la propuesta en menos de 24 horas laborables.
   </p>
 
-  <form v-else class="proposal" novalidate @submit.prevent="submit(answers, quote)">
+  <form v-else class="proposal" novalidate @submit.prevent="submit(answers, quote, steps)">
     <p class="proposal__intro">
       Déjanos tus datos y te enviamos la propuesta. <strong>Tus respuestas ya van incluidas.</strong>
     </p>

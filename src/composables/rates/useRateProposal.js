@@ -30,7 +30,8 @@ export function useRateProposal(service = new ContactService()) {
     return Object.keys(errors).length === 0
   }
 
-  async function submit(answers, quote) {
+  // steps: the questions of the wizard, to write each answer with its label (BGSI-235)
+  async function submit(answers, quote, steps = []) {
     submitError.value = null
     if (!validate()) return false
 
@@ -41,7 +42,7 @@ export function useRateProposal(service = new ContactService()) {
         email: form.email,
         phone: form.phone,
         interestedService: RATE_PROPOSAL_SERVICE,
-        message: buildRateSummary(answers, quote, form.comment),
+        message: buildRateSummary(answers, quote, form.comment, steps),
         gdprConsent: form.gdprConsent,
       })
       isSuccess.value = true

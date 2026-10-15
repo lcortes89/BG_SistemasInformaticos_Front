@@ -4,15 +4,14 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 import RateResult from '@/components/rates/RateResult.vue'
 import RateQuoteModel from '@/core/models/rate/RateQuoteModel'
 import { routes } from '@/router/routes'
+import { RATE_STEPS } from '../../fixtures/rate-steps'
 
-const answers = {
-  businessType: 'RESTAURANT', locations: 'ONE', posCount: 'ONE', space: 'INDOOR', squareMeters: 'SMALL',
-}
+const answers = { 1: 1, 2: 6, 3: 9, 4: 12, 5: 14 }
 
 function mountResult(contactService) {
   const router = createRouter({ history: createMemoryHistory(), routes })
   return mount(RateResult, {
-    props: { quote: new RateQuoteModel(49, 49, 1, 0), answers, contactService },
+    props: { quote: new RateQuoteModel(49, 49, 1, 0), answers, steps: RATE_STEPS, contactService },
     global: { plugins: [router] },
   })
 }
@@ -40,6 +39,7 @@ describe('RateResult', () => {
     await flushPromises()
 
     expect(service.send).toHaveBeenCalledTimes(1)
+    expect(service.send.mock.calls[0][0].message).toContain('Negocio: Restaurante')
     expect(wrapper.text()).toContain('¡Gracias! Hemos recibido tus respuestas')
   })
 })

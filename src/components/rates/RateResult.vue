@@ -4,7 +4,8 @@ import RateProposalForm from '@/components/rates/RateProposalForm.vue'
 
 defineProps({
   quote: { type: Object, required: true }, // RateQuoteModel
-  answers: { type: Object, required: true }, // the 5 option codes of the wizard
+  answers: { type: Object, required: true }, // { questionId: optionId }
+  steps: { type: Array, default: () => [] }, // questions of the wizard (BGSI-235)
   // Optional: lets the tests pass a fake ContactService
   contactService: { type: Object, default: undefined },
 })
@@ -32,7 +33,7 @@ const showProposal = ref(false)
     </div>
 
     <Transition name="slide-fade">
-      <RateProposalForm v-if="showProposal" :answers="answers" :quote="quote" :contact-service="contactService" />
+      <RateProposalForm v-if="showProposal" :answers="answers" :steps="steps" :quote="quote" :contact-service="contactService" />
     </Transition>
   </div>
 </template>
