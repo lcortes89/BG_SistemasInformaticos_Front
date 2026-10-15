@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import logo from '@/assets/logo/logo_footer.png'
+import WhatsAppIcon from '@/shared/WhatsAppIcon.vue'
 
 const currentYear = new Date().getFullYear()
 </script>
@@ -26,8 +27,10 @@ const currentYear = new Date().getFullYear()
 
       <div class="app-footer__col">
         <h2 class="app-footer__title">Contacto</h2>
-        <a href="https://wa.me/34615471066" target="_blank" rel="noopener" class="app-footer__link">
-          WhatsApp: +34 615 471 066
+        <a href="https://wa.me/34615471066" target="_blank" rel="noopener"
+           class="app-footer__link app-footer__whatsapp" aria-label="WhatsApp +34 615 471 066">
+          <WhatsAppIcon />
+          +34 615 471 066
         </a>
         <RouterLink to="/contacto" class="app-footer__link">Formulario de contacto</RouterLink>
       </div>
@@ -73,6 +76,9 @@ const currentYear = new Date().getFullYear()
     font-size: 1rem;
     color: #fff;
   }
+
+  // BGSI-242: green icon + number, aligned
+  &__whatsapp { display: inline-flex; align-items: center; gap: 0.5rem; }
 
   &__link {
     color: #cbd5e1;

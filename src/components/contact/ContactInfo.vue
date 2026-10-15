@@ -1,3 +1,7 @@
+<script setup>
+import WhatsAppIcon from '@/shared/WhatsAppIcon.vue'
+</script>
+
 <template>
   <aside class="contact-info">
     <h2>Hablemos</h2>
@@ -6,7 +10,10 @@
     <ul class="contact-info__list">
       <li>
         <span class="contact-info__label">WhatsApp</span>
-        <a href="https://wa.me/34615471066" target="_blank" rel="noopener">+34 615 471 066</a>
+        <a href="https://wa.me/34615471066" target="_blank" rel="noopener" class="contact-info__whatsapp">
+          <WhatsAppIcon :size="24" />
+          +34 615 471 066
+        </a>
       </li>
       <li>
         <span class="contact-info__label">Facebook</span>
@@ -36,6 +43,9 @@
 
     a { color: var(--color-orange); font-weight: 600; text-decoration: none; }
   }
+
+  // BGSI-242: green icon + number, aligned
+  &__whatsapp { display: inline-flex; align-items: center; gap: 0.5rem; }
 
   &__label {
     display: block;

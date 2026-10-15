@@ -26,3 +26,13 @@ describe('AppFooter', () => {
     expect(wrapper.text()).toContain(String(new Date().getFullYear()))
   })
 })
+
+describe('AppFooter: WhatsApp (BGSI-242)', () => {
+  it('shows the green icon and the number, without the word "WhatsApp:"', () => {
+    const link = mountFooter().find('a[href="https://wa.me/34615471066"]')
+
+    expect(link.find('svg.whatsapp-icon').exists()).toBe(true)
+    expect(link.text()).toBe('+34 615 471 066')
+    expect(link.attributes('aria-label')).toBe('WhatsApp +34 615 471 066')
+  })
+})
