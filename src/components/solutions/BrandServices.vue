@@ -1,5 +1,5 @@
 <script setup>
-import LoadingSpinner from '@/shared/LoadingSpinner.vue'
+import SkeletonCard from '@/shared/SkeletonCard.vue'
 import ProductDetailCard from '@/components/solutions/ProductDetailCard.vue'
 
 defineProps({
@@ -14,7 +14,11 @@ defineProps({
   <section class="brand-services" aria-live="polite">
     <h2 class="brand-services__title">Productos de {{ brand.name }}</h2>
 
-    <LoadingSpinner v-if="isLoading" :label="`Cargando productos de ${brand.name}...`" />
+    <!-- BGSI-243: grey product sheets while the products load -->
+    <div v-if="isLoading" class="brand-services__grid" role="status" aria-busy="true"
+         :aria-label="`Cargando productos de ${brand.name}...`">
+      <SkeletonCard v-for="n in 2" :key="n" variant="product" />
+    </div>
 
     <p v-else-if="error" class="brand-services__message brand-services__message--error" role="alert">{{ error }}</p>
 

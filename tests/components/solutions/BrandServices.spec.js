@@ -13,10 +13,11 @@ function mountServices(props) {
 }
 
 describe('BrandServices', () => {
-  it('shows the spinner while the products are loading', () => {
+  it('shows grey product sheets while the products are loading (BGSI-243)', () => {
     const wrapper = mountServices({ isLoading: true })
 
-    expect(wrapper.find('[role="status"]').exists()).toBe(true)
+    expect(wrapper.find('[aria-busy="true"]').exists()).toBe(true)
+    expect(wrapper.findAll('.skeleton--product')).toHaveLength(2)
   })
 
   it('shows one sheet per product of the brand', () => {

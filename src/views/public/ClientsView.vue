@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import PageHero from '@/shared/PageHero.vue'
 import PageBackdrop from '@/shared/PageBackdrop.vue'
-import LoadingSpinner from '@/shared/LoadingSpinner.vue'
+import SkeletonCard from '@/shared/SkeletonCard.vue'
 import Pagination from '@/shared/Pagination.vue'
 import ClientCard from '@/components/clients/ClientCard.vue'
 import { useClients } from '@/composables/clients/useClients'
@@ -31,7 +31,10 @@ onMounted(() => loadPage(0))
         <!-- Moved out of the hero so every hero has the same height (BGSI-227) -->
         <span class="clients__badge">✓ Instalaciones homologadas en Asturias y Norte de España</span>
 
-        <LoadingSpinner v-if="isLoading" label="Cargando clientes..." />
+        <!-- BGSI-243: grey cards while the clients load -->
+        <div v-if="isLoading" class="clients__grid" role="status" aria-busy="true" aria-label="Cargando clientes...">
+          <SkeletonCard v-for="n in 6" :key="n" variant="client" />
+        </div>
 
         <p v-else-if="error" class="clients__message clients__message--error" role="alert">{{ error }}</p>
 
