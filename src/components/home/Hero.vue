@@ -11,7 +11,6 @@ import heroImage from '@/assets/images/hero.png'
         Transformamos la gestión de tu restaurante o PYME con sistemas inteligentes que optimizan
         cada proceso y mejoran la experiencia de tus clientes.
       </p>
-      <RouterLink to="/soluciones" class="hero__cta">Ver Soluciones</RouterLink>
     </div>
   </section>
 </template>
@@ -51,18 +50,8 @@ import heroImage from '@/assets/images/hero.png'
 
 .hero__subtitle {
   font-size: 1.1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   line-height: 1.6;
-}
-
-.hero__cta {
-  display: inline-block;
-  background-color: var(--color-orange, #e8792a);
-  color: #ffffff;
-  padding: 0.75rem 2rem;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 600;
 }
 
 @media (max-width: 560px) {
