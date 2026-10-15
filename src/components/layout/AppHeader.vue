@@ -7,6 +7,8 @@ import { useScrollHeader } from '@/composables/layout/useScrollHeader'
 defineProps({
   // true on pages with a hero: transparent at the top of the page
   overlay: { type: Boolean, default: false },
+  // false on the admin login (BGSI-256): same header, without the public menu
+  showNav: { type: Boolean, default: true },
 })
 
 const links = [
@@ -45,6 +47,7 @@ function closeMenu() {
       </RouterLink>
 
       <button
+        v-if="showNav"
         type="button"
         class="app-header__toggle"
         data-test="menu-toggle"
@@ -56,7 +59,7 @@ function closeMenu() {
         <span></span><span></span><span></span>
       </button>
 
-      <nav id="main-nav" class="app-header__nav" :class="{ 'is-open': isMenuOpen }" aria-label="Navegación principal">
+      <nav v-if="showNav" id="main-nav" class="app-header__nav" :class="{ 'is-open': isMenuOpen }" aria-label="Navegación principal">
         <RouterLink v-for="link in links" :key="link.to" :to="link.to" class="app-header__link" @click="closeMenu">
           {{ link.label }}
         </RouterLink>
