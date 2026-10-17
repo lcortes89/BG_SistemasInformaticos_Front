@@ -143,3 +143,36 @@ describe('AppHeader: admin login (BGSI-256)', () => {
     expect(wrapper.text()).not.toContain('Contacto')
   })
 })
+
+describe('AppHeader: Inicio link (BGSI-263)', () => {
+  async function mountAt(path) {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    router.push(path)
+    await router.isReady()
+    return mount(AppHeader, { global: { plugins: [router] } })
+  }
+
+  it('shows "Inicio" as the first link of the menu', async () => {
+    const wrapper = await mountAt('/')
+
+    const first = wrapper.findAll('.app-header__link')[0]
+    expect(first.text()).toBe('Inicio')
+    expect(first.attributes('href')).toBe('/')
+  })
+
+  it('marks Inicio only when you are on the home page', async () => {
+    const home = await mountAt('/')
+    const solutions = await mountAt('/soluciones')
+
+    expect(home.findAll('.app-header__link')[0].classes()).toContain('router-link-active')
+    expect(solutions.findAll('.app-header__link')[0].classes()).not.toContain('router-link-active')
+  })
+
+  it('the logo also goes home and says so to screen readers', async () => {
+    const wrapper = await mountAt('/soluciones')
+
+    const logoLink = wrapper.find('.app-header__brand')
+    expect(logoLink.attributes('href')).toBe('/')
+    expect(logoLink.attributes('aria-label')).toBe('Ir a Inicio')
+  })
+})

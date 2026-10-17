@@ -12,6 +12,7 @@ defineProps({
 })
 
 const links = [
+  { to: '/', label: 'Inicio' }, // BGSI-263: not everybody knows that the logo goes home
   { to: '/soluciones', label: 'Soluciones' },
   { to: '/tarifas', label: 'Tarifas' },
   { to: '/clientes', label: 'Nuestros Clientes' },
@@ -42,7 +43,7 @@ function closeMenu() {
             'has-divider': overlay && !isTranslucent && !isMenuOpen,
           }">
     <div class="container app-header__inner">
-      <RouterLink to="/" class="app-header__brand" @click="closeMenu">
+      <RouterLink to="/" class="app-header__brand" aria-label="Ir a Inicio" @click="closeMenu">
         <img :src="logo" alt="BG Sistemas Informáticos" class="app-header__logo" />
       </RouterLink>
 
