@@ -74,8 +74,9 @@ const initials = computed(() => props.service.name
   background: #fff;
   box-shadow: 0 6px 20px rgba(11, 31, 58, 0.1);
 
-  &__media { min-height: 260px; background: var(--color-bg-alt); }
-  &__image { display: block; width: 100%; height: 100%; object-fit: cover; }
+  // BGSI-208: same 4:3 white box for every photo, which shrinks to fit without being cut
+  &__media { align-self: start; aspect-ratio: 4 / 3; background: #fff; border-right: 1px solid #eef1f5; }
+  &__image { display: block; width: 100%; height: 100%; padding: 1.25rem; box-sizing: border-box; object-fit: contain; }
 
   // Without image: navy box with the initials
   &__placeholder {
@@ -173,7 +174,7 @@ const initials = computed(() => props.service.name
 // Mobile: image on top, one column
 @media (max-width: 760px) {
   .product { grid-template-columns: minmax(0, 1fr); }
-  .product__media { min-height: 200px; aspect-ratio: 16 / 9; }
+  .product__media { border-right: 0; border-bottom: 1px solid #eef1f5; }
   .product__body { padding: 1.25rem; }
   .product__features { grid-template-columns: 1fr; }
 }
