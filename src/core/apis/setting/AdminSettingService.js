@@ -1,7 +1,7 @@
 import SettingService from '@/core/apis/setting/SettingService'
 import AdminSettingRepository from '@/core/apis/setting/AdminSettingRepository'
 
-// Admin side of the hero photo: read, change and reset it (BGSI-230)
+// Admin side of the website settings: hero photo (BGSI-230) and email notifications (BGSI-261)
 export default class AdminSettingService {
 
   #publicService
@@ -24,5 +24,18 @@ export default class AdminSettingService {
 
   async resetHeroImage() {
     await this.#adminRepo.resetHero()
+  }
+
+  // { notifyEmail, senderName, senderAccount } (senderAccount is read only: it lives in the server .env)
+  async getMailSettings() {
+    return this.#adminRepo.findMail()
+  }
+
+  async updateMailSettings({ notifyEmail, senderName }) {
+    return this.#adminRepo.updateMail({ notifyEmail: notifyEmail.trim(), senderName: senderName.trim() })
+  }
+
+  async sendTestMail() {
+    await this.#adminRepo.sendTestMail()
   }
 }

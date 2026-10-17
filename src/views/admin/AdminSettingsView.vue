@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
 import ImageUrlField from '@/shared/ImageUrlField.vue'
 import HeroPreview from '@/components/admin/HeroPreview.vue'
+import MailSettingsForm from '@/components/admin/MailSettingsForm.vue'
 import { useAdminAppearance } from '@/composables/admin/useAdminAppearance'
 
 const { draftUrl, isLoading, isSaving, error, feedback, isCustom, hasChanges, load, save, reset } = useAdminAppearance()
@@ -14,16 +15,22 @@ onMounted(load)
   <section>
     <header class="admin-page__header">
       <div>
-        <h1>Apariencia</h1>
-        <p>Elige la foto de fondo de las páginas públicas (Soluciones, Tarifas, Clientes y Contacto).</p>
+        <h1>Ajustes</h1>
+        <p>Configura los avisos por correo y la foto de fondo de la web.</p>
       </div>
     </header>
+
+    <!-- BGSI-261: who receives the "new contact" emails -->
+    <MailSettingsForm />
+
+    <h2 class="settings__subtitle">🖼️ Foto de fondo</h2>
+    <p class="settings__intro">Elige la foto de fondo de las páginas públicas (Soluciones, Tarifas, Clientes y Contacto).</p>
 
     <Transition name="slide-fade">
       <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
     </Transition>
 
-    <LoadingSpinner v-if="isLoading" label="Cargando apariencia..." />
+    <LoadingSpinner v-if="isLoading" label="Cargando foto de fondo..." />
 
     <div v-else class="appearance">
       <form class="appearance__card admin-form" novalidate @submit.prevent="save">
@@ -62,6 +69,9 @@ onMounted(load)
 </template>
 
 <style scoped lang="scss">
+.settings__subtitle { max-width: 1000px; margin: 0 0 0.25rem; font-size: 1.2rem; color: var(--color-navy); }
+.settings__intro { margin: 0 0 1rem; color: var(--color-muted); }
+
 .appearance {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
