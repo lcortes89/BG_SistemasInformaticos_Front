@@ -67,3 +67,29 @@ describe('ProductDetailCard: official page of the maker', () => {
     expect(mountCard(bdpOne).find('.product__official').exists()).toBe(false)
   })
 })
+
+describe('ProductDetailCard: bigger image (BGSI-265)', () => {
+  function mountAttached(service) {
+    const router = createRouter({ history: createMemoryHistory(), routes })
+    return mount(ProductDetailCard, { props: { service }, global: { plugins: [router] }, attachTo: document.body })
+  }
+
+  it('opens the image big when you click on it and closes it with Escape', async () => {
+    const wrapper = mountAttached(bdpOne)
+
+    await wrapper.find('.product__zoom').trigger('click')
+    expect(document.querySelector('.lightbox img').getAttribute('src')).toBe('http://x.com/bdp-one.jpg')
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await wrapper.vm.$nextTick()
+    expect(document.querySelector('.lightbox')).toBeNull()
+    expect(document.activeElement).toBe(wrapper.find('.product__zoom').element) // focus back on the image
+    wrapper.unmount()
+  })
+
+  it('a product without image has nothing to make bigger', () => {
+    const wrapper = mountCard({ ...bdpOne, imageUrl: null })
+
+    expect(wrapper.find('.product__zoom').exists()).toBe(false)
+  })
+})

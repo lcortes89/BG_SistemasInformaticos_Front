@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import ImageLightbox from '@/shared/ImageLightbox.vue'
 
 // Full sheet of one product (BGSI-206)
 const props = defineProps({
@@ -15,6 +16,15 @@ const imageFailed = ref(false)
 watch(() => props.service.imageUrl, () => { imageFailed.value = false })
 const showImage = computed(() => !!props.service.imageUrl && !imageFailed.value)
 
+// BGSI-265: click on the image to see it big; closing gives the focus back to the image
+const isZoomed = ref(false)
+const zoomButton = ref(null)
+
+function closeZoom() {
+  isZoomed.value = false
+  zoomButton.value?.focus()
+}
+
 // "BDP .Net" -> "BN"
 const initials = computed(() => props.service.name
   .replace(/[^\p{L}\p{N}\s]/gu, '')
@@ -24,8 +34,11 @@ const initials = computed(() => props.service.name
 <template>
   <article class="product">
     <div class="product__media">
-      <img v-if="showImage" :src="service.imageUrl" :alt="service.name" class="product__image"
-           @error="imageFailed = true" />
+      <button v-if="showImage" ref="zoomButton" type="button" class="product__zoom"
+              :aria-label="`Ampliar imagen de ${service.name}`" @click="isZoomed = true">
+        <img :src="service.imageUrl" :alt="service.name" class="product__image" @error="imageFailed = true" />
+        <span class="product__zoom-hint" aria-hidden="true">🔍 Ampliar</span>
+      </button>
       <div v-else class="product__placeholder" aria-hidden="true">{{ initials }}</div>
     </div>
 
@@ -62,6 +75,9 @@ const initials = computed(() => props.service.name
         </a>
       </div>
     </div>
+
+    <ImageLightbox v-if="isZoomed" :src="service.imageUrl" :alt="service.name" :caption="service.name"
+                   @close="closeZoom" />
   </article>
 </template>
 
@@ -77,6 +93,35 @@ const initials = computed(() => props.service.name
   // BGSI-208: same 4:3 white box for every photo, which shrinks to fit without being cut
   &__media { align-self: start; aspect-ratio: 4 / 3; background: #fff; border-right: 1px solid #eef1f5; }
   &__image { display: block; width: 100%; height: 100%; padding: 1.25rem; box-sizing: border-box; object-fit: contain; }
+
+  // BGSI-265: the whole image is a button that opens the big view
+  &__zoom {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+
+    &:focus-visible { outline: 3px solid var(--color-orange); outline-offset: -3px; }
+    &:hover .product__zoom-hint,
+    &:focus-visible .product__zoom-hint { background: var(--color-orange); }
+  }
+
+  &__zoom-hint {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(11, 31, 58, 0.85);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
 
   // Without image: navy box with the initials
   &__placeholder {
