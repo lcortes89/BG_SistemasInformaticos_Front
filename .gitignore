@@ -27,3 +27,7 @@ dist-ssr
 
 # Test coverage report (BGSI-266)
 coverage
+
+# Playwright E2E reports (BGSI-88)
+test-results/
+playwright-report/
