@@ -1,6 +1,7 @@
 import { computed, reactive, ref } from 'vue'
 import AccountService from '@/core/apis/account/AccountService'
 import { useAuthStore } from '@/stores/auth'
+import { useConfirmStep } from '@/composables/admin/useConfirmStep'
 
 // Same rules as the backend (ChangePasswordRequestDTO): 10-72 characters, upper, lower and number
 export const MIN_LENGTH = 10
@@ -16,7 +17,8 @@ export function passwordRules(password, currentPassword = '') {
   ]
 }
 
-// "Mi cuenta → Cambiar contraseña" (BGSI-272)
+// "Mi cuenta → Cambiar contraseña" (BGSI-272). Two steps (BGSI-294):
+// 1) current + new password, 2) the new one is hidden and typed again
 export function useChangePasswordForm(service = new AccountService(), authStore = useAuthStore()) {
   const form = reactive({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const errors = reactive({})
@@ -26,20 +28,40 @@ export function useChangePasswordForm(service = new AccountService(), authStore 
 
   const rules = computed(() => passwordRules(form.newPassword, form.currentPassword))
 
-  function validate() {
+  function clearErrors() {
     Object.keys(errors).forEach((key) => delete errors[key])
+  }
+
+  function validateFirstStep() {
+    clearErrors()
+    submitError.value = null
     if (!form.currentPassword) errors.currentPassword = 'Escribe tu contraseña actual'
     if (!form.newPassword) errors.newPassword = 'Escribe la nueva contraseña'
     else if (rules.value.some((rule) => !rule.ok)) errors.newPassword = 'La nueva contraseña no cumple todos los requisitos'
+    return Object.keys(errors).length === 0
+  }
+
+  // Everything (used when saving): the errors of both steps at once
+  function validate() {
+    validateFirstStep()
     if (!form.confirmPassword) errors.confirmPassword = 'Repite la nueva contraseña'
     else if (form.confirmPassword !== form.newPassword) errors.confirmPassword = 'Las contraseñas no coinciden'
     return Object.keys(errors).length === 0
   }
 
+  const confirmStep = useConfirmStep({
+    validateFirst: validateFirstStep,
+    onBack: () => {
+      form.confirmPassword = ''
+      delete errors.confirmPassword
+    },
+  })
+
   function reset() {
     form.currentPassword = ''
     form.newPassword = ''
     form.confirmPassword = ''
+    confirmStep.reset()
   }
 
   async function submit() {
@@ -55,15 +77,22 @@ export function useChangePasswordForm(service = new AccountService(), authStore 
       reset()
       return true
     } catch (e) {
-      // The backend says which field failed (details.currentPassword / details.newPassword)
-      if (e.details?.currentPassword) errors.currentPassword = 'La contraseña actual no es correcta'
-      else if (e.details?.newPassword) errors.newPassword = 'La nueva contraseña no es válida o es igual a la actual'
-      else submitError.value = e.message
+      // The backend says which field failed: back to step 1 to show it next to that field
+      if (e.details?.currentPassword || e.details?.newPassword) {
+        confirmStep.back()
+        if (e.details.currentPassword) errors.currentPassword = 'La contraseña actual no es correcta'
+        else errors.newPassword = 'La nueva contraseña no es válida o es igual a la actual'
+      } else {
+        submitError.value = e.message
+      }
       return false
     } finally {
       isSubmitting.value = false
     }
   }
 
-  return { form, errors, rules, isSubmitting, submitError, successMessage, submit }
+  return {
+    form, errors, rules, isSubmitting, submitError, successMessage, submit,
+    step: confirmStep.step, next: confirmStep.next, back: confirmStep.back,
+  }
 }

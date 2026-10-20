@@ -74,3 +74,30 @@ describe('useChangePasswordForm (BGSI-272)', () => {
     expect(second.submitError.value).toBe('Ha ocurrido un error en el servidor.')
   })
 })
+
+describe('useChangePasswordForm: two steps (BGSI-294)', () => {
+  it('only goes to step 2 when the current and the new password are valid', () => {
+    const { form, errors, step, next } = useChangePasswordForm({ changePassword: vi.fn() }, fakeStore())
+
+    expect(next()).toBe(false)
+    expect(Object.keys(errors)).toEqual(['currentPassword', 'newPassword'])
+
+    form.currentPassword = 'OldPass2026'
+    form.newPassword = 'NewPass2026'
+    expect(next()).toBe(true)
+    expect(step.value).toBe(2)
+  })
+
+  it('goes back to step 1 when the backend says the current password is wrong', async () => {
+    const error = Object.assign(new Error('wrong'), { status: 400, details: { currentPassword: 'wrong' } })
+    const { form, step, next, submit } = useChangePasswordForm(
+      { changePassword: vi.fn().mockRejectedValue(error) }, fakeStore())
+    fill(form, 'Wrong2026x', 'NewPass2026')
+    next()
+
+    await submit()
+
+    expect(step.value).toBe(1)
+    expect(form.confirmPassword).toBe('')
+  })
+})

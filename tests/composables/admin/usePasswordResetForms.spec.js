@@ -113,3 +113,24 @@ describe('useResetPasswordForm (BGSI-273)', () => {
     expect(submitError.value).toBe('Error del servidor')
   })
 })
+
+describe('useResetPasswordForm: two steps (BGSI-294)', () => {
+  it('only goes to step 2 with a valid new password and goes back when the backend rejects it', async () => {
+    const error = Object.assign(new Error('size'), { status: 400, details: { newPassword: 'size' } })
+    const { form, step, next, back, submit } = useResetPasswordForm('tok', { resetPassword: vi.fn().mockRejectedValue(error) })
+
+    form.newPassword = 'short'
+    expect(next()).toBe(false)
+
+    form.newPassword = 'NewPass2026'
+    expect(next()).toBe(true)
+    form.confirmPassword = 'NewPass2026'
+    await submit()
+    expect(step.value).toBe(1)
+
+    next()
+    form.confirmPassword = 'x'
+    back()
+    expect(form.confirmPassword).toBe('')
+  })
+})

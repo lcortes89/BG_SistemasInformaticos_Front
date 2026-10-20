@@ -2,7 +2,9 @@
 import NewAdminForm from '@/components/admin/NewAdminForm.vue'
 import { useNewAdminForm } from '@/composables/admin/useNewAdminForm'
 
-const { form, errors, isSubmitting, submitError, successMessage, submit } = useNewAdminForm()
+const {
+  form, errors, isSubmitting, submitError, successMessage, submit, step, pasteBlocked, next, back, blockPaste,
+} = useNewAdminForm()
 </script>
 
 <template>
@@ -21,8 +23,9 @@ const { form, errors, isSubmitting, submitError, successMessage, submit } = useN
     <div class="admin-users">
       <div class="admin-users__card">
         <h2 class="admin-users__title">Nuevo administrador</h2>
-        <NewAdminForm :form="form" :errors="errors" :is-submitting="isSubmitting"
-                      :submit-error="submitError" @submit="submit" />
+        <NewAdminForm :form="form" :errors="errors" :step="step" :paste-blocked="pasteBlocked"
+                      :is-submitting="isSubmitting" :submit-error="submitError"
+                      @continue="next" @back="back" @blocked-paste="blockPaste" @submit="submit" />
       </div>
 
       <aside class="admin-users__info">

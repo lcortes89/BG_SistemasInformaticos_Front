@@ -4,7 +4,7 @@ import { reactive } from 'vue'
 import ChangePasswordForm from '@/components/admin/ChangePasswordForm.vue'
 import { passwordRules } from '@/composables/admin/useChangePasswordForm'
 
-// BGSI-272: the form only shows data; the logic is in useChangePasswordForm
+// BGSI-272: the form only shows data; the logic is in useChangePasswordForm. Two steps (BGSI-294)
 function mountForm(props = {}) {
   const form = reactive({ currentPassword: '', newPassword: 'Ribadeo2', confirmPassword: '' })
   return mount(ChangePasswordForm, {
@@ -13,13 +13,21 @@ function mountForm(props = {}) {
 }
 
 describe('ChangePasswordForm', () => {
-  it('has the three password fields with the eye button', () => {
+  it('step 1 has the current and the new password with the eye button', () => {
     const wrapper = mountForm()
 
     expect(wrapper.find('#account-current').attributes('type')).toBe('password')
     expect(wrapper.find('#account-new').exists()).toBe(true)
+    expect(wrapper.find('#account-confirm').exists()).toBe(false)
+    expect(wrapper.findAll('.password-input__toggle')).toHaveLength(2)
+  })
+
+  it('step 2 hides them and asks to repeat the new password', () => {
+    const wrapper = mountForm({ step: 2 })
+
+    expect(wrapper.find('#account-new').exists()).toBe(false)
     expect(wrapper.find('#account-confirm').exists()).toBe(true)
-    expect(wrapper.findAll('.password-input__toggle')).toHaveLength(3)
+    expect(wrapper.text()).toContain('✓ Nueva contraseña elegida')
   })
 
   it('shows which rules are already met', () => {
@@ -41,13 +49,24 @@ describe('ChangePasswordForm', () => {
     expect(wrapper.find('[role="alert"]').text()).toBe('Ha ocurrido un error en el servidor.')
   })
 
-  it('emits submit and disables the button while saving', async () => {
+  it('emits continue in step 1 and submit in step 2', async () => {
     const wrapper = mountForm()
+    await wrapper.find('form').trigger('submit')
+    expect(wrapper.emitted('continue')).toHaveLength(1)
+
+    await wrapper.setProps({ step: 2 })
     await wrapper.find('form').trigger('submit')
     expect(wrapper.emitted('submit')).toHaveLength(1)
 
-    await wrapper.setProps({ isSubmitting: true })
-    expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeDefined()
-    expect(wrapper.find('button[type="submit"]').text()).toBe('Guardando...')
+    await wrapper.find('[data-test="back"]').trigger('click')
+    expect(wrapper.emitted('back')).toHaveLength(1)
+  })
+
+  it('disables the button while saving', async () => {
+    const wrapper = mountForm({ step: 2, isSubmitting: true })
+
+    const button = wrapper.find('button[type="submit"]')
+    expect(button.attributes('disabled')).toBeDefined()
+    expect(button.text()).toBe('Guardando...')
   })
 })

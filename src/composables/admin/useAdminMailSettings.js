@@ -1,12 +1,14 @@
 import { computed, reactive, ref } from 'vue'
 import AdminSettingService from '@/core/apis/setting/AdminSettingService'
+import { useConfirmStep } from '@/composables/admin/useConfirmStep'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const TEST_ERROR = 'No se pudo enviar el correo de prueba. Revisa la configuración del correo en el servidor.'
 
 const normalize = (email) => email.trim().toLowerCase()
 
-// "Ajustes > Avisos por correo" of the admin panel (BGSI-261)
+// "Ajustes > Avisos por correo" of the admin panel (BGSI-261).
+// A new recipient goes in two steps (BGSI-294): 1) the email, 2) it is hidden and typed again by hand
 export function useAdminMailSettings(service = new AdminSettingService()) {
   const saved = ref(null) // what the backend has now
   const form = reactive({ notifyEmail: '', confirmEmail: '', senderName: '' })
@@ -26,21 +28,38 @@ export function useAdminMailSettings(service = new AdminSettingService()) {
     !!saved.value && (emailChanged.value || form.senderName.trim() !== (saved.value.senderName ?? '')))
   const canSave = computed(() => hasChanges.value && emailsMatch.value && !isSaving.value)
 
+  // Step 1 can go on (or save) only when something changed
+  const canContinue = computed(() => hasChanges.value && !isSaving.value)
+
+  // Checks the fields of step 1 (firstStepOnly) or everything, and returns the error message
+  function validate(firstStepOnly = false) {
+    const email = form.notifyEmail.trim()
+    if (!email) return 'Escribe el email que recibe los contactos'
+    if (email.length > 255) return 'Máximo 255 caracteres'
+    if (!EMAIL_PATTERN.test(email)) return 'El formato del email no es válido'
+    if (form.senderName.trim().length > 60) return 'El nombre del remitente admite máximo 60 caracteres'
+    if (!firstStepOnly && !emailsMatch.value) return 'Los dos emails no coinciden.'
+    return null
+  }
+
+  const confirmStep = useConfirmStep({
+    validateFirst: () => {
+      feedback.value = null
+      error.value = validate(true)
+      return !error.value
+    },
+    onBack: () => {
+      form.confirmEmail = ''
+      error.value = null
+    },
+  })
+
   function fill(settings) {
     saved.value = settings
     form.notifyEmail = settings.notifyEmail ?? ''
     form.confirmEmail = ''
     form.senderName = settings.senderName ?? ''
-  }
-
-  function validate() {
-    const email = form.notifyEmail.trim()
-    if (!email) return 'Escribe el email que recibe los contactos'
-    if (email.length > 255) return 'Máximo 255 caracteres'
-    if (!EMAIL_PATTERN.test(email)) return 'El formato del email no es válido'
-    if (!emailsMatch.value) return 'Los dos emails no coinciden.'
-    if (form.senderName.trim().length > 60) return 'El nombre del remitente admite máximo 60 caracteres'
-    return null
+    confirmStep.reset()
   }
 
   async function load() {
@@ -91,6 +110,8 @@ export function useAdminMailSettings(service = new AdminSettingService()) {
 
   return {
     saved, form, isLoading, isSaving, isSendingTest, error, feedback,
-    emailChanged, confirmError, hasChanges, canSave, load, save, sendTest,
+    emailChanged, confirmError, hasChanges, canSave, canContinue, load, save, sendTest,
+    step: confirmStep.step, pasteBlocked: confirmStep.pasteBlocked,
+    next: confirmStep.next, back: confirmStep.back, blockPaste: confirmStep.blockPaste,
   }
 }
