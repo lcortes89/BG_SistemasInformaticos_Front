@@ -1,4 +1,5 @@
 import { STORAGE_KEY } from '@/stores/auth'
+import { LOGOUT_REASON_KEY } from '@/core/config/session'
 
 // Keeps every tab of the browser with the same session (BGSI-257).
 // The browser fires "storage" in the OTHER tabs when one tab changes localStorage,
@@ -12,7 +13,17 @@ export function syncSessionBetweenTabs(authStore, router, target = window) {
     authStore.syncFromStorage()
 
     if (wasAdmin && !authStore.isAdmin && router.currentRoute.value.meta.requiresAuth) {
-      router.push({ name: 'admin-login', query: { loggedOut: '1' } })
+      // BGSI-268: if the other tab closed the session for inactivity, say that (not "another tab")
+      const query = readLogoutReason() === 'idle' ? { reason: 'idle' } : { loggedOut: '1' }
+      router.push({ name: 'admin-login', query })
+    }
+  }
+
+  function readLogoutReason() {
+    try {
+      return localStorage.getItem(LOGOUT_REASON_KEY)
+    } catch {
+      return null
     }
   }
 

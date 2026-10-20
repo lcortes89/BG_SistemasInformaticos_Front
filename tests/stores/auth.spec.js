@@ -28,6 +28,15 @@ describe('auth store', () => {
     expect(localStorage.getItem('bgsi-session')).toContain('admin@bg.es')
   })
 
+  it('forgets the reason of the last logout after a new login (BGSI-268)', async () => {
+    localStorage.setItem('bgsi-logout-reason', 'idle')
+    const session = new SessionModel(fakeToken(3600), 'admin@bg.es', 'ADMIN')
+
+    await useAuthStore().login('admin@bg.es', 'secret123', { login: vi.fn().mockResolvedValue(session) })
+
+    expect(localStorage.getItem('bgsi-logout-reason')).toBeNull()
+  })
+
   it('removes the session after logging out', async () => {
     const fakeService = { login: vi.fn().mockResolvedValue(new SessionModel(fakeToken(3600), 'a@bg.es', 'ADMIN')) }
     const store = useAuthStore()

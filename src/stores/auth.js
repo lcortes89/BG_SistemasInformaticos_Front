@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import AuthService from '@/core/apis/auth/AuthService'
 import SessionModel from '@/core/models/auth/SessionModel'
+import { LOGOUT_REASON_KEY } from '@/core/config/session'
 
 export const STORAGE_KEY = 'bgsi-session'
 
@@ -34,6 +35,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(userEmail, password, service = new AuthService()) {
     session.value = await service.login(userEmail, password)
     storeSession(session.value)
+    try {
+      localStorage.removeItem(LOGOUT_REASON_KEY) // BGSI-268: a new session starts without the old reason
+    } catch {
+      // storage blocked
+    }
   }
 
   function logout() {

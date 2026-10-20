@@ -14,6 +14,9 @@ const route = useRoute()
         <p v-if="route.query.expired" class="admin-login__notice" role="status">
           Tu sesión ha caducado. Vuelve a iniciar sesión.
         </p>
+        <p v-else-if="route.query.reason === 'idle'" class="admin-login__notice" role="status">
+          Tu sesión se ha cerrado por inactividad. Vuelve a iniciar sesión.
+        </p>
         <p v-else-if="route.query.loggedOut" class="admin-login__notice" role="status">
           Se ha cerrado la sesión desde otra pestaña.
         </p>

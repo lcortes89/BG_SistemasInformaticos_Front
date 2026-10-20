@@ -44,6 +44,17 @@ describe('session shared between tabs (BGSI-257)', () => {
     expect(router.push).toHaveBeenCalledWith({ name: 'admin-login', query: { loggedOut: '1' } })
   })
 
+  it('says "inactividad" when the other tab closed the session for inactivity (BGSI-268)', () => {
+    const store = useAuthStore()
+    const router = fakeRouter()
+    stop = syncSessionBetweenTabs(store, router)
+
+    localStorage.setItem('bgsi-logout-reason', 'idle')
+    otherTabChanges('bgsi-session', null)
+
+    expect(router.push).toHaveBeenCalledWith({ name: 'admin-login', query: { reason: 'idle' } })
+  })
+
   it('does not move a visitor who is on a public page', () => {
     const store = useAuthStore()
     const router = fakeRouter(false)
