@@ -1,6 +1,7 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
 import { useLoginForm } from '@/composables/admin/useLoginForm'
+import PasswordInput from '@/shared/PasswordInput.vue'
 
 const props = defineProps({
   // Optional: lets the tests pass a fake auth store
@@ -31,7 +32,7 @@ async function handleSubmit() {
 
     <div class="login-form__field">
       <label for="login-password">Contraseña</label>
-      <input id="login-password" v-model="form.password" type="password" autocomplete="current-password"
+      <PasswordInput id="login-password" v-model="form.password" autocomplete="current-password"
              :aria-invalid="!!errors.password" aria-describedby="login-password-error" />
       <Transition name="slide-fade">
         <p v-if="errors.password" id="login-password-error" class="login-form__error">{{ errors.password }}</p>
@@ -58,7 +59,7 @@ async function handleSubmit() {
 
   label { font-weight: 600; color: var(--color-navy); }
 
-  input {
+  :deep(input) { // also the input inside PasswordInput (BGSI-267)
     padding: 0.7rem 0.9rem;
     font: inherit;
     border: 1px solid #d1d5db;
