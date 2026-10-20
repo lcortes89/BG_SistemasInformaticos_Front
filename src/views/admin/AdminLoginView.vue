@@ -17,6 +17,9 @@ const route = useRoute()
         <p v-else-if="route.query.loggedOut" class="admin-login__notice" role="status">
           Se ha cerrado la sesión desde otra pestaña.
         </p>
+        <p v-else-if="route.query.reset" class="admin-login__notice admin-login__notice--ok" role="status">
+          Contraseña cambiada. Ya puedes entrar con la nueva.
+        </p>
       </Transition>
       <AdminLoginForm />
     </div>
@@ -48,6 +51,9 @@ const route = useRoute()
     border-radius: var(--radius);
     color: #78350f !important;
     background: #fef3c7;
+
+    // BGSI-273: green notice after creating a new password
+    &--ok { color: #065f46 !important; background: #ecfdf5; }
   }
 }
 </style>

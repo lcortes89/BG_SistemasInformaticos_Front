@@ -8,6 +8,8 @@ export const http = axios.create({
 const FORBIDDEN_MESSAGE = 'No tienes permiso para realizar esta acción.'
 const SERVER_ERROR_MESSAGE = 'Ha ocurrido un error en el servidor. Inténtalo más tarde.'
 const NETWORK_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Inténtalo más tarde.'
+// A route the backend does not know (e.g. the backend was not restarted after an update)
+const NOT_FOUND_MESSAGE = 'No se ha encontrado el recurso. Comprueba que el servidor está actualizado.'
 
 export default class BaseRepository {
 
@@ -77,6 +79,7 @@ export default class BaseRepository {
   static messageFor(status, backendMessage) {
     if (status === 403) return FORBIDDEN_MESSAGE
     if (status >= 500) return SERVER_ERROR_MESSAGE
+    if (status === 404 && (!backendMessage || backendMessage === 'Not Found')) return NOT_FOUND_MESSAGE
     return backendMessage || NETWORK_ERROR_MESSAGE
   }
 }

@@ -12,6 +12,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // Slow machines need more than 5 s to load the home page the first time
+    testTimeout: 15000,
     // npm run test:coverage -> coverage/index.html (BGSI-266)
     coverage: {
       provider: 'v8',

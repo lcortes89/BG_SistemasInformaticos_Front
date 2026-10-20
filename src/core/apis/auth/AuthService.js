@@ -20,4 +20,14 @@ export default class AuthService {
     const dto = await this.#repo.register(email.trim(), password)
     return dto.email
   }
+
+  // BGSI-273: asks for the "create a new password" email
+  async forgotPassword(email) {
+    await this.#repo.forgotPassword(email.trim())
+  }
+
+  // BGSI-273: sets the new password with the token of the email link
+  async resetPassword(token, newPassword) {
+    await this.#repo.resetPassword(token, newPassword)
+  }
 }
