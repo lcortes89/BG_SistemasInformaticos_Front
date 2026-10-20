@@ -33,3 +33,11 @@ describe('AdminLoginView: logout from another tab (BGSI-257)', () => {
     expect(wrapper.find('[role="status"]').text()).toContain('Se ha cerrado la sesión desde otra pestaña')
   })
 })
+
+describe('AdminLoginView: closed for inactivity (BGSI-268)', () => {
+  it('explains that the session was closed for inactivity', async () => {
+    const wrapper = await mountAt('/admin/login?reason=idle')
+
+    expect(wrapper.find('[role="status"]').text()).toBe('Tu sesión se ha cerrado por inactividad. Vuelve a iniciar sesión.')
+  })
+})

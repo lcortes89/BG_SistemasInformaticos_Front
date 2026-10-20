@@ -1,6 +1,10 @@
 <script setup>
+import { onBeforeUnmount, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useIdleLogout } from '@/composables/admin/useIdleLogout'
+import { IDLE_WARNING_MS, LOGOUT_REASON_KEY } from '@/core/config/session'
+import IdleWarningDialog from '@/components/admin/IdleWarningDialog.vue'
 import logo from '@/assets/logo/logo_header.png'
 
 const authStore = useAuthStore()
@@ -21,6 +25,27 @@ const links = [
 function logout() {
   authStore.logout()
   router.push({ name: 'admin-login' })
+}
+
+// BGSI-268: closed for inactivity. The reason is saved first so the other tabs show the same message
+function logoutForInactivity() {
+  try {
+    localStorage.setItem(LOGOUT_REASON_KEY, 'idle')
+  } catch {
+    // storage blocked: only this tab shows the message
+  }
+  authStore.logout()
+  router.push({ name: 'admin-login', query: { reason: 'idle' } })
+}
+
+const idle = useIdleLogout({ onTimeout: logoutForInactivity })
+const { isWarning, secondsLeft } = idle
+onMounted(idle.start)
+onBeforeUnmount(idle.stop)
+
+function logoutNow() {
+  idle.stop()
+  logout()
 }
 </script>
 
@@ -45,6 +70,11 @@ function logout() {
         <RouterView />
       </div>
     </div>
+
+    <Transition name="slide-fade">
+      <IdleWarningDialog v-if="isWarning" :seconds-left="secondsLeft" :total-seconds="IDLE_WARNING_MS / 1000"
+                         @stay="idle.markActivity" @logout="logoutNow" />
+    </Transition>
   </div>
 </template>
 
