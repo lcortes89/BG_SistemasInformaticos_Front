@@ -2,13 +2,21 @@
 import { onBeforeUnmount, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useConfirmationStore } from '@/stores/confirmation'
 import { useIdleLogout } from '@/composables/admin/useIdleLogout'
 import { IDLE_WARNING_MS, LOGOUT_REASON_KEY } from '@/core/config/session'
 import IdleWarningDialog from '@/components/admin/IdleWarningDialog.vue'
+import ConfirmPasswordDialog from '@/components/admin/ConfirmPasswordDialog.vue'
 import logo from '@/assets/logo/logo_header.png'
 
 const authStore = useAuthStore()
+const confirmation = useConfirmationStore()
 const router = useRouter()
+
+// BGSI-275: the password was right -> the waiting action is repeated with the token
+function onPasswordConfirmed({ token, expiresInSeconds }) {
+  confirmation.confirmed(token, expiresInSeconds, authStore.email)
+}
 
 const links = [
   { to: { name: 'admin-dashboard' }, label: 'Resumen' },
@@ -23,6 +31,7 @@ const links = [
 ]
 
 function logout() {
+  confirmation.clear()
   authStore.logout()
   router.push({ name: 'admin-login' })
 }
@@ -34,6 +43,8 @@ function logoutForInactivity() {
   } catch {
     // storage blocked: only this tab shows the message
   }
+  confirmation.cancel()
+  confirmation.clear()
   authStore.logout()
   router.push({ name: 'admin-login', query: { reason: 'idle' } })
 }
@@ -70,6 +81,10 @@ function logoutNow() {
         <RouterView />
       </div>
     </div>
+
+    <Transition name="slide-fade">
+      <ConfirmPasswordDialog v-if="confirmation.isOpen" @confirmed="onPasswordConfirmed" @cancel="confirmation.cancel" />
+    </Transition>
 
     <Transition name="slide-fade">
       <IdleWarningDialog v-if="isWarning" :seconds-left="secondsLeft" :total-seconds="IDLE_WARNING_MS / 1000"

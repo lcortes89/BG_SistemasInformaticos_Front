@@ -56,6 +56,17 @@ describe('useAdminMailSettings (BGSI-261)', () => {
     expect(canSave.value).toBe(true)
   })
 
+  it('closing "Confirma tu contraseña" keeps the form without an error (BGSI-275)', async () => {
+    const service = { ...fakeService(), updateMailSettings: vi.fn().mockRejectedValue(Object.assign(new Error('Acción cancelada'), { cancelled: true })) }
+    const { form, error, feedback, save } = await loaded(service)
+    form.senderName = 'Web de BG'
+
+    expect(await save()).toBe(false)
+    expect(error.value).toBeNull()
+    expect(feedback.value).toBeNull()
+    expect(form.senderName).toBe('Web de BG')
+  })
+
   it('does not save an email with a wrong format', async () => {
     const service = fakeService()
     const { form, error, save } = await loaded(service)

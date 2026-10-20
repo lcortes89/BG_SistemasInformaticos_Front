@@ -94,4 +94,13 @@ describe('useAdminRateQuestions (BGSI-234)', () => {
 
     expect(admin.actionError.value).toBe('Server down')
   })
+
+  it('closing "Confirma tu contraseña" is not an error (BGSI-275)', async () => {
+    const service = fakeService({ removeQuestion: vi.fn().mockRejectedValue(Object.assign(new Error('Acción cancelada'), { cancelled: true })) })
+    const admin = useAdminRateQuestions(service)
+    await admin.load()
+
+    expect(await admin.removeQuestion(admin.questions.value[0])).toBe(false)
+    expect(admin.actionError.value).toBeNull()
+  })
 })

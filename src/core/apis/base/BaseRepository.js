@@ -61,6 +61,7 @@ export default class BaseRepository {
       const response = await call()
       return response.data
     } catch (error) {
+      if (error.cancelled) throw error // BGSI-275: the admin closed "Confirma tu contraseña"
       const status = error.response?.status
       const apiError = error.response?.data
       const wrapped = new Error(BaseRepository.messageFor(status, apiError?.message))

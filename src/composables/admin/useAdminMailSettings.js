@@ -85,7 +85,8 @@ export function useAdminMailSettings(service = new AdminSettingService()) {
       feedback.value = `Avisos guardados. Los próximos contactos llegarán a ${saved.value.notifyEmail}.`
       return true
     } catch (e) {
-      error.value = e.message
+      // BGSI-275: password dialog closed -> nothing is saved and the form keeps what was typed
+      error.value = e.cancelled ? null : e.message
       return false
     } finally {
       isSaving.value = false

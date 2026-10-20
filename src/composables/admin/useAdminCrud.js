@@ -65,7 +65,8 @@ export function useAdminCrud(service, { pageSize = 10, conflictMessage = null } 
       await loadPage(targetPage)
       return true
     } catch (e) {
-      actionError.value = e.status === 409 && conflictMessage ? conflictMessage : e.message
+      // BGSI-275: closing "Confirma tu contraseña" is not an error, nothing is deleted
+      if (!e.cancelled) actionError.value = e.status === 409 && conflictMessage ? conflictMessage : e.message
       return false
     }
   }

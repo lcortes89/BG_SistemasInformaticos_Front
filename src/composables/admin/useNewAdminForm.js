@@ -66,7 +66,8 @@ export function useNewAdminForm(service = new AuthService()) {
       reset()
       return true
     } catch (e) {
-      submitError.value = e.status === 409 ? 'Ya existe un administrador con ese email' : e.message
+      if (e.cancelled) submitError.value = null // BGSI-275: password dialog closed, the form is kept
+      else submitError.value = e.status === 409 ? 'Ya existe un administrador con ese email' : e.message
       return false
     } finally {
       isSubmitting.value = false

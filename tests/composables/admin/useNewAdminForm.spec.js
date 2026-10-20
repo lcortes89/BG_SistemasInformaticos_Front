@@ -81,6 +81,16 @@ describe('useNewAdminForm: two steps (BGSI-294)', () => {
     expect(step.value).toBe(2)
   })
 
+  it('closing "Confirma tu contraseña" keeps the form without an error (BGSI-275)', async () => {
+    const { form, submitError, successMessage, submit } = useNewAdminForm({ registerAdmin: vi.fn().mockRejectedValue(Object.assign(new Error('Acción cancelada'), { cancelled: true })) })
+    fill(form, 'maria@bg.es', 'Segura2026')
+
+    expect(await submit()).toBe(false)
+    expect(submitError.value).toBeNull()
+    expect(successMessage.value).toBeNull()
+    expect(form.email).toBe('maria@bg.es')
+  })
+
   it('going back keeps the email and empties the repeated fields', () => {
     const { form, step, next, back } = useNewAdminForm({ registerAdmin: vi.fn() })
     fill(form, 'maria@bg.es', 'Segura2026')

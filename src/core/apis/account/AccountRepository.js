@@ -11,4 +11,9 @@ export default class AccountRepository extends BaseRepository {
   async changePassword(currentPassword, newPassword) {
     return this.put('/password', { currentPassword, newPassword })
   }
+
+  // BGSI-275: POST /api/admin/account/confirm { password } -> { confirmToken, expiresInSeconds }
+  async confirmPassword(password) {
+    return this.post('/confirm', { password })
+  }
 }
