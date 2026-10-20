@@ -37,6 +37,12 @@ describe('MailSettingsForm (BGSI-261)', () => {
     const wrapper = await mountForm()
 
     await wrapper.find('#mail-notify-email').setValue('nuevo@bg.es')
+    expect(wrapper.find('#mail-confirm-email').exists()).toBe(false)
+    expect(saveButton(wrapper).text()).toBe('Continuar →')
+
+    // Step 2 (BGSI-294): the email is hidden and typed again
+    await wrapper.find('form').trigger('submit')
+    expect(wrapper.find('#mail-notify-email').exists()).toBe(false)
     expect(wrapper.find('#mail-confirm-email').exists()).toBe(true)
 
     await wrapper.find('#mail-confirm-email').setValue('nuevo@bg.e')
@@ -51,6 +57,7 @@ describe('MailSettingsForm (BGSI-261)', () => {
   it('does not let you paste or drop text in the confirmation field', async () => {
     const wrapper = await mountForm()
     await wrapper.find('#mail-notify-email').setValue('nuevo@bg.es')
+    await wrapper.find('form').trigger('submit')
     const confirm = wrapper.find('#mail-confirm-email').element
 
     const paste = new Event('paste', { cancelable: true })
@@ -60,6 +67,26 @@ describe('MailSettingsForm (BGSI-261)', () => {
 
     expect(paste.defaultPrevented).toBe(true)
     expect(drop.defaultPrevented).toBe(true)
+    await flushPromises()
+    expect(wrapper.text()).toContain('no admite pegar')
+  })
+
+  it('goes back to step 1 with "Atrás" and saves the sender name in one step', async () => {
+    const service = fakeService()
+    const wrapper = await mountForm(service)
+    await wrapper.find('#mail-notify-email').setValue('nuevo@bg.es')
+    await wrapper.find('form').trigger('submit')
+
+    await wrapper.find('[data-test="back"]').trigger('click')
+    expect(wrapper.find('#mail-notify-email').element.value).toBe('nuevo@bg.es')
+
+    await wrapper.find('#mail-notify-email').setValue('duenio@bg.es')
+    await wrapper.find('#mail-sender-name').setValue('Web de BG')
+    expect(saveButton(wrapper).text()).toBe('Guardar avisos')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(service.updateMailSettings).toHaveBeenCalled()
   })
 
   it('saves the new email and shows where the next emails will go', async () => {
@@ -67,6 +94,7 @@ describe('MailSettingsForm (BGSI-261)', () => {
     const wrapper = await mountForm(service)
 
     await wrapper.find('#mail-notify-email').setValue('nuevo@bg.es')
+    await wrapper.find('form').trigger('submit')
     await wrapper.find('#mail-confirm-email').setValue('nuevo@bg.es')
     await wrapper.find('form').trigger('submit')
     await flushPromises()

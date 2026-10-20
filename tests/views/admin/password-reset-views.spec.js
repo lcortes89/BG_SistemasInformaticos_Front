@@ -77,6 +77,7 @@ describe('AdminResetPasswordView (BGSI-273)', () => {
     const push = vi.spyOn(router, 'push')
 
     await wrapper.find('#reset-new').setValue('NewPass2026')
+    await wrapper.find('form').trigger('submit') // step 1 -> step 2 (BGSI-294)
     await wrapper.find('#reset-confirm').setValue('NewPass2026')
     await wrapper.find('form').trigger('submit')
     await flushPromises()
@@ -91,6 +92,7 @@ describe('AdminResetPasswordView (BGSI-273)', () => {
     const { wrapper } = await mountAt('/admin/nueva-contrasena?token=old', AdminResetPasswordView, { authService })
 
     await wrapper.find('#reset-new').setValue('NewPass2026')
+    await wrapper.find('form').trigger('submit') // step 1 -> step 2 (BGSI-294)
     await wrapper.find('#reset-confirm').setValue('NewPass2026')
     await wrapper.find('form').trigger('submit')
     await flushPromises()

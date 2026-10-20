@@ -2,6 +2,7 @@
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AuthPageCard from '@/components/admin/AuthPageCard.vue'
 import PasswordInput from '@/shared/PasswordInput.vue'
+import ConfirmFieldSteps from '@/components/admin/ConfirmFieldSteps.vue'
 import { useResetPasswordForm } from '@/composables/admin/usePasswordResetForms'
 
 const props = defineProps({
@@ -14,10 +15,12 @@ const router = useRouter()
 // /admin/nueva-contrasena?token=... (the link of the email)
 const token = typeof route.query.token === 'string' ? route.query.token : ''
 
-const { form, errors, rules, isSubmitting, submitError, isInvalidLink, submit } =
+const { form, errors, rules, isSubmitting, submitError, isInvalidLink, submit, step, next, back } =
   useResetPasswordForm(token, props.authService)
 
+// Step 1 goes on (BGSI-294); step 2 saves and goes to the login
 async function handleSubmit() {
+  if (step.value === 1) return next()
   if (await submit()) router.push({ name: 'admin-login', query: { reset: '1' } })
 }
 </script>
@@ -32,38 +35,47 @@ async function handleSubmit() {
     </div>
 
     <form v-else class="admin-form" novalidate @submit.prevent="handleSubmit">
-      <div class="admin-form__field">
-        <label for="reset-new">Nueva contraseña</label>
-        <PasswordInput id="reset-new" v-model="form.newPassword" autocomplete="new-password"
-                       :aria-invalid="!!errors.newPassword" aria-describedby="reset-rules reset-new-error" />
-        <p v-if="errors.newPassword" id="reset-new-error" class="admin-form__error">{{ errors.newPassword }}</p>
-        <ul id="reset-rules" class="password-rules" aria-label="Requisitos de la contraseña">
-          <li v-for="rule in rules" :key="rule.key" class="password-rules__item"
-              :class="{ 'password-rules__item--ok': rule.ok }" :data-rule="rule.key">
-            <span aria-hidden="true">{{ rule.ok ? '✓' : '•' }}</span> {{ rule.label }}
-          </li>
-        </ul>
-      </div>
+      <ConfirmFieldSteps :step="step" done-label="Nueva contraseña elegida"
+                         second-hint="Repite la nueva contraseña." @back="back">
+        <template #first>
+          <div class="admin-form__field">
+            <label for="reset-new">Nueva contraseña</label>
+            <PasswordInput id="reset-new" v-model="form.newPassword" autocomplete="new-password"
+                           :aria-invalid="!!errors.newPassword" aria-describedby="reset-rules reset-new-error" />
+            <p v-if="errors.newPassword" id="reset-new-error" class="admin-form__error">{{ errors.newPassword }}</p>
+            <ul id="reset-rules" class="password-rules" aria-label="Requisitos de la contraseña">
+              <li v-for="rule in rules" :key="rule.key" class="password-rules__item"
+                  :class="{ 'password-rules__item--ok': rule.ok }" :data-rule="rule.key">
+                <span aria-hidden="true">{{ rule.ok ? '✓' : '•' }}</span> {{ rule.label }}
+              </li>
+            </ul>
+          </div>
+        </template>
 
-      <div class="admin-form__field">
-        <label for="reset-confirm">Repite la nueva contraseña</label>
-        <PasswordInput id="reset-confirm" v-model="form.confirmPassword" autocomplete="new-password"
-                       :aria-invalid="!!errors.confirmPassword" aria-describedby="reset-confirm-error" />
-        <p v-if="errors.confirmPassword" id="reset-confirm-error" class="admin-form__error">{{ errors.confirmPassword }}</p>
-      </div>
+        <template #second>
+          <div class="admin-form__field">
+            <label for="reset-confirm">Repite la nueva contraseña</label>
+            <PasswordInput id="reset-confirm" v-model="form.confirmPassword" autocomplete="new-password"
+                           :aria-invalid="!!errors.confirmPassword" aria-describedby="reset-confirm-error" />
+            <p v-if="errors.confirmPassword" id="reset-confirm-error" class="admin-form__error">{{ errors.confirmPassword }}</p>
+          </div>
+        </template>
 
-      <p v-if="submitError" class="admin-form__alert" role="alert">{{ submitError }}</p>
+        <template #alert>
+          <p v-if="submitError" class="admin-form__alert" role="alert">{{ submitError }}</p>
+        </template>
 
-      <button type="submit" class="btn btn--primary auth-submit" :disabled="isSubmitting">
-        {{ isSubmitting ? 'Guardando...' : 'Guardar contraseña' }}
-      </button>
+        <template #submit>
+          <button type="submit" class="btn btn--primary admin-form__submit" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Guardando...' : 'Guardar contraseña' }}
+          </button>
+        </template>
+      </ConfirmFieldSteps>
     </form>
   </AuthPageCard>
 </template>
 
 <style scoped lang="scss">
-.auth-submit { width: 100%; font: inherit; font-weight: 600; }
-
 .password-rules {
   display: grid;
   grid-template-columns: 1fr 1fr;

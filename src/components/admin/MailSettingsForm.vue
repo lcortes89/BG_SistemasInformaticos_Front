@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
+import ConfirmFieldSteps from '@/components/admin/ConfirmFieldSteps.vue'
 import AdminSettingService from '@/core/apis/setting/AdminSettingService'
 import { useAdminMailSettings } from '@/composables/admin/useAdminMailSettings'
 
@@ -12,10 +13,17 @@ const props = defineProps({
 
 const {
   saved, form, isLoading, isSaving, isSendingTest, error, feedback,
-  emailChanged, confirmError, hasChanges, canSave, load, save, sendTest,
+  emailChanged, confirmError, hasChanges, canSave, canContinue, load, save, sendTest,
+  step, pasteBlocked, next, back, blockPaste,
 } = useAdminMailSettings(props.service)
 
 onMounted(load)
+
+// A new email goes to step 2 first (BGSI-294); otherwise it saves directly
+function handleSubmit() {
+  if (step.value === 1 && emailChanged.value) return next()
+  return save()
+}
 </script>
 
 <template>
@@ -27,51 +35,66 @@ onMounted(load)
 
     <LoadingSpinner v-if="isLoading" label="Cargando avisos por correo..." />
 
-    <form v-else-if="saved" class="admin-form" novalidate @submit.prevent="save">
-      <div class="mail-settings__grid">
-        <div class="admin-form__field">
-          <label for="mail-notify-email">Email que recibe los contactos *</label>
-          <input id="mail-notify-email" v-model="form.notifyEmail" type="email" autocomplete="email" maxlength="255" />
-          <small class="mail-settings__hint">
-            Ahora: {{ saved.notifyEmail || '—' }} · Puede ser el del dueño o el de un empleado.
-          </small>
-        </div>
+    <form v-else-if="saved" class="admin-form" novalidate @submit.prevent="handleSubmit">
+      <ConfirmFieldSteps :step="step" :paste-blocked="pasteBlocked" :show-progress="emailChanged"
+                         done-label="Nuevo email introducido" second-hint="Escribe a mano el nuevo email otra vez."
+                         :continue-label="emailChanged ? 'Continuar →' : (isSaving ? 'Guardando...' : 'Guardar avisos')"
+                         :continue-disabled="!canContinue" @back="back">
+        <template #first>
+          <div class="mail-settings__grid">
+            <div class="admin-form__field">
+              <label for="mail-notify-email">Email que recibe los contactos *</label>
+              <input id="mail-notify-email" v-model="form.notifyEmail" type="email" autocomplete="email" maxlength="255" />
+              <small class="mail-settings__hint">
+                Ahora: {{ saved.notifyEmail || '—' }} · Puede ser el del dueño o el de un empleado.
+              </small>
+            </div>
 
-        <!-- Only when the recipient changes. No paste or drop: the admin types it again by hand -->
-        <div v-if="emailChanged" class="admin-form__field">
-          <label for="mail-confirm-email">Repite el nuevo email *</label>
-          <input id="mail-confirm-email" v-model="form.confirmEmail" type="email" autocomplete="off" maxlength="255"
-                 :aria-invalid="!!confirmError" aria-describedby="mail-confirm-error"
-                 @paste.prevent @drop.prevent />
-          <p v-if="confirmError" id="mail-confirm-error" class="admin-form__error" role="alert">{{ confirmError }}</p>
-        </div>
+            <div class="admin-form__field">
+              <label for="mail-sender-name">Nombre del remitente</label>
+              <input id="mail-sender-name" v-model="form.senderName" type="text" maxlength="60" />
+              <small class="mail-settings__hint">Es el nombre que verás en la bandeja de entrada.</small>
+            </div>
+          </div>
 
-        <div class="admin-form__field">
-          <label for="mail-sender-name">Nombre del remitente</label>
-          <input id="mail-sender-name" v-model="form.senderName" type="text" maxlength="60" />
-          <small class="mail-settings__hint">Es el nombre que verás en la bandeja de entrada.</small>
-        </div>
-      </div>
+          <p class="mail-settings__lock">
+            🔒 Los correos se envían desde <strong>{{ saved.senderAccount || 'la cuenta del servidor' }}</strong>.
+            Esa cuenta y su contraseña se configuran en el servidor por seguridad.
+          </p>
 
-      <p class="mail-settings__lock">
-        🔒 Los correos se envían desde <strong>{{ saved.senderAccount || 'la cuenta del servidor' }}</strong>.
-        Esa cuenta y su contraseña se configuran en el servidor por seguridad.
-      </p>
+          <Transition name="slide-fade">
+            <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
+          </Transition>
+        </template>
 
-      <Transition name="slide-fade">
-        <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
-      </Transition>
-      <p v-if="error" class="admin-form__alert" role="alert">{{ error }}</p>
+        <template #first-actions>
+          <button type="button" class="mail-settings__test" :disabled="hasChanges || isSendingTest"
+                  :title="hasChanges ? 'Guarda los cambios antes de enviar la prueba' : null" @click="sendTest">
+            {{ isSendingTest ? 'Enviando...' : 'Enviar correo de prueba' }}
+          </button>
+        </template>
 
-      <div class="admin-form__actions">
-        <button type="button" class="mail-settings__test" :disabled="hasChanges || isSendingTest"
-                :title="hasChanges ? 'Guarda los cambios antes de enviar la prueba' : null" @click="sendTest">
-          {{ isSendingTest ? 'Enviando...' : 'Enviar correo de prueba' }}
-        </button>
-        <button type="submit" class="btn btn--primary admin-form__submit" :disabled="!canSave">
-          {{ isSaving ? 'Guardando...' : 'Guardar avisos' }}
-        </button>
-      </div>
+        <!-- The new recipient is typed again by hand: no paste or drop -->
+        <template #second>
+          <div class="admin-form__field mail-settings__confirm">
+            <label for="mail-confirm-email">Repite el nuevo email *</label>
+            <input id="mail-confirm-email" v-model="form.confirmEmail" type="email" autocomplete="off" maxlength="255"
+                   :aria-invalid="!!confirmError" aria-describedby="mail-confirm-error"
+                   @paste="blockPaste" @drop="blockPaste" />
+            <p v-if="confirmError" id="mail-confirm-error" class="admin-form__error" role="alert">{{ confirmError }}</p>
+          </div>
+        </template>
+
+        <template #alert>
+          <p v-if="error" class="admin-form__alert" role="alert">{{ error }}</p>
+        </template>
+
+        <template #submit>
+          <button type="submit" class="btn btn--primary admin-form__submit" :disabled="!canSave">
+            {{ isSaving ? 'Guardando...' : 'Guardar avisos' }}
+          </button>
+        </template>
+      </ConfirmFieldSteps>
     </form>
 
     <p v-else-if="error" class="admin-form__alert" role="alert">{{ error }}</p>
@@ -122,6 +145,8 @@ onMounted(load)
   }
 
   .admin-page__feedback { margin: 0; }
+
+  &__confirm { max-width: 480px; }
 }
 
 @media (max-width: 700px) {

@@ -20,6 +20,7 @@ describe('AdminAccountView', () => {
 
     await wrapper.find('#account-current').setValue('OldPass2026')
     await wrapper.find('#account-new').setValue('NewPass2026')
+    await wrapper.find('form').trigger('submit') // step 1 -> step 2 (BGSI-294)
     await wrapper.find('#account-confirm').setValue('NewPass2026')
     await wrapper.find('form').trigger('submit')
     await flushPromises()

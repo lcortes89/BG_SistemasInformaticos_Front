@@ -100,3 +100,31 @@ describe('useAdminMailSettings (BGSI-261)', () => {
     expect(error.value).toContain('No se pudo enviar el correo de prueba')
   })
 })
+
+describe('useAdminMailSettings: two steps for a new email (BGSI-294)', () => {
+  it('checks step 1 without the repeated email and goes back to step 1 after saving', async () => {
+    const service = {
+      getMailSettings: vi.fn().mockResolvedValue({ notifyEmail: 'duenio@bg.es', senderName: 'BG' }),
+      updateMailSettings: vi.fn().mockImplementation(async (f) => ({ notifyEmail: f.notifyEmail, senderName: f.senderName })),
+    }
+    const { form, step, error, canContinue, next, back, save, load } = useAdminMailSettings(service)
+    await load()
+    expect(canContinue.value).toBe(false)
+
+    form.notifyEmail = 'nuevo@'
+    expect(next()).toBe(false)
+    expect(error.value).toBe('El formato del email no es válido')
+
+    form.notifyEmail = 'nuevo@bg.es'
+    expect(canContinue.value).toBe(true)
+    expect(next()).toBe(true)
+    form.confirmEmail = 'nuevo@bg'
+    back()
+    expect(form.confirmEmail).toBe('')
+
+    next()
+    form.confirmEmail = 'nuevo@bg.es'
+    expect(await save()).toBe(true)
+    expect(step.value).toBe(1)
+  })
+})

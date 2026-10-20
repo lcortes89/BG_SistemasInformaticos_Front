@@ -9,7 +9,7 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
-const { form, errors, rules, isSubmitting, submitError, successMessage, submit } =
+const { form, errors, rules, isSubmitting, submitError, successMessage, submit, step, next, back } =
   useChangePasswordForm(props.accountService, authStore)
 </script>
 
@@ -29,14 +29,14 @@ const { form, errors, rules, isSubmitting, submitError, successMessage, submit }
     <div class="admin-account">
       <div class="admin-account__card">
         <h2 class="admin-account__title">Cambiar contraseña</h2>
-        <ChangePasswordForm :form="form" :errors="errors" :rules="rules" :is-submitting="isSubmitting"
-                            :submit-error="submitError" @submit="submit" />
+        <ChangePasswordForm :form="form" :errors="errors" :rules="rules" :step="step" :is-submitting="isSubmitting"
+                            :submit-error="submitError" @continue="next" @back="back" @submit="submit" />
       </div>
 
       <aside class="admin-account__info">
         <h2 class="admin-account__title">Ten en cuenta</h2>
         <ul>
-          <li>Al cambiarla se <strong>cierra la sesión en tus otros dispositivos</strong>; aquí sigues conectada.</li>
+          <li>Al cambiarla se <strong>cierra la sesión en tus otros dispositivos</strong>; aquí sigues conectad@.</li>
           <li>Usa una contraseña que <strong>no uses en otras webs</strong>.</li>
           <li>Si crees que alguien conoce tu contraseña, cámbiala cuanto antes.</li>
         </ul>
