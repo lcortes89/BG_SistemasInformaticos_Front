@@ -165,7 +165,7 @@ describe('admin screens', () => {
     const wrapper = await mountWithRouter(AdminLayout, { RouterView: true })
     const links = wrapper.findAll('.admin-layout__nav a').map((link) => link.text())
 
-    expect(links).toEqual(['Resumen', 'Contactos', 'Marcas', 'Productos', 'Clientes', 'Tarifas', 'Ajustes', 'Administradores'])
+    expect(links).toEqual(['Resumen', 'Contactos', 'Marcas', 'Productos', 'Clientes', 'Tarifas', 'Ajustes', 'Administradores', 'Mi cuenta'])
     const push = vi.spyOn(wrapper.vm.$router, 'push')
     await buttonWithText(wrapper, 'Cerrar sesión').trigger('click')
     expect(push).toHaveBeenCalledWith({ name: 'admin-login' })

@@ -23,6 +23,8 @@ export const routes = [
       { path: 'clientes', name: 'admin-clients', component: () => import('@/views/admin/AdminClientsView.vue') },
       { path: 'tarifas', name: 'admin-rates', component: () => import('@/views/admin/AdminRatesView.vue') },
       { path: 'administradores', name: 'admin-users', component: () => import('@/views/admin/AdminUsersView.vue') },
+      // BGSI-272: the admin's own account (change password)
+      { path: 'mi-cuenta', name: 'admin-account', component: () => import('@/views/admin/AdminAccountView.vue') },
       // BGSI-261: "Apariencia" is now "Ajustes" (the old address still works)
       { path: 'ajustes', name: 'admin-settings', component: () => import('@/views/admin/AdminSettingsView.vue') },
       { path: 'apariencia', redirect: { name: 'admin-settings' } },

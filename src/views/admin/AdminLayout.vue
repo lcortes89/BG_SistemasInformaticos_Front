@@ -15,6 +15,7 @@ const links = [
   { to: { name: 'admin-rates' }, label: 'Tarifas' },
   { to: { name: 'admin-settings' }, label: 'Ajustes' },
   { to: { name: 'admin-users' }, label: 'Administradores' },
+  { to: { name: 'admin-account' }, label: 'Mi cuenta' },
 ]
 
 function logout() {
