@@ -38,7 +38,13 @@ export function useForgotPasswordForm(service = new AuthService()) {
     }
   }
 
-  return { form, errors, isSubmitting, isSent, submitError, submit }
+  // BGSI-293: back to the form to try with another email (the typed one is kept)
+  function tryAgain() {
+    isSent.value = false
+    submitError.value = null
+  }
+
+  return { form, errors, isSubmitting, isSent, submitError, submit, tryAgain }
 }
 
 // BGSI-273: "Crea una nueva contraseña" with the token of the email link.

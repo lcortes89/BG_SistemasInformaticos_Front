@@ -8,7 +8,7 @@ const props = defineProps({
   authService: { type: Object, default: undefined },
 })
 
-const { form, errors, isSubmitting, isSent, submitError, submit } = useForgotPasswordForm(props.authService)
+const { form, errors, isSubmitting, isSent, submitError, submit, tryAgain } = useForgotPasswordForm(props.authService)
 </script>
 
 <template>
@@ -19,7 +19,14 @@ const { form, errors, isSubmitting, isSent, submitError, submit } = useForgotPas
         <p class="reset-sent__icon" aria-hidden="true">✉️</p>
         <p><strong>Revisa tu correo.</strong></p>
         <p>Si <strong>{{ form.email.trim() }}</strong> está registrado, te hemos enviado un enlace para crear una nueva contraseña.</p>
-        <p class="reset-sent__hint">El enlace caduca en 30 minutos. Si no lo ves, mira en la carpeta de spam.</p>
+        <!-- BGSI-293: what to do when nothing arrives (same text for any email: no user enumeration) -->
+        <p class="reset-sent__hint">
+          El enlace caduca en 30 minutos. Si no te llega nada en unos minutos, revisa el spam
+          o comprueba que es el email con el que entras al panel.
+        </p>
+        <button type="button" class="reset-sent__retry" data-test="try-again" @click="tryAgain">
+          Probar con otro email
+        </button>
       </div>
 
       <form v-else key="form" class="admin-form" novalidate @submit.prevent="submit">
@@ -54,7 +61,19 @@ const { form, errors, isSubmitting, isSent, submitError, submit } = useForgotPas
 
   p { margin: 0 0 0.6rem; }
   &__icon { font-size: 2rem; }
-  &__hint { margin: 0 !important; font-size: 0.875rem; color: #047857; }
+  &__hint { margin: 0 0 0.9rem !important; font-size: 0.875rem; color: #047857; }
+
+  &__retry {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-navy);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }
 
 .auth-back {

@@ -44,6 +44,20 @@ describe('useForgotPasswordForm (BGSI-273)', () => {
   })
 })
 
+describe('useForgotPasswordForm: try again (BGSI-293)', () => {
+  it('goes back to the form keeping the email', async () => {
+    const { form, isSent, submitError, submit, tryAgain } = useForgotPasswordForm({ forgotPassword: vi.fn().mockResolvedValue() })
+    form.email = 'luisa@hotmal.com'
+    await submit()
+
+    tryAgain()
+
+    expect(isSent.value).toBe(false)
+    expect(submitError.value).toBeNull()
+    expect(form.email).toBe('luisa@hotmal.com')
+  })
+})
+
 describe('useResetPasswordForm (BGSI-273)', () => {
   it('marks the link as invalid when there is no token', async () => {
     const service = { resetPassword: vi.fn() }

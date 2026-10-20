@@ -45,6 +45,21 @@ describe('AdminForgotPasswordView (BGSI-273)', () => {
     expect(wrapper.text()).toContain('admin@bg.com')
   })
 
+  it('explains what to do when nothing arrives and lets you try another email (BGSI-293)', async () => {
+    const authService = { forgotPassword: vi.fn().mockResolvedValue() }
+    const { wrapper } = await mountAt('/admin/olvide-contrasena', AdminForgotPasswordView, { authService })
+    await wrapper.find('#forgot-email').setValue('luisa@hotmal.com')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.find('.reset-sent__hint').text()).toContain('comprueba que es el email con el que entras al panel')
+
+    await wrapper.find('[data-test="try-again"]').trigger('click')
+
+    expect(wrapper.find('#forgot-email').element.value).toBe('luisa@hotmal.com')
+    expect(wrapper.find('.reset-sent').exists()).toBe(false)
+  })
+
   it('shows the email error', async () => {
     const { wrapper } = await mountAt('/admin/olvide-contrasena', AdminForgotPasswordView, { authService: { forgotPassword: vi.fn() } })
 
