@@ -11,6 +11,9 @@ export const routes = [
   { path: '/cookies', name: 'cookies', component: () => import('@/views/public/LegalView.vue') },
   // Admin area: reached by typing the URL, no public link
   { path: '/admin/login', name: 'admin-login', component: () => import('@/views/admin/AdminLoginView.vue'), meta: { hideDemoCta: true, hideNav: true } },
+  // BGSI-273: forgot password (public: the admin cannot log in)
+  { path: '/admin/olvide-contrasena', name: 'admin-forgot-password', component: () => import('@/views/admin/AdminForgotPasswordView.vue'), meta: { hideDemoCta: true, hideNav: true } },
+  { path: '/admin/nueva-contrasena', name: 'admin-reset-password', component: () => import('@/views/admin/AdminResetPasswordView.vue'), meta: { hideDemoCta: true, hideNav: true } },
   {
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),

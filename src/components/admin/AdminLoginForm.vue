@@ -1,5 +1,5 @@
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useLoginForm } from '@/composables/admin/useLoginForm'
 import PasswordInput from '@/shared/PasswordInput.vue'
 
@@ -37,6 +37,8 @@ async function handleSubmit() {
       <Transition name="slide-fade">
         <p v-if="errors.password" id="login-password-error" class="login-form__error">{{ errors.password }}</p>
       </Transition>
+      <!-- BGSI-273 -->
+      <RouterLink :to="{ name: 'admin-forgot-password' }" class="login-form__forgot">¿Olvidaste tu contraseña?</RouterLink>
     </div>
 
     <Transition name="slide-fade">
@@ -70,6 +72,15 @@ async function handleSubmit() {
   }
 
   &__error { margin: 0; font-size: 0.875rem; color: #b91c1c; }
+
+  &__forgot {
+    align-self: flex-end;
+    font-size: 0.875rem;
+    color: var(--color-navy);
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
 
   &__alert {
     margin: 0;
