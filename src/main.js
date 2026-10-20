@@ -5,6 +5,7 @@ import router from './router'
 import { http } from './core/apis/base/BaseRepository'
 import { setupInterceptors } from './core/apis/base/http-interceptors'
 import { useAuthStore } from './stores/auth'
+import { useConfirmationStore } from './stores/confirmation'
 import { syncSessionBetweenTabs } from './stores/auth-tabs'
 import './assets/styles/style.css'
 
@@ -13,8 +14,11 @@ app.use(createPinia())
 app.use(router)
 
 const authStore = useAuthStore()
+const confirmationStore = useConfirmationStore()
 setupInterceptors(http, {
   getToken: () => authStore.token,
+  getConfirmToken: () => confirmationStore.validToken(authStore.email),
+  requestConfirmation: () => confirmationStore.request(),
   onUnauthorized: () => {
     authStore.logout()
     router.push({ name: 'admin-login', query: { expired: '1' } })

@@ -39,7 +39,7 @@ export function useAdminRateQuestions(service = new AdminRateQuestionService()) 
       await load()
       return true
     } catch (e) {
-      actionError.value = e.message
+      if (!e.cancelled) actionError.value = e.message // BGSI-275: password dialog closed
       return false
     }
   }

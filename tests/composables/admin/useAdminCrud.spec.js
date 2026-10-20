@@ -52,4 +52,13 @@ describe('useAdminCrud', () => {
     expect(ok).toBe(false)
     expect(actionError.value).toBe('Tiene productos')
   })
+
+  it('closing "Confirma tu contraseña" is not an error (BGSI-275)', async () => {
+    const service = { ...fakeService(), remove: vi.fn().mockRejectedValue(Object.assign(new Error('Acción cancelada'), { cancelled: true })) }
+    const { actionError, feedback, remove } = useAdminCrud(service)
+
+    expect(await remove(1, 'Borrada')).toBe(false)
+    expect(actionError.value).toBeNull()
+    expect(feedback.value).toBeNull()
+  })
 })

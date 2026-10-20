@@ -14,4 +14,13 @@ describe('AccountService', () => {
     expect(token).toBe('new-token')
     expect(calls[0].body).toEqual({ currentPassword: 'OldPass2026', newPassword: 'NewPass2026' })
   })
+
+  it('confirms the password and returns the 5-minute token (BGSI-275)', async () => {
+    const calls = fakeApi({ 'POST /admin/account/confirm': { confirmToken: 'tok', expiresInSeconds: 300 } })
+
+    const result = await new AccountService().confirmPassword('Correct2026')
+
+    expect(result).toEqual({ token: 'tok', expiresInSeconds: 300 })
+    expect(calls[0].body).toEqual({ password: 'Correct2026' })
+  })
 })
