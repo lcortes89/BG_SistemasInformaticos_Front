@@ -41,10 +41,17 @@ export const useAuthStore = defineStore('auth', () => {
     storeSession(null)
   }
 
+  // BGSI-272: after changing the password the backend sends a new token (the old one stops working)
+  function replaceToken(newToken) {
+    if (!session.value) return
+    session.value = new SessionModel(newToken, session.value.email, session.value.role)
+    storeSession(session.value)
+  }
+
   // Another tab logged in or out: read the session again from localStorage (BGSI-257)
   function syncFromStorage() {
     session.value = readStoredSession()
   }
 
-  return { session, isAuthenticated, isAdmin, token, email, login, logout, syncFromStorage }
+  return { session, isAuthenticated, isAdmin, token, email, login, logout, replaceToken, syncFromStorage }
 })
