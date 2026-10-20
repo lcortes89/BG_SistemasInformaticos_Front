@@ -8,6 +8,8 @@ export const http = axios.create({
 const FORBIDDEN_MESSAGE = 'No tienes permiso para realizar esta acción.'
 const SERVER_ERROR_MESSAGE = 'Ha ocurrido un error en el servidor. Inténtalo más tarde.'
 const NETWORK_ERROR_MESSAGE = 'No se pudo conectar con el servidor. Inténtalo más tarde.'
+// BGSI-284: the backend asks to wait (e.g. too many failed logins)
+const TOO_MANY_REQUESTS_MESSAGE = 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.'
 // A route the backend does not know (e.g. the backend was not restarted after an update)
 const NOT_FOUND_MESSAGE = 'No se ha encontrado el recurso. Comprueba que el servidor está actualizado.'
 
@@ -78,6 +80,7 @@ export default class BaseRepository {
 
   static messageFor(status, backendMessage) {
     if (status === 403) return FORBIDDEN_MESSAGE
+    if (status === 429) return TOO_MANY_REQUESTS_MESSAGE
     if (status >= 500) return SERVER_ERROR_MESSAGE
     if (status === 404 && (!backendMessage || backendMessage === 'Not Found')) return NOT_FOUND_MESSAGE
     return backendMessage || NETWORK_ERROR_MESSAGE

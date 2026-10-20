@@ -10,6 +10,10 @@ describe('BaseRepository.messageFor', () => {
     expect(BaseRepository.messageFor(500, 'NullPointerException')).toBe('Ha ocurrido un error en el servidor. Inténtalo más tarde.')
   })
 
+  it('uses a friendly message for 429 (BGSI-284)', () => {
+    expect(BaseRepository.messageFor(429, 'Too many failed attempts')).toBe('Demasiados intentos. Espera unos minutos y vuelve a intentarlo.')
+  })
+
   it('keeps the backend message for other errors', () => {
     expect(BaseRepository.messageFor(400, 'Some fields are not valid')).toBe('Some fields are not valid')
   })
