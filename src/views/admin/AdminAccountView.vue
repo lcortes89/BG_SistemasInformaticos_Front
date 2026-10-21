@@ -1,5 +1,6 @@
 <script setup>
 import ChangePasswordForm from '@/components/admin/ChangePasswordForm.vue'
+import TwoFactorCard from '@/components/admin/TwoFactorCard.vue'
 import { useChangePasswordForm } from '@/composables/admin/useChangePasswordForm'
 import { useAuthStore } from '@/stores/auth'
 
@@ -33,12 +34,18 @@ const { form, errors, rules, isSubmitting, submitError, successMessage, submit, 
                             :submit-error="submitError" @continue="next" @back="back" @submit="submit" />
       </div>
 
+      <!-- BGSI-276 -->
+      <div class="admin-account__card admin-account__card--wide">
+        <TwoFactorCard :service="accountService" />
+      </div>
+
       <aside class="admin-account__info">
         <h2 class="admin-account__title">Ten en cuenta</h2>
         <ul>
           <li>Al cambiarla se <strong>cierra la sesión en tus otros dispositivos</strong>; aquí sigues conectad@.</li>
           <li>Usa una contraseña que <strong>no uses en otras webs</strong>.</li>
           <li>Si crees que alguien conoce tu contraseña, cámbiala cuanto antes.</li>
+          <li>Activa la <strong>verificación en dos pasos</strong>: es la mejor protección para el panel.</li>
         </ul>
       </aside>
     </div>
@@ -72,9 +79,15 @@ const { form, errors, rules, isSubmitting, submitError, successMessage, submit, 
   }
 
   &__title { margin: 0 0 1.25rem; font-size: 1.15rem; color: var(--color-navy); }
+
+  // BGSI-276: the two-step verification card goes under the password one
+  &__card--wide { grid-column: 1; }
+  &__info { grid-column: 2; grid-row: 1 / span 2; }
 }
 
 @media (max-width: 900px) {
   .admin-account { grid-template-columns: 1fr; }
+  .admin-account__card--wide,
+  .admin-account__info { grid-column: auto; grid-row: auto; }
 }
 </style>

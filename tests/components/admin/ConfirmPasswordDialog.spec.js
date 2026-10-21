@@ -45,4 +45,26 @@ describe('ConfirmPasswordDialog', () => {
 
     expect(wrapper.emitted('cancel')).toHaveLength(2)
   })
+
+  // BGSI-276
+  it('adds the code field when two-step verification is on', async () => {
+    const codeRequired = Object.assign(new Error('x'), { status: 400, details: { code: 'Code is required' } })
+    const service = {
+      confirmPassword: vi.fn().mockRejectedValueOnce(codeRequired).mockResolvedValueOnce({ token: 'tok', expiresInSeconds: 300 }),
+    }
+    const wrapper = mount(ConfirmPasswordDialog, { props: { service } })
+    expect(wrapper.find('#confirm-password-code').exists()).toBe(false)
+
+    await wrapper.find('#confirm-password-input').setValue('Correct2026')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+    expect(wrapper.find('#confirm-password-code').exists()).toBe(true)
+
+    await wrapper.find('#confirm-password-code').setValue('123456')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(service.confirmPassword).toHaveBeenLastCalledWith('Correct2026', '123456')
+    expect(wrapper.emitted('confirmed')[0]).toEqual([{ token: 'tok', expiresInSeconds: 300 }])
+  })
 })

@@ -10,11 +10,17 @@ export function lockedMessage(minutes) {
   return `Demasiados intentos fallidos. Vuelve a intentarlo en ${value} ${value === 1 ? 'minuto' : 'minutos'}.`
 }
 
+const EXPIRED_MESSAGE = 'Han pasado más de 5 minutos. Vuelve a escribir tu contraseña.'
+
 export function useLoginForm(authStore = useAuthStore()) {
-  const form = reactive({ email: '', password: '' })
+  const form = reactive({ email: '', password: '', code: '' })
   const errors = reactive({})
   const isSubmitting = ref(false)
   const submitError = ref(null)
+  // BGSI-276: 'password' -> 'code' when the admin has two-step verification
+  const step = ref('password')
+  const useRecoveryCode = ref(false)
+  let pendingToken = null
 
   function validate() {
     Object.keys(errors).forEach((key) => delete errors[key])
@@ -30,8 +36,14 @@ export function useLoginForm(authStore = useAuthStore()) {
 
     isSubmitting.value = true
     try {
-      await authStore.login(form.email, form.password)
+      const result = await authStore.login(form.email, form.password)
       form.password = ''
+      if (result?.twoFactorRequired) {
+        pendingToken = result.pendingToken
+        form.code = ''
+        step.value = 'code'
+        return false
+      }
       return true
     } catch (e) {
       // 401: wrong credentials. We never say which of the two fields failed (security)
@@ -45,5 +57,54 @@ export function useLoginForm(authStore = useAuthStore()) {
     }
   }
 
-  return { form, errors, isSubmitting, submitError, submit }
+  // BGSI-276: second step. Returns true when the admin is in
+  async function submitCode() {
+    submitError.value = null
+    delete errors.code
+    if (!form.code.trim()) {
+      errors.code = useRecoveryCode.value ? 'Escribe un código de recuperación' : 'Escribe el código de 6 cifras'
+      return false
+    }
+
+    isSubmitting.value = true
+    try {
+      await authStore.verifyTwoFactor(pendingToken, form.code)
+      pendingToken = null
+      return true
+    } catch (e) {
+      form.code = ''
+      if (e.status === 400 && e.details?.code) {
+        errors.code = 'Código incorrecto. Comprueba que es el último que muestra la app.'
+      } else if (e.status === 429) {
+        backToPassword(lockedMessage(e.details?.retryAfterMinutes))
+      } else if (e.status === 400) {
+        backToPassword(EXPIRED_MESSAGE) // the 5 minutes of the pending login are over
+      } else {
+        submitError.value = e.message
+      }
+      return false
+    } finally {
+      isSubmitting.value = false
+    }
+  }
+
+  function backToPassword(message = null) {
+    pendingToken = null
+    form.code = ''
+    useRecoveryCode.value = false
+    delete errors.code
+    step.value = 'password'
+    submitError.value = message
+  }
+
+  function toggleRecoveryCode() {
+    useRecoveryCode.value = !useRecoveryCode.value
+    form.code = ''
+    delete errors.code
+  }
+
+  return {
+    form, errors, isSubmitting, submitError, submit,
+    step, useRecoveryCode, submitCode, backToPassword, toggleRecoveryCode,
+  }
 }

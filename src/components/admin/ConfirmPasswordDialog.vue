@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import PasswordInput from '@/shared/PasswordInput.vue'
 import { useConfirmPasswordForm } from '@/composables/admin/useConfirmPasswordForm'
 
@@ -11,14 +11,22 @@ const props = defineProps({
 
 const emit = defineEmits(['confirmed', 'cancel'])
 
-const { password, error, isSubmitting, submit } = useConfirmPasswordForm(props.service)
+const { password, code, needsCode, error, codeError, isSubmitting, submit } = useConfirmPasswordForm(props.service)
 const box = ref(null)
+const codeInput = ref(null)
 
 onMounted(() => box.value?.querySelector('input')?.focus())
+
+// BGSI-276: when the code is asked, the cursor goes there
+watch(needsCode, async (value) => {
+  await nextTick()
+  if (value) codeInput.value?.focus()
+})
 
 async function handleSubmit() {
   const result = await submit()
   if (result) emit('confirmed', result)
+  else if (needsCode.value && !error.value) codeInput.value?.focus()
   else box.value?.querySelector('input')?.focus()
 }
 </script>
@@ -41,6 +49,18 @@ async function handleSubmit() {
                        :aria-invalid="!!error" aria-describedby="confirm-password-error" />
         <p v-if="error" id="confirm-password-error" class="confirm-password__error" role="alert">{{ error }}</p>
       </div>
+
+      <!-- BGSI-276: only when two-step verification is on -->
+      <Transition name="slide-fade">
+        <div v-if="needsCode" class="confirm-password__field">
+          <label for="confirm-password-code">Código de tu app de autenticación</label>
+          <input id="confirm-password-code" ref="codeInput" v-model="code" type="text" inputmode="numeric"
+                 autocomplete="one-time-code" maxlength="9" placeholder="123456"
+                 :aria-invalid="!!codeError" aria-describedby="confirm-password-code-error" />
+          <p v-if="codeError" id="confirm-password-code-error" class="confirm-password__error" role="alert">{{ codeError }}</p>
+          <p v-else class="confirm-password__hint">Tienes la verificación en dos pasos activada.</p>
+        </div>
+      </Transition>
 
       <div class="confirm-password__actions">
         <button type="button" class="confirm-password__cancel" @click="emit('cancel')">Cancelar</button>
@@ -96,6 +116,7 @@ async function handleSubmit() {
   }
 
   &__error { margin: 0; color: #b91c1c; font-size: 0.9rem; font-weight: 600; }
+  &__hint { margin: 0; color: #6b7280; font-size: 0.85rem; }
 
   &__actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
 
