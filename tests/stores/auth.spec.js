@@ -55,4 +55,24 @@ describe('auth store', () => {
 
     expect(store.isAuthenticated).toBe(false)
   })
+
+  // BGSI-276
+  it('with 2FA the login does not start a session until the code is right', async () => {
+    const store = useAuthStore()
+    const fakeService = {
+      login: vi.fn().mockResolvedValue({ twoFactorRequired: true, pendingToken: 'pend' }),
+      verifyTwoFactor: vi.fn().mockResolvedValue(new SessionModel(fakeToken(3600), 'a@bg.es', 'ADMIN')),
+    }
+
+    const result = await store.login('a@bg.es', 'secret123', fakeService)
+
+    expect(result).toEqual({ twoFactorRequired: true, pendingToken: 'pend' })
+    expect(store.isAuthenticated).toBe(false)
+
+    await store.verifyTwoFactor('pend', '123456', fakeService)
+
+    expect(fakeService.verifyTwoFactor).toHaveBeenCalledWith('pend', '123456')
+    expect(store.isAuthenticated).toBe(true)
+    expect(JSON.parse(localStorage.getItem('bgsi-session')).email).toBe('a@bg.es')
+  })
 })

@@ -32,14 +32,26 @@ export const useAuthStore = defineStore('auth', () => {
   const token = computed(() => session.value?.token ?? null)
   const email = computed(() => session.value?.email ?? null)
 
-  async function login(userEmail, password, service = new AuthService()) {
-    session.value = await service.login(userEmail, password)
+  function start(newSession) {
+    session.value = newSession
     storeSession(session.value)
     try {
       localStorage.removeItem(LOGOUT_REASON_KEY) // BGSI-268: a new session starts without the old reason
     } catch {
       // storage blocked
     }
+  }
+
+  // BGSI-276: with 2FA on there is no session yet: returns { twoFactorRequired, pendingToken }
+  async function login(userEmail, password, service = new AuthService()) {
+    const result = await service.login(userEmail, password)
+    if (result?.twoFactorRequired) return result
+    start(result)
+    return { twoFactorRequired: false }
+  }
+
+  async function verifyTwoFactor(pendingToken, code, service = new AuthService()) {
+    start(await service.verifyTwoFactor(pendingToken, code))
   }
 
   function logout() {
@@ -59,5 +71,5 @@ export const useAuthStore = defineStore('auth', () => {
     session.value = readStoredSession()
   }
 
-  return { session, isAuthenticated, isAdmin, token, email, login, logout, replaceToken, syncFromStorage }
+  return { session, isAuthenticated, isAdmin, token, email, login, verifyTwoFactor, logout, replaceToken, syncFromStorage }
 })

@@ -23,4 +23,29 @@ describe('AccountService', () => {
     expect(result).toEqual({ token: 'tok', expiresInSeconds: 300 })
     expect(calls[0].body).toEqual({ password: 'Correct2026' })
   })
+
+  // BGSI-276
+  it('calls the two-step verification endpoints', async () => {
+    const calls = fakeApi({
+      'GET /admin/account/2fa': { enabled: true, recoveryCodesLeft: 8 },
+      'POST /admin/account/2fa/setup': { secret: 'ABC', otpauthUri: 'otpauth://totp/x' },
+      'POST /admin/account/2fa/enable': { recoveryCodes: ['aaaa-bbbb'] },
+      'DELETE /admin/account/2fa': '',
+      'POST /admin/account/confirm': { confirmToken: 'tok', expiresInSeconds: 300 },
+    })
+    const service = new AccountService()
+
+    expect(await service.getTwoFactor()).toEqual({ enabled: true, recoveryCodesLeft: 8 })
+    expect(await service.setupTwoFactor()).toEqual({ secret: 'ABC', otpauthUri: 'otpauth://totp/x' })
+    expect(await service.enableTwoFactor(' 123456 ')).toEqual(['aaaa-bbbb'])
+    await service.disableTwoFactor()
+    await service.confirmPassword('Correct2026', '654321')
+
+    expect(calls.map((call) => call.key)).toEqual([
+      'GET /admin/account/2fa', 'POST /admin/account/2fa/setup', 'POST /admin/account/2fa/enable',
+      'DELETE /admin/account/2fa', 'POST /admin/account/confirm',
+    ])
+    expect(calls[2].body).toEqual({ code: '123456' })
+    expect(calls[4].body).toEqual({ password: 'Correct2026', code: '654321' })
+  })
 })
