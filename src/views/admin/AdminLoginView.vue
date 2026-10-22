@@ -20,6 +20,9 @@ const route = useRoute()
         <p v-else-if="route.query.loggedOut" class="admin-login__notice" role="status">
           Se ha cerrado la sesión desde otra pestaña.
         </p>
+        <p v-else-if="route.query.invited" class="admin-login__notice admin-login__notice--ok" role="status">
+          Tu cuenta está lista. Entra con tu email y la contraseña que acabas de crear.
+        </p>
         <p v-else-if="route.query.reset" class="admin-login__notice admin-login__notice--ok" role="status">
           Contraseña cambiada. Ya puedes entrar con la nueva.
         </p>

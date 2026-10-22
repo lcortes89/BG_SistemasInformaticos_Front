@@ -151,12 +151,61 @@ describe('admin screens', () => {
     expect(wrapper.text()).toContain('Foto original')
   })
 
-  it('Administradores: shows the form to add a new admin', async () => {
-    fakeApi({})
+  // BGSI-277: the list of admins and the invitation
+  it('Administradores: lists the admins and invites a new one', async () => {
+    const maria = { id: 2, email: 'maria@bg.es', status: 'ACTIVE', twoFactorEnabled: true, lastLoginAt: null, you: false }
+    const nuevo = { id: 3, email: 'nuevo@bg.es', status: 'PENDING', twoFactorEnabled: false, lastLoginAt: null, you: false }
+    let list = [maria]
+    const calls = fakeApi({
+      'GET /admin/users': () => list,
+      'POST /admin/users/invitations': () => { list = [maria, nuevo]; return nuevo },
+    })
+    const wrapper = await mountWithRouter(AdminUsersView)
+    expect(wrapper.find('h1').text()).toBe('Administradores')
+    expect(wrapper.text()).toContain('1 administrador')
+
+    await buttonWithText(wrapper, 'Invitar administrador').trigger('click')
+    await wrapper.find('#invite-email').setValue('Nuevo@bg.es')
+    await wrapper.find('.modal form').trigger('submit') // step 1 -> step 2 (BGSI-294)
+    await wrapper.find('#invite-confirm-email').setValue('nuevo@bg.es')
+    await wrapper.find('.modal form').trigger('submit')
+    await flushPromises()
+
+    expect(calls.find((call) => call.key === 'POST /admin/users/invitations').body).toEqual({ email: 'nuevo@bg.es' })
+    expect(wrapper.find('.modal').exists()).toBe(false)
+    expect(wrapper.find('[role="status"]').text()).toContain('Invitación enviada a nuevo@bg.es')
+    expect(wrapper.find('[data-test="admin-3"]').text()).toContain('Pendiente')
+  })
+
+  it('Administradores: asks before blocking and then blocks', async () => {
+    const maria = { id: 2, email: 'maria@bg.es', status: 'ACTIVE', twoFactorEnabled: false, lastLoginAt: null, you: false }
+    let list = [maria]
+    fakeApi({
+      'GET /admin/users': () => list,
+      'PUT /admin/users/2/block': () => { list = [{ ...maria, status: 'BLOCKED' }]; return list[0] },
+    })
     const wrapper = await mountWithRouter(AdminUsersView)
 
-    expect(wrapper.find('h1').text()).toBe('Administradores')
-    expect(wrapper.find('form').exists()).toBe(true)
+    await buttonWithText(wrapper, 'Bloquear').trigger('click')
+    expect(wrapper.find('.confirm-dialog').text()).toContain('maria@bg.es no podrá entrar al panel')
+    await wrapper.find('.confirm-dialog__confirm').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[role="status"]').text()).toBe('maria@bg.es está bloqueado. Ya no puede entrar al panel.')
+    expect(wrapper.find('[data-test="admin-2"]').text()).toContain('Desbloquear')
+  })
+
+  it('Administradores: cancelling the question does nothing', async () => {
+    const calls = fakeApi({
+      'GET /admin/users': [{ id: 2, email: 'maria@bg.es', status: 'ACTIVE', twoFactorEnabled: false, lastLoginAt: null, you: false }],
+    })
+    const wrapper = await mountWithRouter(AdminUsersView)
+
+    await buttonWithText(wrapper, 'Borrar').trigger('click')
+    await wrapper.find('.confirm-dialog__cancel').trigger('click')
+
+    expect(wrapper.find('.confirm-dialog').exists()).toBe(false)
+    expect(calls.some((call) => call.key.startsWith('DELETE'))).toBe(false)
   })
 
   it('Layout: shows the menu of the panel and logs out', async () => {

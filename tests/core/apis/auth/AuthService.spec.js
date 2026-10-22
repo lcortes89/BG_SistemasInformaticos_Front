@@ -15,17 +15,6 @@ describe('AuthService', () => {
     expect(session.isAdmin()).toBe(true)
   })
 
-  it('registers a new admin with the trimmed email and returns that email (BGSI-197)', async () => {
-    const fakeRepository = {
-      register: vi.fn().mockResolvedValue({ id: 2, email: 'maria@bg.es', role: 'ADMIN' }),
-    }
-
-    const email = await new AuthService(fakeRepository).registerAdmin(' maria@bg.es ', 'Segura2026')
-
-    expect(fakeRepository.register).toHaveBeenCalledWith('maria@bg.es', 'Segura2026')
-    expect(email).toBe('maria@bg.es')
-  })
-
   // BGSI-276
   it('returns the pending token instead of a session when 2FA is on', async () => {
     const fakeRepository = { login: vi.fn().mockResolvedValue({ email: 'a@bg.es', twoFactorRequired: true, pendingToken: 'pend' }) }

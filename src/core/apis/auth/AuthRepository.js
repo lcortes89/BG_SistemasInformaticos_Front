@@ -16,11 +16,6 @@ export default class AuthRepository extends BaseRepository {
     return this.post('/login/2fa', { pendingToken, code })
   }
 
-  // POST /api/auth/register (only an ADMIN, with its JWT) -> { id, email, role } (BGSI-197)
-  async register(email, password) {
-    return this.post('/register', { email, password })
-  }
-
   // POST /api/auth/forgot-password { email } -> 202 always (BGSI-273)
   async forgotPassword(email) {
     return this.post('/forgot-password', { email })
