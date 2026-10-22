@@ -32,4 +32,10 @@ export default class AuthService {
   async resetPassword(token, newPassword) {
     await this.#repo.resetPassword(token, newPassword)
   }
+
+  // BGSI-299: opens the link of "change my email". Returns the new email
+  async confirmEmailChange(token) {
+    const dto = await this.#repo.confirmEmailChange(token)
+    return dto.email
+  }
 }

@@ -25,4 +25,9 @@ export default class AuthRepository extends BaseRepository {
   async resetPassword(token, newPassword) {
     return this.post('/reset-password', { token, newPassword })
   }
+
+  // BGSI-299: POST /api/auth/confirm-email { token } -> { email }, or 400 if the link is not valid
+  async confirmEmailChange(token) {
+    return this.post('/confirm-email', { token })
+  }
 }

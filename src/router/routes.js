@@ -14,6 +14,8 @@ export const routes = [
   // BGSI-273: forgot password (public: the admin cannot log in)
   { path: '/admin/olvide-contrasena', name: 'admin-forgot-password', component: () => import('@/views/admin/AdminForgotPasswordView.vue'), meta: { hideDemoCta: true, hideNav: true } },
   { path: '/admin/nueva-contrasena', name: 'admin-reset-password', component: () => import('@/views/admin/AdminResetPasswordView.vue'), meta: { hideDemoCta: true, hideNav: true } },
+  // BGSI-301: link of "change my email" (public: it may be opened in any browser)
+  { path: '/admin/confirmar-email', name: 'admin-confirm-email', component: () => import('@/views/admin/AdminConfirmEmailView.vue'), meta: { hideDemoCta: true, hideNav: true } },
   {
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),

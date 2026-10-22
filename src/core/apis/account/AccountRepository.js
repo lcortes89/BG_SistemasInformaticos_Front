@@ -38,4 +38,20 @@ export default class AccountRepository extends BaseRepository {
   async disableTwoFactor() {
     return this.delete('/2fa')
   }
+
+  // BGSI-299: change my own email
+  // POST /email { newEmail } -> 202 { newEmail, expiresAt } (needs the password confirmation)
+  async requestEmailChange(newEmail) {
+    return this.post('/email', { newEmail })
+  }
+
+  // GET /email -> { newEmail, expiresAt } (both null if nothing is pending)
+  async getPendingEmailChange() {
+    return this.get('/email')
+  }
+
+  // DELETE /email -> 204: the link that was sent stops working
+  async cancelEmailChange() {
+    return this.delete('/email')
+  }
 }
