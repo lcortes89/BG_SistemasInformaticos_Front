@@ -42,6 +42,21 @@ describe('AppHeader', () => {
     await toggle.trigger('click')
     expect(nav.classes()).not.toContain('is-open')
   })
+
+  // BGSI-298
+  it('says what the button does and closes the menu with Esc', async () => {
+    const wrapper = mountHeader()
+    const toggle = wrapper.find('[data-test="menu-toggle"]')
+    expect(toggle.attributes('aria-label')).toBe('Abrir menú')
+
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-label')).toBe('Cerrar menú')
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('nav').classes()).not.toContain('is-open')
+    wrapper.unmount()
+  })
 })
 
 describe('AppHeader on scroll (BGSI-210)', () => {

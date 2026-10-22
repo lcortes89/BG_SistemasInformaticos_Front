@@ -29,7 +29,10 @@ export const routes = [
       // BGSI-272: the admin's own account (change password)
       { path: 'mi-cuenta', name: 'admin-account', component: () => import('@/views/admin/AdminAccountView.vue') },
       // BGSI-261: "Apariencia" is now "Ajustes" (the old address still works)
-      { path: 'ajustes', name: 'admin-settings', component: () => import('@/views/admin/AdminSettingsView.vue') },
+      // BGSI-297: "Ajustes" is split in two pages of the menu
+      { path: 'foto-portada', name: 'admin-settings', component: () => import('@/views/admin/AdminSettingsView.vue') },
+      { path: 'avisos-correo', name: 'admin-mail-settings', component: () => import('@/views/admin/AdminMailSettingsView.vue') },
+      { path: 'ajustes', redirect: { name: 'admin-settings' } },
       { path: 'apariencia', redirect: { name: 'admin-settings' } },
     ],
   },
