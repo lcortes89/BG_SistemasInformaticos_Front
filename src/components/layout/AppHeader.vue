@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import logo from '@/assets/logo/logo_header.png'
 import { useScrollHeader } from '@/composables/layout/useScrollHeader'
+import { useMobileMenu } from '@/composables/layout/useMobileMenu'
 
 defineProps({
   // true on pages with a hero: transparent at the top of the page
@@ -18,23 +19,17 @@ const links = [
   { to: '/clientes', label: 'Nuestros Clientes' },
 ]
 
-// Mobile menu: closed by default
-const isMenuOpen = ref(false)
+// Mobile menu (BGSI-298): closed by default; Esc, a tap outside or a new page close it
+const header = ref(null)
+const { isOpen: isMenuOpen, toggle: toggleMenu, close: closeMenu } = useMobileMenu(header)
 
 // Smart header: glass when scrolling, hidden going down, back when going up
 const { isTranslucent, isHidden, isAtTop } = useScrollHeader()
 
-function toggleMenu() {
-  isMenuOpen.value = !isMenuOpen.value
-}
-
-function closeMenu() {
-  isMenuOpen.value = false
-}
 </script>
 
 <template>
-  <header class="app-header"
+  <header ref="header" class="app-header"
           :class="{
             'is-solid': !overlay && !isTranslucent,
             'is-translucent': isTranslucent || isMenuOpen,
@@ -54,7 +49,7 @@ function closeMenu() {
         data-test="menu-toggle"
         aria-controls="main-nav"
         :aria-expanded="isMenuOpen"
-        aria-label="Abrir o cerrar el menú"
+        :aria-label="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'"
         @click="toggleMenu"
       >
         <span></span><span></span><span></span>
@@ -154,7 +149,13 @@ function closeMenu() {
       height: 2px;
       margin: 5px 0;
       background: #fff;
+      transition: transform 0.2s, opacity 0.2s;
     }
+
+    // BGSI-298: ☰ becomes ✕ while the menu is open
+    &[aria-expanded='true'] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    &[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
+    &[aria-expanded='true'] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
   }
 }
 

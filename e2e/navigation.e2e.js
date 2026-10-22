@@ -27,3 +27,17 @@ test('an unknown address shows the 404 page', async ({ page }) => {
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Página no encontrada')
 })
+
+// BGSI-298: on the mobile the menu is behind the ☰ button
+test('on the mobile the ☰ menu opens and closes after choosing a page', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'Only on the mobile project')
+  await page.goto('/')
+
+  const menu = page.getByRole('navigation', { name: 'Navegación principal' })
+  await expect(menu).toBeHidden()
+  await page.getByRole('button', { name: 'Abrir menú' }).click()
+  await menu.getByRole('link', { name: 'Tarifas' }).click()
+
+  await expect(page).toHaveURL(/\/tarifas$/)
+  await expect(page.getByRole('button', { name: 'Abrir menú' })).toHaveAttribute('aria-expanded', 'false')
+})

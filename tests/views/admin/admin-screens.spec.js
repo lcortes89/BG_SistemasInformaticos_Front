@@ -8,6 +8,7 @@ import AdminContactsView from '@/views/admin/AdminContactsView.vue'
 import AdminRatesView from '@/views/admin/AdminRatesView.vue'
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
 import AdminSettingsView from '@/views/admin/AdminSettingsView.vue'
+import AdminMailSettingsView from '@/views/admin/AdminMailSettingsView.vue'
 import AdminUsersView from '@/views/admin/AdminUsersView.vue'
 import AdminLayout from '@/views/admin/AdminLayout.vue'
 
@@ -139,16 +140,25 @@ describe('admin screens', () => {
     expect(wrapper.text()).toContain('Ana López')
   })
 
-  it('Ajustes: shows the email settings and the hero photo', async () => {
-    fakeApi({
-      'GET /settings/hero': { imageUrl: null },
-      'GET /admin/settings/mail': { notifyEmail: 'duenio@bg.es', senderName: 'BG Sistemas Web', senderAccount: 'web@gmail.com' },
-    })
+  // BGSI-297: "Ajustes" is split in two pages
+  it('Foto de portada: shows only the hero photo', async () => {
+    fakeApi({ 'GET /settings/hero': { imageUrl: null } })
     const wrapper = await mountWithRouter(AdminSettingsView)
 
-    expect(wrapper.text()).toContain('Avisos por correo')
-    expect(wrapper.find('#mail-notify-email').element.value).toBe('duenio@bg.es')
+    expect(wrapper.find('h1').text()).toBe('Foto de portada')
     expect(wrapper.text()).toContain('Foto original')
+    expect(wrapper.find('#mail-notify-email').exists()).toBe(false)
+  })
+
+  it('Avisos por correo: shows only the email settings', async () => {
+    fakeApi({
+      'GET /admin/settings/mail': { notifyEmail: 'duenio@bg.es', senderName: 'BG Sistemas Web', senderAccount: 'web@gmail.com' },
+    })
+    const wrapper = await mountWithRouter(AdminMailSettingsView)
+
+    expect(wrapper.find('h1').text()).toBe('Avisos por correo')
+    expect(wrapper.find('#mail-notify-email').element.value).toBe('duenio@bg.es')
+    expect(wrapper.text()).not.toContain('Foto original')
   })
 
   // BGSI-277: the list of admins and the invitation
@@ -212,9 +222,10 @@ describe('admin screens', () => {
     fakeApi({})
     // RouterView stubbed: the page inside the layout is tested on its own
     const wrapper = await mountWithRouter(AdminLayout, { RouterView: true })
-    const links = wrapper.findAll('.admin-layout__nav a').map((link) => link.text())
+    const titles = wrapper.findAll('.admin-layout__nav .admin-layout__label').map((title) => title.text())
 
-    expect(links).toEqual(['Resumen', 'Contactos', 'Marcas', 'Productos', 'Clientes', 'Tarifas', 'Ajustes', 'Administradores', 'Mi cuenta'])
+    // BGSI-297: "Resumen" and the titles of the groups
+    expect(titles).toEqual(['Resumen', 'Gestión de clientes', 'Gestión comercial', 'Gestión Administración', 'Ajustes de perfil'])
     const push = vi.spyOn(wrapper.vm.$router, 'push')
     await buttonWithText(wrapper, 'Cerrar sesión').trigger('click')
     expect(push).toHaveBeenCalledWith({ name: 'admin-login' })
