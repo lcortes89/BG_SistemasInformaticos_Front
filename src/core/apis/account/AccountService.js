@@ -40,4 +40,22 @@ export default class AccountService {
   async disableTwoFactor() {
     await this.#repo.disableTwoFactor()
   }
+
+  // BGSI-299: change my own email. Returns { newEmail, expiresAt (Date) }
+  async requestEmailChange(newEmail) {
+    return toPending(await this.#repo.requestEmailChange(newEmail.trim()))
+  }
+
+  // The change waiting for the link, or null
+  async getPendingEmailChange() {
+    return toPending(await this.#repo.getPendingEmailChange())
+  }
+
+  async cancelEmailChange() {
+    await this.#repo.cancelEmailChange()
+  }
+}
+
+function toPending(dto) {
+  return dto?.newEmail ? { newEmail: dto.newEmail, expiresAt: new Date(dto.expiresAt) } : null
 }

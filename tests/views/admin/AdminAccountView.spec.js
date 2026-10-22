@@ -17,6 +17,7 @@ describe('AdminAccountView', () => {
     const accountService = { changePassword: vi.fn().mockResolvedValue('new-token') }
     const wrapper = mount(AdminAccountView, { props: { accountService } })
     expect(wrapper.text()).toContain('luisa@bg.es')
+    expect(wrapper.text()).toContain('Cambiar mi email') // BGSI-301
 
     await wrapper.find('#account-current').setValue('OldPass2026')
     await wrapper.find('#account-new').setValue('NewPass2026')

@@ -1,5 +1,6 @@
 <script setup>
 import ChangePasswordForm from '@/components/admin/ChangePasswordForm.vue'
+import ChangeEmailCard from '@/components/admin/ChangeEmailCard.vue'
 import TwoFactorCard from '@/components/admin/TwoFactorCard.vue'
 import { useChangePasswordForm } from '@/composables/admin/useChangePasswordForm'
 import { useAuthStore } from '@/stores/auth'
@@ -34,6 +35,11 @@ const { form, errors, rules, isSubmitting, submitError, successMessage, submit, 
                             :submit-error="submitError" @continue="next" @back="back" @submit="submit" />
       </div>
 
+      <!-- BGSI-301 -->
+      <div class="admin-account__card admin-account__card--wide">
+        <ChangeEmailCard :current-email="authStore.email" :service="accountService" />
+      </div>
+
       <!-- BGSI-276 -->
       <div class="admin-account__card admin-account__card--wide">
         <TwoFactorCard :service="accountService" />
@@ -43,6 +49,7 @@ const { form, errors, rules, isSubmitting, submitError, successMessage, submit, 
         <h2 class="admin-account__title">Ten en cuenta</h2>
         <ul>
           <li>Al cambiarla se <strong>cierra la sesión en tus otros dispositivos</strong>; aquí sigues conectad@.</li>
+          <li>Para cambiar tu email te enviamos un <strong>enlace al email nuevo</strong>: el cambio se hace al abrirlo y después entras con el nuevo.</li>
           <li>Usa una contraseña que <strong>no uses en otras webs</strong>.</li>
           <li>Si crees que alguien conoce tu contraseña, cámbiala cuanto antes.</li>
           <li>Activa la <strong>verificación en dos pasos</strong>: es la mejor protección para el panel.</li>
@@ -80,9 +87,9 @@ const { form, errors, rules, isSubmitting, submitError, successMessage, submit, 
 
   &__title { margin: 0 0 1.25rem; font-size: 1.15rem; color: var(--color-navy); }
 
-  // BGSI-276: the two-step verification card goes under the password one
+  // BGSI-276 / BGSI-301: the email and two-step verification cards go under the password one
   &__card--wide { grid-column: 1; }
-  &__info { grid-column: 2; grid-row: 1 / span 2; }
+  &__info { grid-column: 2; grid-row: 1 / span 3; }
 }
 
 @media (max-width: 900px) {
