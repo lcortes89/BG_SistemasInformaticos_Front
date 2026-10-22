@@ -23,12 +23,6 @@ export default class AuthService {
     return SessionModel.create(dto, authMapper)
   }
 
-  // Creates another administrator and returns the email that was registered (BGSI-197)
-  async registerAdmin(email, password) {
-    const dto = await this.#repo.register(email.trim(), password)
-    return dto.email
-  }
-
   // BGSI-273: asks for the "create a new password" email
   async forgotPassword(email) {
     await this.#repo.forgotPassword(email.trim())

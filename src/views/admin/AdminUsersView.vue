@@ -1,10 +1,76 @@
 <script setup>
-import NewAdminForm from '@/components/admin/NewAdminForm.vue'
-import { useNewAdminForm } from '@/composables/admin/useNewAdminForm'
+import { computed, onMounted, ref } from 'vue'
+import LoadingSpinner from '@/shared/LoadingSpinner.vue'
+import ModalDialog from '@/shared/ModalDialog.vue'
+import ConfirmDialog from '@/shared/ConfirmDialog.vue'
+import AdminUsersTable from '@/components/admin/AdminUsersTable.vue'
+import InviteAdminForm from '@/components/admin/InviteAdminForm.vue'
+import { useAdminUsers } from '@/composables/admin/useAdminUsers'
+import { useInviteAdminForm } from '@/composables/admin/useInviteAdminForm'
 
-const {
-  form, errors, isSubmitting, submitError, successMessage, submit, step, pasteBlocked, next, back, blockPaste,
-} = useNewAdminForm()
+const props = defineProps({
+  // Optional: lets the tests pass a fake AdminUserService
+  service: { type: Object, default: undefined },
+})
+
+const { admins, isLoading, error, feedback, actionError, busyId, load, run, invited } = useAdminUsers(props.service)
+const invite = useInviteAdminForm(props.service)
+
+// BGSI-277: the "¿Seguro?" of each action. After it, the backend asks for the password (BGSI-275)
+const QUESTIONS = {
+  block: (email) => ({
+    title: 'Bloquear administrador',
+    message: `${email} no podrá entrar al panel y se cerrarán sus sesiones abiertas. Podrás desbloquearlo cuando quieras.`,
+    confirmLabel: 'Bloquear',
+  }),
+  unblock: (email) => ({
+    title: 'Desbloquear administrador',
+    message: `${email} podrá volver a entrar al panel con su contraseña.`,
+    confirmLabel: 'Desbloquear',
+  }),
+  resetTwoFactor: (email) => ({
+    title: 'Quitar la verificación en dos pasos',
+    message: `Úsalo solo si ${email} ha perdido el móvil y sus códigos de recuperación. Podrá entrar solo con su contraseña y volver a activarla en Mi cuenta.`,
+    confirmLabel: 'Quitar verificación',
+  }),
+  resendInvitation: (email) => ({
+    title: 'Reenviar invitación',
+    message: `Se enviará un enlace nuevo a ${email}, válido 24 horas. El enlace anterior dejará de servir.`,
+    confirmLabel: 'Reenviar',
+  }),
+  remove: (email) => ({
+    title: 'Borrar administrador',
+    message: `¿Seguro que quieres borrar a ${email}? Perderá el acceso al panel y esta acción no se puede deshacer.`,
+    confirmLabel: 'Borrar',
+  }),
+}
+
+const pending = ref(null) // { action, admin } waiting for "¿Seguro?"
+const question = computed(() => pending.value && QUESTIONS[pending.value.action](pending.value.admin.email))
+
+async function confirmAction() {
+  const { action, admin } = pending.value
+  pending.value = null
+  await run(action, admin)
+}
+
+const inviteOpen = ref(false)
+
+function openInvite() {
+  invite.reset()
+  inviteOpen.value = true
+}
+
+async function sendInvitation() {
+  const email = await invite.submit()
+  if (!email) return
+  inviteOpen.value = false
+  await invited(email)
+}
+
+const countLabel = computed(() => `${admins.value.length} ${admins.value.length === 1 ? 'administrador' : 'administradores'}`)
+
+onMounted(load)
 </script>
 
 <template>
@@ -12,65 +78,53 @@ const {
     <header class="admin-page__header">
       <div>
         <h1>Administradores</h1>
-        <p>Da de alta a otra persona para que gestione el panel.</p>
+        <p>{{ countLabel }}</p>
+      </div>
+      <div class="admin-page__tools">
+        <button type="button" class="btn btn--primary admin-page__new" @click="openInvite">+ Invitar administrador</button>
       </div>
     </header>
 
+    <p class="admin-users__info">
+      🛡️ Todos los administradores tienen <strong>los mismos permisos</strong>. Cada cambio te pide tu contraseña
+      y se avisa por correo a todos los administradores.
+    </p>
+
     <Transition name="slide-fade">
-      <p v-if="successMessage" class="admin-page__feedback" role="status">{{ successMessage }}</p>
+      <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
+    </Transition>
+    <Transition name="slide-fade">
+      <p v-if="actionError" class="admin-page__error" role="alert">{{ actionError }}</p>
     </Transition>
 
-    <div class="admin-users">
-      <div class="admin-users__card">
-        <h2 class="admin-users__title">Nuevo administrador</h2>
-        <NewAdminForm :form="form" :errors="errors" :step="step" :paste-blocked="pasteBlocked"
-                      :is-submitting="isSubmitting" :submit-error="submitError"
-                      @continue="next" @back="back" @blocked-paste="blockPaste" @submit="submit" />
-      </div>
+    <LoadingSpinner v-if="isLoading" label="Cargando administradores..." />
+    <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
+    <AdminUsersTable v-else :admins="admins" :busy-id="busyId" @action="(action, admin) => (pending = { action, admin })" />
 
-      <aside class="admin-users__info">
-        <h2 class="admin-users__title">Ten en cuenta</h2>
-        <ul>
-          <li>El nuevo administrador tendrá <strong>los mismos permisos</strong> que tú.</li>
-          <li>Podrá gestionar contactos, marcas, productos, clientes y tarifas.</li>
-          <li>Entra por <strong>/admin/login</strong> con el email y la contraseña que pongas aquí.</li>
-          <li>Comunícale la contraseña por un canal seguro.</li>
-        </ul>
-      </aside>
-    </div>
+    <Transition name="slide-fade">
+      <ModalDialog v-if="inviteOpen" title="Invitar administrador" @close="inviteOpen = false">
+        <InviteAdminForm :form="invite.form" :errors="invite.errors" :step="invite.step.value"
+                         :paste-blocked="invite.pasteBlocked.value" :is-submitting="invite.isSubmitting.value"
+                         :submit-error="invite.submitError.value"
+                         @continue="invite.next" @back="invite.back" @blocked-paste="invite.blockPaste"
+                         @submit="sendInvitation" @cancel="inviteOpen = false" />
+      </ModalDialog>
+    </Transition>
+
+    <Transition name="slide-fade">
+      <ConfirmDialog v-if="question" :title="question.title" :message="question.message"
+                     :confirm-label="question.confirmLabel" @confirm="confirmAction" @cancel="pending = null" />
+    </Transition>
   </section>
 </template>
 
-<style scoped lang="scss">
-.admin-users {
-  display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  max-width: 1000px;
-  gap: 1.5rem;
-  align-items: start;
-
-  &__card,
-  &__info {
-    padding: 1.75rem;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 4px 16px rgba(11, 31, 58, 0.08);
-  }
-
-  &__info {
-    background: var(--color-navy);
-    color: #e3eaf4;
-
-    ul { margin: 0; padding-left: 1.1rem; line-height: 1.6; }
-    li + li { margin-top: 0.5rem; }
-    strong { color: #fff; }
-    .admin-users__title { color: #fff; }
-  }
-
-  &__title { margin: 0 0 1.25rem; font-size: 1.15rem; color: var(--color-navy); }
-}
-
-@media (max-width: 900px) {
-  .admin-users { grid-template-columns: 1fr; }
+<style scoped>
+.admin-users__info {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  background: #eef4fb;
+  color: var(--color-navy);
+  line-height: 1.5;
 }
 </style>

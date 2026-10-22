@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AuthPageCard from '@/components/admin/AuthPageCard.vue'
 import PasswordInput from '@/shared/PasswordInput.vue'
@@ -14,6 +15,8 @@ const route = useRoute()
 const router = useRouter()
 // /admin/nueva-contrasena?token=... (the link of the email)
 const token = typeof route.query.token === 'string' ? route.query.token : ''
+// BGSI-277: the invitation link is this same page with &invitacion=1
+const isInvitation = route.query.invitacion === '1'
 
 const { form, errors, rules, isSubmitting, submitError, isInvalidLink, submit, step, next, back } =
   useResetPasswordForm(token, props.authService)
@@ -21,21 +24,32 @@ const { form, errors, rules, isSubmitting, submitError, isInvalidLink, submit, s
 // Step 1 goes on (BGSI-294); step 2 saves and goes to the login
 async function handleSubmit() {
   if (step.value === 1) return next()
-  if (await submit()) router.push({ name: 'admin-login', query: { reset: '1' } })
+  if (await submit()) router.push({ name: 'admin-login', query: isInvitation ? { invited: '1' } : { reset: '1' } })
 }
+
+const title = isInvitation ? 'Bienvenido al panel de BG Sistemas' : 'Crea una nueva contraseña'
+const subtitle = computed(() => {
+  if (isInvalidLink.value) return ''
+  return isInvitation
+    ? 'Te han invitado como administrador. Crea tu contraseña para entrar: solo la sabrás tú.'
+    : 'Elige una contraseña segura que no uses en otras webs.'
+})
 </script>
 
 <template>
-  <AuthPageCard title="Crea una nueva contraseña"
-                :subtitle="isInvalidLink ? '' : 'Elige una contraseña segura que no uses en otras webs.'">
-    <div v-if="isInvalidLink" class="reset-invalid" role="alert">
+  <AuthPageCard :title="title" :subtitle="subtitle">
+    <div v-if="isInvalidLink && isInvitation" class="reset-invalid" role="alert">
+      <p><strong>La invitación no es válida o ha caducado.</strong></p>
+      <p>Las invitaciones solo sirven una vez y durante 24 horas. Pide a un administrador que te la reenvíe.</p>
+    </div>
+    <div v-else-if="isInvalidLink" class="reset-invalid" role="alert">
       <p><strong>El enlace no es válido o ha caducado.</strong></p>
       <p>Los enlaces solo sirven una vez y durante 30 minutos.</p>
       <RouterLink :to="{ name: 'admin-forgot-password' }" class="btn btn--primary">Pedir un enlace nuevo</RouterLink>
     </div>
 
     <form v-else class="admin-form" novalidate @submit.prevent="handleSubmit">
-      <ConfirmFieldSteps :step="step" done-label="Nueva contraseña elegida"
+      <ConfirmFieldSteps :step="step" :done-label="isInvitation ? 'Contraseña elegida' : 'Nueva contraseña elegida'"
                          second-hint="Repite la nueva contraseña." @back="back">
         <template #first>
           <div class="admin-form__field">
@@ -67,7 +81,7 @@ async function handleSubmit() {
 
         <template #submit>
           <button type="submit" class="btn btn--primary admin-form__submit" :disabled="isSubmitting">
-            {{ isSubmitting ? 'Guardando...' : 'Guardar contraseña' }}
+            {{ isSubmitting ? 'Guardando...' : isInvitation ? 'Crear mi contraseña' : 'Guardar contraseña' }}
           </button>
         </template>
       </ConfirmFieldSteps>

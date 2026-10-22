@@ -29,6 +29,12 @@ describe('Login: forgot password link (BGSI-273)', () => {
 
     expect(wrapper.find('[role="status"]').text()).toContain('Contraseña cambiada')
   })
+
+  it('welcomes an invited admin after creating the password (BGSI-277)', async () => {
+    const { wrapper } = await mountAt('/admin/login?invited=1', AdminLoginView)
+
+    expect(wrapper.find('[role="status"]').text()).toContain('Tu cuenta está lista')
+  })
 })
 
 describe('AdminForgotPasswordView (BGSI-273)', () => {
@@ -113,5 +119,37 @@ describe('AdminResetPasswordView (BGSI-273)', () => {
     await flushPromises()
 
     expect(wrapper.find('.reset-invalid').exists()).toBe(true)
+  })
+})
+
+describe('AdminResetPasswordView as an invitation (BGSI-277)', () => {
+  it('welcomes the invited admin', async () => {
+    const { wrapper } = await mountAt('/admin/nueva-contrasena?token=tok&invitacion=1', AdminResetPasswordView, { authService: {} })
+
+    expect(wrapper.find('h1').text()).toBe('Bienvenido al panel de BG Sistemas')
+    expect(wrapper.text()).toContain('Te han invitado como administrador')
+  })
+
+  it('creates the password and goes to the login with the welcome notice', async () => {
+    const authService = { resetPassword: vi.fn().mockResolvedValue() }
+    const { wrapper, router } = await mountAt('/admin/nueva-contrasena?token=tok&invitacion=1', AdminResetPasswordView, { authService })
+    const push = vi.spyOn(router, 'push')
+
+    await wrapper.find('#reset-new').setValue('NewPass2026')
+    await wrapper.find('form').trigger('submit')
+    await wrapper.find('#reset-confirm').setValue('NewPass2026')
+    expect(wrapper.find('.admin-form__submit').text()).toBe('Crear mi contraseña')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(authService.resetPassword).toHaveBeenCalledWith('tok', 'NewPass2026')
+    expect(push).toHaveBeenCalledWith({ name: 'admin-login', query: { invited: '1' } })
+  })
+
+  it('an old invitation explains that another admin has to send it again', async () => {
+    const { wrapper } = await mountAt('/admin/nueva-contrasena?invitacion=1', AdminResetPasswordView, { authService: {} })
+
+    expect(wrapper.find('[role="alert"]').text()).toContain('La invitación no es válida o ha caducado')
+    expect(wrapper.find('a.btn').exists()).toBe(false) // no "Pedir un enlace nuevo": only an admin can invite
   })
 })
