@@ -94,4 +94,19 @@ describe('AdminLayout menu', () => {
     expect(link.attributes('title')).toBe('Ver la web (se abre en una pestaña nueva)')
     expect(link.find('img').attributes('alt')).toBe('') // the link already has a name
   })
+
+  // BGSI-314: the three pages of "Ajustes de perfil"; the old "mi-cuenta" address still works
+  it('Ajustes de perfil has three pages and the old address goes to Cambiar contraseña', async () => {
+    const { wrapper, router } = await mountAt('/admin/mi-cuenta')
+
+    expect(router.currentRoute.value.name).toBe('admin-change-password')
+    expect(isOpen(wrapper, 'Ajustes de perfil')).toBe(true)
+    expect(group(wrapper, 'Ajustes de perfil').findAll('a').map((a) => a.text()))
+      .toEqual(['Cambiar contraseña', 'Cambiar email', 'Verificación en dos pasos'])
+    expect(wrapper.find('.admin-layout__link--active').text()).toBe('Cambiar contraseña')
+
+    await router.push('/admin/verificacion-dos-pasos')
+    await flushPromises()
+    expect(wrapper.find('.admin-layout__link--active').text()).toBe('Verificación en dos pasos')
+  })
 })

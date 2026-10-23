@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, RouterLinkStub } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import AdminAccountView from '@/views/admin/AdminAccountView.vue'
 import { useAuthStore } from '@/stores/auth'
 import SessionModel from '@/core/models/auth/SessionModel'
 
-// BGSI-272: "Mi cuenta" screen
+// BGSI-272: "Mi cuenta" screen. BGSI-314: now it is "Ajustes de perfil > Cambiar contraseña"
 describe('AdminAccountView', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -15,9 +15,11 @@ describe('AdminAccountView', () => {
 
   it('shows who is logged in and changes the password', async () => {
     const accountService = { changePassword: vi.fn().mockResolvedValue('new-token') }
-    const wrapper = mount(AdminAccountView, { props: { accountService } })
+    const wrapper = mount(AdminAccountView, { props: { accountService }, global: { stubs: { RouterLink: RouterLinkStub } } })
+    expect(wrapper.find('h1').text()).toBe('Cambiar contraseña')
     expect(wrapper.text()).toContain('luisa@bg.es')
-    expect(wrapper.text()).toContain('Cambiar mi email') // BGSI-301
+    expect(wrapper.text()).not.toContain('Cambiar mi email') // BGSI-314: it has its own page
+    expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({ name: 'admin-two-factor' })
 
     await wrapper.find('#account-current').setValue('OldPass2026')
     await wrapper.find('#account-new').setValue('NewPass2026')

@@ -98,4 +98,13 @@ describe('TwoFactorCard', () => {
     expect(service.disableTwoFactor).toHaveBeenCalled()
     expect(wrapper.text()).toContain('Verificación en dos pasos desactivada.')
   })
+
+  // BGSI-314: on its own page the title is the one of the page
+  it('can hide its title (only for screen readers) and keeps the badge', async () => {
+    const wrapper = mount(TwoFactorCard, { props: { service: fakeService(), toQr, hideTitle: true } })
+    await flushPromises()
+
+    expect(wrapper.find('h2').classes()).toContain('sr-only')
+    expect(wrapper.text()).toContain('Desactivada')
+  })
 })

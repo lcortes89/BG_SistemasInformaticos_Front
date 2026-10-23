@@ -7,6 +7,8 @@ const props = defineProps({
   // Optional: lets the tests pass a fake AccountService and QR generator
   service: { type: Object, default: undefined },
   toQr: { type: Function, default: undefined },
+  // BGSI-314: on its own page the title is already the one of the page (it stays for screen readers)
+  hideTitle: { type: Boolean, default: false },
 })
 
 const {
@@ -49,7 +51,7 @@ function done() {
 <template>
   <div class="two-factor">
     <div class="two-factor__head">
-      <h2 class="two-factor__title">Verificación en dos pasos</h2>
+      <h2 class="two-factor__title" :class="{ 'sr-only': hideTitle }">Verificación en dos pasos</h2>
       <span v-if="view === 'on'" class="two-factor__badge two-factor__badge--on">Activada</span>
       <span v-else-if="view === 'off'" class="two-factor__badge">Desactivada</span>
     </div>

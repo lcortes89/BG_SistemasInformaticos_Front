@@ -10,7 +10,7 @@ const ACTIONS = {
   unblock: { call: (service, admin) => service.unblock(admin.id), done: (admin) => `${admin.email} puede volver a entrar al panel.` },
   resetTwoFactor: {
     call: (service, admin) => service.resetTwoFactor(admin.id),
-    done: (admin) => `Se ha quitado la verificación en dos pasos de ${admin.email}. Puede volver a activarla en Mi cuenta.`,
+    done: (admin) => `Se ha quitado la verificación en dos pasos de ${admin.email}. Puede volver a activarla en Ajustes de perfil.`,
   },
   resendInvitation: {
     call: (service, admin) => service.resendInvitation(admin.id),

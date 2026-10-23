@@ -46,14 +46,14 @@ const titles = {
 
     <div v-else-if="state === 'invalid'" class="confirm-email__box" role="alert">
       <p><strong>El enlace ya se ha usado, ha caducado o se canceló el cambio.</strong></p>
-      <p>Los enlaces sirven una vez y durante 1 hora. Tu email no ha cambiado: entra con el de siempre y pídelo otra vez desde <strong>Mi cuenta</strong>.</p>
+      <p>Los enlaces sirven una vez y durante 1 hora. Tu email no ha cambiado: entra con el de siempre y pídelo otra vez desde <strong>Ajustes de perfil › Cambiar email</strong>.</p>
       <RouterLink :to="{ name: 'admin-login' }" class="btn btn--primary">Ir a iniciar sesión</RouterLink>
     </div>
 
     <div v-else class="confirm-email__box" role="alert">
       <p v-if="state === 'taken'"><strong>Ese email ya lo usa otro administrador.</strong></p>
       <p v-else><strong>{{ errorMessage }}</strong></p>
-      <p>Tu email no ha cambiado. Inténtalo más tarde o pide el cambio con otro email desde <strong>Mi cuenta</strong>.</p>
+      <p>Tu email no ha cambiado. Inténtalo más tarde o pide el cambio con otro email desde <strong>Ajustes de perfil › Cambiar email</strong>.</p>
       <RouterLink :to="{ name: 'admin-login' }" class="btn btn--primary">Ir a iniciar sesión</RouterLink>
     </div>
   </AuthPageCard>

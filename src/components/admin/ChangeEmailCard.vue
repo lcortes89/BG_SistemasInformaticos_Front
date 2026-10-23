@@ -6,6 +6,8 @@ import { expiryText, useEmailChange } from '@/composables/admin/useEmailChange'
 // BGSI-301: change my own email. The link goes to the new email; the change is made when it is opened
 const props = defineProps({
   currentEmail: { type: String, default: '' },
+  // BGSI-314: on its own page the title is already the one of the page (it stays for screen readers)
+  hideTitle: { type: Boolean, default: false },
   // Optional: lets the tests pass a fake AccountService
   service: { type: Object, default: undefined },
 })
@@ -26,8 +28,9 @@ function handleSubmit() {
 
 <template>
   <div class="change-email">
-    <div class="change-email__head">
-      <h2 class="change-email__title">Cambiar mi email</h2>
+    <!-- BGSI-314: without the title, the head is only shown for the "pending" badge -->
+    <div v-if="!hideTitle || view === 'pending'" class="change-email__head">
+      <h2 class="change-email__title" :class="{ 'sr-only': hideTitle }">Cambiar mi email</h2>
       <span v-if="view === 'pending'" class="change-email__badge">Pendiente de confirmar</span>
     </div>
 
