@@ -52,7 +52,7 @@ describe('App', () => {
   it('shows the legal page', async () => {
     const wrapper = await openAt('/aviso-legal')
 
-    expect(wrapper.find('h1').text()).toBe('Información legal')
+    expect(wrapper.find('h1').text()).toBe('Aviso legal') // BGSI-321
   })
 
   it('shows "Página no encontrada" for an unknown address', async () => {
