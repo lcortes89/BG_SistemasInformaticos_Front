@@ -80,4 +80,18 @@ describe('AdminLayout menu', () => {
 
     expect(wrapper.find('#admin-nav .admin-layout__session').text()).toContain('Cerrar sesión')
   })
+
+  // BGSI-318: the logo is a real link to the website, in a new tab
+  it('the logo opens the public website in a new tab', async () => {
+    const { wrapper } = await mountAt('/admin/marcas')
+    const link = wrapper.find('[data-test="admin-site-link"]')
+
+    expect(link.element.tagName).toBe('A')
+    expect(link.attributes('href')).toBe('/')
+    expect(link.attributes('target')).toBe('_blank')
+    expect(link.attributes('rel')).toContain('noopener')
+    expect(link.attributes('aria-label')).toBe('Ver la web (se abre en una pestaña nueva)')
+    expect(link.attributes('title')).toBe('Ver la web (se abre en una pestaña nueva)')
+    expect(link.find('img').attributes('alt')).toBe('') // the link already has a name
+  })
 })
