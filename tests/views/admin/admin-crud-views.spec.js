@@ -153,6 +153,18 @@ describe('admin CRUD screens', () => {
     expect(wrapper.find('[role="alert"]').text()).toContain('Not mocked: PATCH /admin/clients/2/active')
   })
 
+  // BGSI-316: 6 per page in Clientes, Marcas and Productos
+  it.each([
+    ['Clientes', AdminClientsView, 'GET /admin/clients'],
+    ['Marcas', AdminBrandsView, 'GET /admin/brands'],
+    ['Productos', AdminServicesView, 'GET /admin/services'],
+  ])('%s asks for 6 per page', async (_, view, route) => {
+    const calls = fakeApi({ [route]: page([]), 'GET /admin/brands': page([]) })
+    await mountView(view)
+
+    expect(calls.find((call) => call.key === route).body.params).toEqual(expect.objectContaining({ page: 0, size: 6 }))
+  })
+
   it('shows the error of the backend when the list cannot be loaded', async () => {
     fakeApi({})
     const wrapper = await mountView(AdminClientsView)

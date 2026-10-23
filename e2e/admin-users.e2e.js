@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { findRowInPages } from './helpers/pages'
 
 // BGSI-277: invite an admin, send the invitation again and delete it (real backend).
 // The invited admin is created by the test itself (example.com never receives mail), so the main admin is not touched
@@ -6,7 +7,8 @@ const { E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD } = process.env
 
 test('an admin invites another one, sends the invitation again and deletes it', async ({ page }) => {
   test.skip(!E2E_ADMIN_EMAIL || !E2E_ADMIN_PASSWORD, 'Add the admin credentials to .env.e2e.local')
-  const email = `e2e-invite-${Date.now()}@example.com`
+  // "000-" so it is on the first page (5 admins per page, sorted by email, BGSI-316)
+  const email = `000-e2e-invite-${Date.now()}@example.com`
 
   await page.goto('/admin/login')
   await page.locator('#login-email').fill(E2E_ADMIN_EMAIL)
@@ -15,12 +17,14 @@ test('an admin invites another one, sends the invitation again and deletes it', 
   await expect(page).toHaveURL(/\/admin$/)
 
   await page.goto('/admin/administradores')
-  // Your own row has no buttons, only the link to "Mi cuenta"
-  const myRow = page.getByRole('row').filter({ hasText: E2E_ADMIN_EMAIL })
+  await expect(page.getByRole('table')).toBeVisible()
+  // Your own row has no buttons, only the link to "Mi cuenta". It can be on another page (BGSI-316)
+  const myRow = await findRowInPages(page, E2E_ADMIN_EMAIL)
   await expect(myRow.getByText('Tú', { exact: true })).toBeVisible()
   await expect(myRow.getByRole('button')).toHaveCount(0)
 
   // Invite: the email twice, then the password (BGSI-275)
+  await page.goto('/admin/administradores')
   await page.getByRole('button', { name: '+ Invitar administrador' }).click()
   await page.locator('#invite-email').fill(email)
   await page.getByRole('button', { name: 'Continuar →' }).click()

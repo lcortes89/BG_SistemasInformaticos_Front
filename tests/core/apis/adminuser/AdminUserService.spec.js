@@ -6,13 +6,16 @@ const dto = { id: 2, email: 'maria@bg.es', status: 'ACTIVE', twoFactorEnabled: t
 
 // BGSI-277
 describe('AdminUserService', () => {
-  it('returns the admins as models', async () => {
-    const repo = { findAll: vi.fn().mockResolvedValue([dto]) }
+  // BGSI-316: one page, like the other admin lists
+  it('returns one page of admins as models', async () => {
+    const repo = { findPage: vi.fn().mockResolvedValue({ content: [dto], page: 1, totalPages: 2, totalElements: 6 }) }
 
-    const admins = await new AdminUserService(repo).getAll()
+    const result = await new AdminUserService(repo).getPage(1, 5)
 
-    expect(admins[0]).toBeInstanceOf(AdminUserModel)
-    expect(admins[0].email).toBe('maria@bg.es')
+    expect(repo.findPage).toHaveBeenCalledWith(1, 5)
+    expect(result.items[0]).toBeInstanceOf(AdminUserModel)
+    expect(result.items[0].email).toBe('maria@bg.es')
+    expect(result).toMatchObject({ page: 1, totalPages: 2, totalElements: 6 })
   })
 
   it('invites with the email trimmed and in lowercase', async () => {

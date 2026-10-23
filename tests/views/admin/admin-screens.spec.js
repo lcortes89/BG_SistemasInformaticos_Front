@@ -199,7 +199,7 @@ describe('admin screens', () => {
     const nuevo = { id: 3, email: 'nuevo@bg.es', status: 'PENDING', twoFactorEnabled: false, lastLoginAt: null, you: false }
     let list = [maria]
     const calls = fakeApi({
-      'GET /admin/users': () => list,
+      'GET /admin/users': () => page(list),
       'POST /admin/users/invitations': () => { list = [maria, nuevo]; return nuevo },
     })
     const wrapper = await mountWithRouter(AdminUsersView)
@@ -219,11 +219,32 @@ describe('admin screens', () => {
     expect(wrapper.find('[data-test="admin-3"]').text()).toContain('Pendiente')
   })
 
+  // BGSI-316: 5 per page, the header shows the total and the paginator goes to the next page
+  it('Administradores: shows 5 per page and the total', async () => {
+    const admin = (id) => ({ id, email: `admin${id}@bg.es`, status: 'ACTIVE', twoFactorEnabled: false, lastLoginAt: null, you: false })
+    const calls = fakeApi({
+      'GET /admin/users': (config) => ({ content: config.params.page === 1 ? [admin(6)] : [1, 2, 3, 4, 5].map(admin),
+        page: config.params.page, totalPages: 2, totalElements: 6 }),
+    })
+    const wrapper = await mountWithRouter(AdminUsersView)
+
+    expect(wrapper.text()).toContain('6 administradores')
+    expect(wrapper.findAll('tbody tr')).toHaveLength(5)
+    expect(calls[0].body.params).toEqual({ page: 0, size: 5 })
+
+    await wrapper.find('nav[aria-label="Paginación"]').findAll('button').find((b) => b.text() === '2').trigger('click')
+    await flushPromises()
+
+    expect(calls.at(-1).body.params).toEqual({ page: 1, size: 5 })
+    expect(wrapper.findAll('tbody tr')).toHaveLength(1)
+    expect(wrapper.text()).toContain('admin6@bg.es')
+  })
+
   it('Administradores: asks before blocking and then blocks', async () => {
     const maria = { id: 2, email: 'maria@bg.es', status: 'ACTIVE', twoFactorEnabled: false, lastLoginAt: null, you: false }
     let list = [maria]
     fakeApi({
-      'GET /admin/users': () => list,
+      'GET /admin/users': () => page(list),
       'PUT /admin/users/2/block': () => { list = [{ ...maria, status: 'BLOCKED' }]; return list[0] },
     })
     const wrapper = await mountWithRouter(AdminUsersView)
@@ -239,7 +260,7 @@ describe('admin screens', () => {
 
   it('Administradores: cancelling the question does nothing', async () => {
     const calls = fakeApi({
-      'GET /admin/users': [{ id: 2, email: 'maria@bg.es', status: 'ACTIVE', twoFactorEnabled: false, lastLoginAt: null, you: false }],
+      'GET /admin/users': page([{ id: 2, email: 'maria@bg.es', status: 'ACTIVE', twoFactorEnabled: false, lastLoginAt: null, you: false }]),
     })
     const wrapper = await mountWithRouter(AdminUsersView)
 

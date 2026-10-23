@@ -14,9 +14,15 @@ export default class AdminUserService {
     return AdminUserModel.create(dto, adminUserMapper)
   }
 
-  async getAll() {
-    const list = await this.#repo.findAll()
-    return list.map((dto) => this.#toModel(dto))
+  // BGSI-316: one page of admins, like the other admin lists
+  async getPage(page = 0, size = 5) {
+    const response = await this.#repo.findPage(page, size)
+    return {
+      items: response.content.map((dto) => this.#toModel(dto)),
+      page: response.page,
+      totalPages: response.totalPages,
+      totalElements: response.totalElements,
+    }
   }
 
   async invite(email) {

@@ -13,7 +13,7 @@ import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 const {
   items: clients, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
   loadPage, save, remove, setActive,
-} = useAdminCrud(new AdminClientService())
+} = useAdminCrud(new AdminClientService(), { pageSize: 6 })
 
 const formOpen = ref(false)
 const clientToEdit = ref(null) // null = new client
