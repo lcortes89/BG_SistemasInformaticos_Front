@@ -25,6 +25,8 @@
 .admin-table__badge { display: inline-block; padding: 0.2rem 0.65rem; font-size: 0.8rem; font-weight: 600; border-radius: 999px; }
 .admin-table__badge--on { color: #14532d; background: #dcfce7; }
 .admin-table__badge--off { color: #374151; background: #e5e7eb; }
+/* BGSI-310: an inactive row (hidden from the website) looks faded, but can still be read */
+.admin-table__row--inactive .admin-table__identity { opacity: 0.55; }
 /* BGSI-312: the "⋯" column (RowActionsMenu) */
 .row-actions-cell { width: 1%; white-space: nowrap; text-align: right !important; }
 .admin-table th:first-child { border-top-left-radius: var(--radius); }

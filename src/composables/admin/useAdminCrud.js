@@ -1,6 +1,7 @@
 import { reactive, ref } from 'vue'
 
 // service must have: getPage(page, size, filters), create(form), update(id, form), remove(id)
+// and, for the tables with "Activar / Inactivar", setActive(id, active) (BGSI-310)
 // conflictMessage: text shown when the backend answers 409 (e.g. deleting a brand with services)
 export function useAdminCrud(service, { pageSize = 10, conflictMessage = null } = {}) {
   const items = ref([])
@@ -71,8 +72,22 @@ export function useAdminCrud(service, { pageSize = 10, conflictMessage = null } 
     }
   }
 
+  // BGSI-310: show or hide on the website without deleting. The page is reloaded to show the new state
+  async function setActive(id, active, successMessage) {
+    clearMessages()
+    try {
+      await service.setActive(id, active)
+      feedback.value = successMessage
+      await loadPage(page.value)
+      return true
+    } catch (e) {
+      actionError.value = e.message
+      return false
+    }
+  }
+
   return {
     items, filters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-    loadPage, setFilter, save, remove, clearMessages,
+    loadPage, setFilter, save, remove, setActive, clearMessages,
   }
 }

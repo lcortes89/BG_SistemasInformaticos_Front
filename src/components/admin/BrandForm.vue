@@ -61,7 +61,7 @@ function submit() {
 
     <label class="admin-form__check">
       <input id="brand-active" v-model="form.active" type="checkbox" />
-      Visible en la web pública
+      Activa: se ve en la web pública, con sus productos
     </label>
 
     <p v-if="serverError" class="admin-form__alert" role="alert">{{ serverError }}</p>

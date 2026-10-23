@@ -2,18 +2,15 @@
 import StarRating from '@/shared/StarRating.vue'
 import ExpandableText from '@/shared/ExpandableText.vue'
 import RowActionsMenu from '@/shared/RowActionsMenu.vue'
-
-// BGSI-312: the actions of each row, in the "⋯" menu
-const ACTIONS = [
-  { key: 'edit', label: 'Editar', icon: 'edit' },
-  { key: 'delete', label: 'Borrar', icon: 'trash', danger: true },
-]
+import ActiveBadge from '@/shared/ActiveBadge.vue'
+import { editToggleDeleteActions } from '@/components/admin/row-actions'
 
 defineProps({
   clients: { type: Array, required: true }, // ClientModel[]
 })
 
-const emit = defineEmits(['edit', 'delete'])
+// BGSI-312 / 310: the actions of each row, in the "⋯" menu. toggle = Activar / Inactivar
+const emit = defineEmits(['edit', 'toggle', 'delete'])
 </script>
 
 <template>
@@ -30,7 +27,7 @@ const emit = defineEmits(['edit', 'delete'])
       </tr>
     </thead>
     <tbody>
-      <tr v-for="client in clients" :key="client.id">
+      <tr v-for="client in clients" :key="client.id" :class="{ 'admin-table__row--inactive': !client.published }">
         <td data-label="Cliente">
           <div class="admin-table__identity">
             <img v-if="client.logoUrl" :src="client.logoUrl" alt="" class="admin-table__thumb" />
@@ -44,12 +41,10 @@ const emit = defineEmits(['edit', 'delete'])
         <td data-label="Valoración"><StarRating :rating="client.rating" /></td>
         <td data-label="Testimonio" class="admin-table__text"><ExpandableText :text="`“${client.testimonial}”`" /></td>
         <td data-label="Estado">
-          <span class="admin-table__badge" :class="client.published ? 'admin-table__badge--on' : 'admin-table__badge--off'">
-            {{ client.published ? 'Publicado' : 'Oculto' }}
-          </span>
+          <ActiveBadge :active="client.published" />
         </td>
         <td class="row-actions-cell">
-          <RowActionsMenu :items="ACTIONS" :label="`Acciones de ${client.name}`" @select="emit($event, client)" />
+          <RowActionsMenu :items="editToggleDeleteActions(client.published)" :label="`Acciones de ${client.name}`" @select="emit($event, client)" />
         </td>
       </tr>
     </tbody>

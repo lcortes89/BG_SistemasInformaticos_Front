@@ -21,4 +21,9 @@ export default class AdminBrandRepository extends BaseRepository {
   async remove(id) {
     return this.delete(`/${id}`)
   }
+
+  // BGSI-310: PATCH /api/admin/brands/{id}/active { active } -> shown or hidden on the website
+  async setActive(id, active) {
+    return this.patch(`/${id}/active`, { active })
+  }
 }

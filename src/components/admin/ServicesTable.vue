@@ -1,18 +1,15 @@
 <script setup>
 import ExpandableText from '@/shared/ExpandableText.vue'
 import RowActionsMenu from '@/shared/RowActionsMenu.vue'
-
-// BGSI-312: the actions of each row, in the "⋯" menu
-const ACTIONS = [
-  { key: 'edit', label: 'Editar', icon: 'edit' },
-  { key: 'delete', label: 'Borrar', icon: 'trash', danger: true },
-]
+import ActiveBadge from '@/shared/ActiveBadge.vue'
+import { editToggleDeleteActions } from '@/components/admin/row-actions'
 
 defineProps({
   services: { type: Array, required: true }, // ServiceModel[]
 })
 
-const emit = defineEmits(['edit', 'delete'])
+// BGSI-312 / 310: the actions of each row, in the "⋯" menu. toggle = Activar / Inactivar
+const emit = defineEmits(['edit', 'toggle', 'delete'])
 </script>
 
 <template>
@@ -25,11 +22,12 @@ const emit = defineEmits(['edit', 'delete'])
         <th scope="col">Marca</th>
         <th scope="col">Descripción</th>
         <th scope="col">Inicio</th>
+        <th scope="col">Estado</th>
         <th scope="col" class="row-actions-cell"><span class="sr-only">Acciones</span></th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="service in services" :key="service.id">
+      <tr v-for="service in services" :key="service.id" :class="{ 'admin-table__row--inactive': !service.active }">
         <td data-label="Producto">
           <div class="admin-table__identity">
             <img v-if="service.imageUrl" :src="service.imageUrl" alt="" class="admin-table__thumb" />
@@ -45,8 +43,9 @@ const emit = defineEmits(['edit', 'delete'])
           <span v-if="service.featured" class="admin-table__badge admin-table__badge--on">Destacado</span>
           <span v-else>—</span>
         </td>
+        <td data-label="Estado"><ActiveBadge :active="service.active" /></td>
         <td class="row-actions-cell">
-          <RowActionsMenu :items="ACTIONS" :label="`Acciones de ${service.name}`" @select="emit($event, service)" />
+          <RowActionsMenu :items="editToggleDeleteActions(service.active)" :label="`Acciones de ${service.name}`" @select="emit($event, service)" />
         </td>
       </tr>
     </tbody>

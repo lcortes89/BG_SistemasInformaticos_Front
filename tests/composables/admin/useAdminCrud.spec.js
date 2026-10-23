@@ -61,4 +61,31 @@ describe('useAdminCrud', () => {
     expect(actionError.value).toBeNull()
     expect(feedback.value).toBeNull()
   })
+
+  // BGSI-310
+  it('activates or inactivates and reloads the same page', async () => {
+    const service = {
+      ...fakeService(),
+      getPage: vi.fn().mockImplementation(async (page) => ({ items: [{ id: 4 }], page, totalPages: 3, totalElements: 25 })),
+      setActive: vi.fn().mockResolvedValue({}),
+    }
+    const { feedback, loadPage, setActive } = useAdminCrud(service)
+    await loadPage(1)
+
+    expect(await setActive(4, false, 'Inactivado')).toBe(true)
+
+    expect(service.setActive).toHaveBeenCalledWith(4, false)
+    expect(feedback.value).toBe('Inactivado')
+    expect(service.getPage).toHaveBeenLastCalledWith(1, 10, {})
+  })
+
+  it('shows the error when the state cannot be changed', async () => {
+    const service = { ...fakeService(), setActive: vi.fn().mockRejectedValue(new Error('Service with id 4 not found')) }
+    const { actionError, feedback, setActive } = useAdminCrud(service)
+
+    expect(await setActive(4, true, 'Activado')).toBe(false)
+
+    expect(actionError.value).toBe('Service with id 4 not found')
+    expect(feedback.value).toBeNull()
+  })
 })

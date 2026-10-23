@@ -97,6 +97,62 @@ describe('admin CRUD screens', () => {
     expect(lastServicesCall.body.params).toEqual(expect.objectContaining({ brandId: 1 }))
   })
 
+  // BGSI-310: "Activar / Inactivar" from the "⋯" menu, with the real repositories (PATCH .../active)
+  it('Productos: inactivates a product and shows the new state', async () => {
+    let current = serviceDto
+    const calls = fakeApi({
+      'GET /admin/services': () => page([current]),
+      'GET /admin/brands': page([brandDto]),
+      'PATCH /admin/services/3/active': (body) => (current = { ...serviceDto, ...body }),
+    })
+    const wrapper = await mountView(AdminServicesView)
+    expect(wrapper.find('[data-label="Estado"]').text()).toBe('Activo')
+
+    await chooseRowAction(wrapper, 'Inactivar')
+    await flushPromises()
+
+    expect(calls.find((call) => call.key === 'PATCH /admin/services/3/active').body).toEqual({ active: false })
+    expect(wrapper.find('[role="status"]').text()).toBe('Producto BDP One inactivado: ya no se ve en la web.')
+    expect(wrapper.find('[data-label="Estado"]').text()).toBe('Inactivo')
+  })
+
+  it('Clientes: activates a hidden client', async () => {
+    const calls = fakeApi({
+      'GET /admin/clients': page([{ ...clientDto, published: false }]),
+      'PATCH /admin/clients/2/active': (body) => ({ ...clientDto, published: body.active }),
+    })
+    const wrapper = await mountView(AdminClientsView)
+
+    await chooseRowAction(wrapper, 'Activar')
+    await flushPromises()
+
+    expect(calls.find((call) => call.key === 'PATCH /admin/clients/2/active').body).toEqual({ active: true })
+    expect(wrapper.find('[role="status"]').text()).toBe('Cliente Bar La Plaza activado: vuelve a verse en la web.')
+  })
+
+  it('Marcas: inactivating a brand explains that its products are hidden too', async () => {
+    fakeApi({
+      'GET /admin/brands': page([brandDto]),
+      'PATCH /admin/brands/1/active': (body) => ({ ...brandDto, ...body }),
+    })
+    const wrapper = await mountView(AdminBrandsView)
+
+    await chooseRowAction(wrapper, 'Inactivar')
+    await flushPromises()
+
+    expect(wrapper.find('[role="status"]').text()).toBe('Marca BDP inactivada: ni ella ni sus productos se ven en la web.')
+  })
+
+  it('shows the error of the backend when the state cannot be changed', async () => {
+    fakeApi({ 'GET /admin/clients': page([clientDto]) })
+    const wrapper = await mountView(AdminClientsView)
+
+    await chooseRowAction(wrapper, 'Inactivar')
+    await flushPromises()
+
+    expect(wrapper.find('[role="alert"]').text()).toContain('Not mocked: PATCH /admin/clients/2/active')
+  })
+
   it('shows the error of the backend when the list cannot be loaded', async () => {
     fakeApi({})
     const wrapper = await mountView(AdminClientsView)

@@ -22,6 +22,7 @@ const form = reactive({
   description: props.service?.description ?? '',
   imageUrl: props.service?.imageUrl ?? '',
   featured: props.service?.featured ?? false,
+  active: props.service?.active ?? true, // BGSI-310
   // BGSI-205: full product sheet. The lists are edited as text, one item per line
   longDescription: props.service?.longDescription ?? '',
   featuresText: (props.service?.features ?? []).join('\n'),
@@ -113,6 +114,11 @@ function submit() {
     <label class="admin-form__check">
       <input id="service-featured" v-model="form.featured" type="checkbox" />
       Destacado en la página de Inicio
+    </label>
+
+    <label class="admin-form__check">
+      <input id="service-active" v-model="form.active" type="checkbox" />
+      Activo: se ve en la web pública
     </label>
 
     <p v-if="serverError" class="admin-form__alert" role="alert">{{ serverError }}</p>
