@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { whatsappUrl } from '@/core/config/social'
 import ContactInfo from '@/components/contact/ContactInfo.vue'
 
 describe('ContactInfo', () => {
   it('shows the WhatsApp number with the green icon (BGSI-242)', () => {
-    const link = mount(ContactInfo).find('a[href="https://wa.me/34615471066"]')
+    // BGSI-320: same "click to chat" link as the footer, with the message already written
+    const link = mount(ContactInfo).find(`a[href="${whatsappUrl()}"]`)
 
     expect(link.find('svg.whatsapp-icon').exists()).toBe(true)
     expect(link.text()).toBe('+34 615 471 066')

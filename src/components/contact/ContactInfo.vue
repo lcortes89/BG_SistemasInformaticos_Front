@@ -1,6 +1,10 @@
 <script setup>
 import WhatsAppIcon from '@/shared/WhatsAppIcon.vue'
 import { OFFICE } from '@/core/config/office'
+import { SOCIAL_LINKS, WHATSAPP, whatsappUrl } from '@/core/config/social'
+
+// BGSI-320: the same links as the footer (src/core/config/social.js)
+const facebook = SOCIAL_LINKS.find((network) => network.key === 'facebook')
 </script>
 
 <template>
@@ -11,14 +15,14 @@ import { OFFICE } from '@/core/config/office'
     <ul class="contact-info__list">
       <li>
         <span class="contact-info__label">WhatsApp</span>
-        <a href="https://wa.me/34615471066" target="_blank" rel="noopener" class="contact-info__whatsapp">
+        <a :href="whatsappUrl()" target="_blank" rel="noopener" class="contact-info__whatsapp">
           <WhatsAppIcon :size="24" />
-          +34 615 471 066
+          {{ WHATSAPP.display }}
         </a>
       </li>
       <li>
         <span class="contact-info__label">Facebook</span>
-        <a href="https://www.facebook.com/bgconsultoria/" target="_blank" rel="noopener">BG Consultoría</a>
+        <a :href="facebook.url" target="_blank" rel="noopener">BG Consultoría</a>
       </li>
     </ul>
 

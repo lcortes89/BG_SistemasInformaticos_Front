@@ -67,4 +67,21 @@ describe('App', () => {
     expect(router.currentRoute.value.name).toBe('admin-login')
     expect(wrapper.text()).not.toContain('Solicita tu demo')
   })
+
+  // BGSI-324: the admin area only shows the copyright bar, the public pages the whole footer
+  it('the admin area has the compact footer, without the fade', async () => {
+    const wrapper = await openAt('/admin/login')
+
+    expect(wrapper.find('footer').classes()).toContain('app-footer--compact')
+    expect(wrapper.find('.footer-fade').exists()).toBe(false)
+    expect(wrapper.find('main').classes()).toContain('is-admin-area')
+  })
+
+  it('the public pages have the whole footer', async () => {
+    const wrapper = await openAt('/')
+
+    expect(wrapper.find('footer').classes()).not.toContain('app-footer--compact')
+    expect(wrapper.find('footer').text()).toContain('Legal')
+    expect(wrapper.find('main').classes()).not.toContain('is-admin-area')
+  })
 })
