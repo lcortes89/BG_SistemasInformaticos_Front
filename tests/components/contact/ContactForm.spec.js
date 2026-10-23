@@ -34,6 +34,18 @@ describe('ContactForm', () => {
     expect(wrapper.find('a[href="/privacidad"]').exists()).toBe(true)
   })
 
+  // BGSI-321: first layer of information about the data, next to the checkbox
+  it('shows the basic information about the data with a link to the policy', () => {
+    const wrapper = mountForm({ send: vi.fn() })
+    const box = wrapper.find('aside[aria-label="Información básica sobre protección de datos"]')
+
+    expect(box.findAll('dt').map((dt) => dt.text()))
+      .toEqual(['Responsable', 'Finalidad', 'Legitimación', 'Destinatarios', 'Derechos'])
+    expect(box.text()).toContain('BG Sistemas Informáticos')
+    expect(box.find('a[href="/privacidad"]').exists()).toBe(true)
+    expect(wrapper.find('#contact-gdpr').element.checked).toBe(false) // the box is never ticked for you
+  })
+
   it('lists the services in the select', () => {
     const wrapper = mountForm({ send: vi.fn() }, [{ id: 2, name: 'BDP One', brandName: 'BDP' }])
 

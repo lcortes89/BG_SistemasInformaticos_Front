@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import { useContactForm } from '@/composables/contact/useContactForm'
+import { COMPANY } from '@/core/config/company'
 
 const props = defineProps({
   services: { type: Array, default: () => [] },
@@ -82,6 +83,22 @@ const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContac
       </Transition>
     </div>
 
+    <!-- BGSI-321: first layer of information about the data (RGPD art. 13), next to the checkbox -->
+    <aside class="contact-form__privacy" aria-label="Información básica sobre protección de datos">
+      <p class="contact-form__privacy-title">Información básica sobre protección de datos</p>
+      <dl>
+        <dt>Responsable</dt><dd>{{ COMPANY.name }}</dd>
+        <dt>Finalidad</dt><dd>Responder a tu consulta.</dd>
+        <dt>Legitimación</dt><dd>Tu consentimiento (la casilla de arriba).</dd>
+        <dt>Destinatarios</dt><dd>No se ceden a terceros, salvo obligación legal.</dd>
+        <dt>Derechos</dt>
+        <dd>
+          Acceder, rectificar y suprimir tus datos, y otros que explica la
+          <RouterLink to="/privacidad" target="_blank">política de privacidad</RouterLink>.
+        </dd>
+      </dl>
+    </aside>
+
     <Transition name="slide-fade">
       <p v-if="submitError" class="contact-form__alert contact-form__alert--error" role="alert">{{ submitError }}</p>
     </Transition>
@@ -131,6 +148,23 @@ const { form, errors, isSubmitting, isSuccess, submitError, submit } = useContac
   }
 
   &__error { margin: 0; font-size: 0.875rem; color: #b91c1c; }
+
+  // BGSI-321: first layer about the data, small so it does not take the attention from the form
+  &__privacy {
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: #4b5563;
+    background: var(--color-bg-alt);
+
+    dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 0.75rem; margin: 0; }
+    dt { font-weight: 700; color: var(--color-navy); }
+    dd { margin: 0; }
+    a { color: var(--color-orange-dark); font-weight: 600; }
+  }
+
+  &__privacy-title { margin: 0 0 0.5rem; font-weight: 700; color: var(--color-navy); }
 
   &__alert {
     margin: 0;
