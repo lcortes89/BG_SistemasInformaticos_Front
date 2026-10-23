@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { chooseRowAction, rowActionLabels } from '../../helpers/row-actions'
 import ClientsTable from '@/components/admin/ClientsTable.vue'
 import ClientModel from '@/core/models/client/ClientModel'
 
@@ -12,9 +13,10 @@ describe('ClientsTable', () => {
     expect(wrapper.text()).toContain('Oculto')
     expect(wrapper.find('[aria-label="Valoración: 4 de 5"]').exists()).toBe(true)
 
-    const [editButton, deleteButton] = wrapper.findAll('button')
-    await editButton.trigger('click')
-    await deleteButton.trigger('click')
+    // BGSI-312: the actions are in the "⋯" menu
+    expect(await rowActionLabels(wrapper)).toEqual(['Editar', 'Borrar'])
+    await chooseRowAction(wrapper, 'Editar')
+    await chooseRowAction(wrapper, 'Borrar')
 
     expect(wrapper.emitted('edit')[0]).toEqual([hidden])
     expect(wrapper.emitted('delete')[0]).toEqual([hidden])

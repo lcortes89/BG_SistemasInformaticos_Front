@@ -1,10 +1,32 @@
 <script setup>
+import ExpandableText from '@/shared/ExpandableText.vue'
+import RowActionsMenu from '@/shared/RowActionsMenu.vue'
+
 defineProps({
   contacts: { type: Array, required: true }, // ContactModel[]
 })
 
-// change-status: (contact, newStatus) · edit-note: (contact)
-const emit = defineEmits(['change-status', 'edit-note'])
+// change-status: (contact, newStatus) · edit-note: (contact) · delete: (contact) (BGSI-308)
+const emit = defineEmits(['change-status', 'edit-note', 'delete'])
+
+// BGSI-312: the actions of each row, in the "⋯" menu
+function actionsFor(contact) {
+  const items = []
+  if (contact.status === 'NEW') items.push({ key: 'contacted', label: 'Marcar contactado', icon: 'check' })
+  items.push({ key: 'note', label: contact.note ? 'Editar nota' : 'Añadir nota', icon: 'note' })
+  if (contact.status === 'ARCHIVED') items.push({ key: 'restore', label: 'Restaurar', icon: 'restore' })
+  else items.push({ key: 'archive', label: 'Archivar', icon: 'archive' })
+  items.push({ key: 'delete', label: 'Borrar', icon: 'trash', danger: true })
+  return items
+}
+
+function onAction(contact, key) {
+  if (key === 'contacted') emit('change-status', contact, 'CONTACTED')
+  else if (key === 'archive') emit('change-status', contact, 'ARCHIVED')
+  else if (key === 'restore') emit('change-status', contact, 'NEW')
+  else if (key === 'note') emit('edit-note', contact)
+  else if (key === 'delete') emit('delete', contact)
+}
 </script>
 
 <template>
@@ -16,25 +38,26 @@ const emit = defineEmits(['change-status', 'edit-note'])
     <thead>
       <tr>
         <th scope="col">Fecha</th>
-        <th scope="col">Nombre</th>
         <th scope="col">Contacto</th>
         <th scope="col">Servicio</th>
         <th scope="col">Mensaje</th>
         <th scope="col">Estado</th>
-        <th scope="col">Acciones</th>
+        <th scope="col" class="row-actions-cell"><span class="sr-only">Acciones</span></th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="contact in contacts" :key="contact.id">
-        <td data-label="Fecha">{{ contact.getFormattedDate() }}</td>
-        <td data-label="Nombre" class="contacts-table__name">{{ contact.name }}</td>
-        <td data-label="Contacto">
-          <a :href="`mailto:${contact.email}`">{{ contact.email }}</a>
+        <td data-label="Fecha" class="contacts-table__date">{{ contact.getFormattedDate() }}</td>
+        <!-- BGSI-312: name, email and phone in one column, so the table fits without scrolling -->
+        <td data-label="Contacto" class="contacts-table__who">
+          <span class="contacts-table__name">{{ contact.name }}</span>
+          <!-- <wbr>: a long email breaks before the @, not in the middle of a word -->
+          <a :href="`mailto:${contact.email}`">{{ contact.email.split('@')[0] }}<wbr>@{{ contact.email.split('@')[1] }}</a>
           <span v-if="contact.phone" class="contacts-table__phone">{{ contact.phone }}</span>
         </td>
         <td data-label="Servicio">{{ contact.interestedService || '—' }}</td>
         <td data-label="Mensaje" class="contacts-table__message">
-          {{ contact.message }}
+          <ExpandableText :text="contact.message" />
           <span v-if="contact.note" class="contacts-table__note">Nota: {{ contact.note }}</span>
         </td>
         <td data-label="Estado">
@@ -42,25 +65,9 @@ const emit = defineEmits(['change-status', 'edit-note'])
             {{ contact.getStatusLabel() }}
           </span>
         </td>
-        <td data-label="Acciones">
-          <div class="contacts-table__actions">
-            <button v-if="contact.status === 'NEW'" type="button" class="contacts-table__action"
-                    @click="emit('change-status', contact, 'CONTACTED')">
-              Marcar contactado
-            </button>
-            <button type="button" class="contacts-table__action" @click="emit('edit-note', contact)">
-              {{ contact.note ? 'Editar nota' : 'Añadir nota' }}
-            </button>
-            <button v-if="contact.status !== 'ARCHIVED'" type="button"
-                    class="contacts-table__action contacts-table__action--danger"
-                    @click="emit('change-status', contact, 'ARCHIVED')">
-              Archivar
-            </button>
-            <button v-else type="button" class="contacts-table__action"
-                    @click="emit('change-status', contact, 'NEW')">
-              Restaurar
-            </button>
-          </div>
+        <td class="row-actions-cell">
+          <RowActionsMenu :items="actionsFor(contact)" :label="`Acciones de ${contact.name}`"
+                          @select="onAction(contact, $event)" />
         </td>
       </tr>
     </tbody>
@@ -73,7 +80,6 @@ const emit = defineEmits(['change-status', 'edit-note'])
   border-collapse: collapse;
   background: #fff;
   border-radius: var(--radius);
-  overflow: hidden;
   box-shadow: 0 2px 10px rgba(11, 31, 58, 0.06);
 
   th, td {
@@ -91,11 +97,18 @@ const emit = defineEmits(['change-status', 'edit-note'])
     background: var(--color-bg-alt);
   }
 
+  // The corners of the header, now that the table does not cut its content (the menu goes over it)
+  th:first-child { border-top-left-radius: var(--radius); }
+  th:last-child { border-top-right-radius: var(--radius); }
+  tbody tr:last-child td { border-bottom: 0; }
+
   a { color: var(--color-navy); }
 
-  &__name { font-weight: 600; color: var(--color-navy); }
+  &__date { min-width: 6.5rem; }
+  &__who { overflow-wrap: break-word; }
+  &__name { display: block; font-weight: 600; color: var(--color-navy); }
   &__phone { display: block; color: var(--color-muted); font-size: 0.9rem; }
-  &__message { max-width: 320px; color: var(--color-text); }
+  &__message { width: 30%; min-width: 180px; color: var(--color-text); }
 
   &__note {
     display: block;
@@ -113,27 +126,11 @@ const emit = defineEmits(['change-status', 'edit-note'])
     font-size: 0.8rem;
     font-weight: 600;
     border-radius: 999px;
+    white-space: nowrap;
 
     &--new { color: #9a3412; background: #ffedd5; }
     &--contacted { color: #14532d; background: #dcfce7; }
     &--archived { color: #374151; background: #e5e7eb; }
-  }
-
-  &__actions { display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; }
-
-  &__action {
-    padding: 0;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--color-navy);
-    background: none;
-    border: 0;
-    text-decoration: underline;
-    cursor: pointer;
-
-    &:hover { color: var(--color-orange-dark); }
-    &--danger { color: #b91c1c; }
   }
 
   &__empty {
@@ -145,8 +142,8 @@ const emit = defineEmits(['change-status', 'edit-note'])
   }
 }
 
-/* Mobile: each row becomes a card */
-@media (max-width: 768px) {
+/* Mobile and narrow screens (the menu takes 320px, this table has more columns): each row becomes a card, with the "⋯" in the top right corner */
+@media (max-width: 1200px) {
   .contacts-table {
     background: transparent;
     box-shadow: none;
@@ -154,6 +151,7 @@ const emit = defineEmits(['change-status', 'edit-note'])
     thead { display: none; }
 
     tr {
+      position: relative;
       display: block;
       margin-bottom: 1rem;
       padding: 0.5rem 0;
@@ -176,8 +174,10 @@ const emit = defineEmits(['change-status', 'edit-note'])
       }
     }
 
-    &__message { max-width: none; }
-    &__actions { flex-direction: row; flex-wrap: wrap; gap: 1rem; }
+    td:first-child { padding-right: 3.75rem; }
+    td.row-actions-cell { position: absolute; top: 0.5rem; right: 0.5rem; width: auto; padding: 0; }
+    td.row-actions-cell::before { display: none; }
+    &__message { width: auto; min-width: 0; }
   }
 }
 </style>

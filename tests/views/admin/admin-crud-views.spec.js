@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { fakeApi, page } from '../../helpers/fake-api'
+import { chooseRowAction } from '../../helpers/row-actions'
 import AdminBrandsView from '@/views/admin/AdminBrandsView.vue'
 import AdminClientsView from '@/views/admin/AdminClientsView.vue'
 import AdminServicesView from '@/views/admin/AdminServicesView.vue'
@@ -43,7 +44,7 @@ describe('admin CRUD screens', () => {
     expect(calls.some((call) => call.key === 'POST /admin/brands' && call.body.name === 'PUDU')).toBe(true)
     expect(wrapper.find('[role="status"]').text()).toBe('Marca creada')
 
-    await buttonWithText(wrapper, 'Borrar').trigger('click')
+    await chooseRowAction(wrapper, 'Borrar')
     await wrapper.find('.confirm-dialog__confirm').trigger('click')
     await flushPromises()
     expect(calls.map((call) => call.key)).toContain('DELETE /admin/brands/1')
@@ -56,7 +57,7 @@ describe('admin CRUD screens', () => {
       .mockRejectedValue(Object.assign(new Error('conflict'), { response: { status: 409, data: { message: 'Brand has services' } } }))
     const wrapper = await mountView(AdminBrandsView)
 
-    await buttonWithText(wrapper, 'Borrar').trigger('click')
+    await chooseRowAction(wrapper, 'Borrar')
     await wrapper.find('.confirm-dialog__confirm').trigger('click')
     await flushPromises()
 
@@ -71,7 +72,7 @@ describe('admin CRUD screens', () => {
     const wrapper = await mountView(AdminClientsView)
     expect(wrapper.text()).toContain('Bar La Plaza')
 
-    await buttonWithText(wrapper, 'Editar').trigger('click')
+    await chooseRowAction(wrapper, 'Editar')
     expect(wrapper.find('#client-name').element.value).toBe('Bar La Plaza')
     await wrapper.find('#client-name').setValue('Bar La Plaza Mayor')
     await wrapper.find('form').trigger('submit')

@@ -1,4 +1,12 @@
 <script setup>
+import RowActionsMenu from '@/shared/RowActionsMenu.vue'
+
+// BGSI-312: the actions of each row, in the "⋯" menu
+const ACTIONS = [
+  { key: 'edit', label: 'Editar', icon: 'edit' },
+  { key: 'delete', label: 'Borrar', icon: 'trash', danger: true },
+]
+
 defineProps({
   brands: { type: Array, required: true }, // BrandModel[]
 })
@@ -16,7 +24,7 @@ const emit = defineEmits(['edit', 'delete'])
         <th scope="col">Categoría</th>
         <th scope="col">Productos</th>
         <th scope="col">Estado</th>
-        <th scope="col">Acciones</th>
+        <th scope="col" class="row-actions-cell"><span class="sr-only">Acciones</span></th>
       </tr>
     </thead>
     <tbody>
@@ -35,13 +43,8 @@ const emit = defineEmits(['edit', 'delete'])
             {{ brand.active ? 'Visible' : 'Oculta' }}
           </span>
         </td>
-        <td data-label="Acciones">
-          <div class="admin-table__actions">
-            <button type="button" class="admin-table__action" @click="emit('edit', brand)">Editar</button>
-            <button type="button" class="admin-table__action admin-table__action--danger" @click="emit('delete', brand)">
-              Borrar
-            </button>
-          </div>
+        <td class="row-actions-cell">
+          <RowActionsMenu :items="ACTIONS" :label="`Acciones de ${brand.name}`" @select="emit($event, brand)" />
         </td>
       </tr>
     </tbody>

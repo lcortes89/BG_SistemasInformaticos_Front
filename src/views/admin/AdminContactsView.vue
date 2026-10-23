@@ -10,11 +10,12 @@ import { useAdminContacts } from '@/composables/admin/useAdminContacts'
 
 const {
   contacts, status, page, totalPages, totalElements, isLoading, error, feedback, actionError,
-  loadPage, changeStatus, updateContact,
+  loadPage, changeStatus, updateContact, removeContact,
 } = useAdminContacts()
 
 const contactToArchive = ref(null) // shows the confirmation dialog
 const contactWithNote = ref(null) // shows the note dialog
+const contactToDelete = ref(null) // BGSI-308: shows the "delete for good" dialog
 
 const SUCCESS_MESSAGES = {
   CONTACTED: 'Contacto marcado como contactado',
@@ -35,6 +36,13 @@ async function confirmArchive() {
   const contact = contactToArchive.value
   contactToArchive.value = null
   await updateContact(contact.id, { status: 'ARCHIVED' }, SUCCESS_MESSAGES.ARCHIVED)
+}
+
+// After "Borrar" the interceptor asks for the password (BGSI-275)
+async function confirmDelete() {
+  const contact = contactToDelete.value
+  contactToDelete.value = null
+  await removeContact(contact)
 }
 
 async function saveNote(note) {
@@ -66,7 +74,8 @@ onMounted(() => loadPage(0))
     <LoadingSpinner v-if="isLoading" label="Cargando contactos..." />
     <p v-else-if="error" class="admin-contacts__error" role="alert">{{ error }}</p>
     <template v-else>
-      <ContactsTable :contacts="contacts" @change-status="handleChangeStatus" @edit-note="contactWithNote = $event" />
+      <ContactsTable :contacts="contacts" @change-status="handleChangeStatus" @edit-note="contactWithNote = $event"
+                     @delete="contactToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>
 
@@ -78,6 +87,17 @@ onMounted(() => loadPage(0))
         confirm-label="Archivar"
         @confirm="confirmArchive"
         @cancel="contactToArchive = null"
+      />
+    </Transition>
+
+    <Transition name="slide-fade">
+      <ConfirmDialog
+        v-if="contactToDelete"
+        title="Borrar contacto"
+        :message="`¿Seguro que quieres borrar el mensaje de ${contactToDelete.name}? Se borra para siempre y no se puede recuperar. Si solo quieres quitarlo de la lista, archívalo.`"
+        confirm-label="Borrar para siempre"
+        @confirm="confirmDelete"
+        @cancel="contactToDelete = null"
       />
     </Transition>
 

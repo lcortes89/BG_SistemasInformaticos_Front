@@ -36,12 +36,15 @@ test('an admin invites another one, sends the invitation again and deletes it', 
   await expect(row.getByText('Nunca')).toBeVisible()
 
   // Send it again
-  await row.getByRole('button', { name: 'Reenviar invitación' }).click()
+  // BGSI-312: the actions are in the "⋯" menu of the row
+  await row.getByRole('button', { name: `Acciones de ${email}` }).click()
+  await page.getByRole('menuitem', { name: 'Reenviar invitación' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Reenviar' }).click()
   await expect(page.getByRole('status')).toHaveText(`Invitación reenviada a ${email}. El enlace anterior ya no sirve.`)
 
   // Delete it: the password was confirmed less than 5 minutes ago, it is not asked again
-  await row.getByRole('button', { name: 'Borrar' }).click()
+  await row.getByRole('button', { name: `Acciones de ${email}` }).click()
+  await page.getByRole('menuitem', { name: 'Borrar' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Borrar' }).click()
   await expect(page.getByRole('status')).toHaveText(`${email} se ha borrado.`)
   await expect(row).toHaveCount(0)

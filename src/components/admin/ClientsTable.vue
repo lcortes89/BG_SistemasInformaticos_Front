@@ -1,5 +1,13 @@
 <script setup>
 import StarRating from '@/shared/StarRating.vue'
+import ExpandableText from '@/shared/ExpandableText.vue'
+import RowActionsMenu from '@/shared/RowActionsMenu.vue'
+
+// BGSI-312: the actions of each row, in the "⋯" menu
+const ACTIONS = [
+  { key: 'edit', label: 'Editar', icon: 'edit' },
+  { key: 'delete', label: 'Borrar', icon: 'trash', danger: true },
+]
 
 defineProps({
   clients: { type: Array, required: true }, // ClientModel[]
@@ -18,7 +26,7 @@ const emit = defineEmits(['edit', 'delete'])
         <th scope="col">Valoración</th>
         <th scope="col">Testimonio</th>
         <th scope="col">Estado</th>
-        <th scope="col">Acciones</th>
+        <th scope="col" class="row-actions-cell"><span class="sr-only">Acciones</span></th>
       </tr>
     </thead>
     <tbody>
@@ -34,19 +42,14 @@ const emit = defineEmits(['edit', 'delete'])
           </div>
         </td>
         <td data-label="Valoración"><StarRating :rating="client.rating" /></td>
-        <td data-label="Testimonio" class="admin-table__text">“{{ client.testimonial }}”</td>
+        <td data-label="Testimonio" class="admin-table__text"><ExpandableText :text="`“${client.testimonial}”`" /></td>
         <td data-label="Estado">
           <span class="admin-table__badge" :class="client.published ? 'admin-table__badge--on' : 'admin-table__badge--off'">
             {{ client.published ? 'Publicado' : 'Oculto' }}
           </span>
         </td>
-        <td data-label="Acciones">
-          <div class="admin-table__actions">
-            <button type="button" class="admin-table__action" @click="emit('edit', client)">Editar</button>
-            <button type="button" class="admin-table__action admin-table__action--danger" @click="emit('delete', client)">
-              Borrar
-            </button>
-          </div>
+        <td class="row-actions-cell">
+          <RowActionsMenu :items="ACTIONS" :label="`Acciones de ${client.name}`" @select="emit($event, client)" />
         </td>
       </tr>
     </tbody>

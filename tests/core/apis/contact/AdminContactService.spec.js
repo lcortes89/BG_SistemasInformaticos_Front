@@ -31,4 +31,13 @@ describe('AdminContactService', () => {
     expect(result).toBeInstanceOf(ContactModel)
     expect(result.note).toBe('Llamada')
   })
+
+  // BGSI-308
+  it('deletes a contact', async () => {
+    const fakeRepository = { remove: vi.fn().mockResolvedValue(undefined) }
+
+    await new AdminContactService(fakeRepository).remove(4)
+
+    expect(fakeRepository.remove).toHaveBeenCalledWith(4)
+  })
 })

@@ -22,7 +22,9 @@ test('deleting a brand asks for the password and then deletes it', async ({ page
   const row = page.getByRole('row').filter({ hasText: name })
   await expect(row).toBeVisible()
 
-  await row.getByRole('button', { name: 'Borrar' }).click()
+  // BGSI-312: the actions are in the "⋯" menu of the row
+  await row.getByRole('button', { name: `Acciones de ${name}` }).click()
+  await page.getByRole('menuitem', { name: 'Borrar' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Borrar' }).click()
 
   const dialog = page.getByRole('dialog', { name: 'Confirma tu contraseña' })

@@ -49,8 +49,25 @@ export function useAdminContacts(service = new AdminContactService(), pageSize =
     }
   }
 
+  // BGSI-308: deletes for good. The interceptor asks for the password first (BGSI-275)
+  async function removeContact(contact) {
+    feedback.value = null
+    actionError.value = null
+    try {
+      await service.remove(contact.id)
+      feedback.value = `Contacto de ${contact.name} borrado`
+      // The last contact of the last page: go back one page
+      const lastOfPage = contacts.value.length === 1 && page.value > 0
+      await loadPage(lastOfPage ? page.value - 1 : page.value)
+      return true
+    } catch (e) {
+      if (!e.cancelled) actionError.value = e.message // dialog closed: nothing to say
+      return false
+    }
+  }
+
   return {
     contacts, status, page, totalPages, totalElements, isLoading, error, feedback, actionError,
-    loadPage, changeStatus, updateContact,
+    loadPage, changeStatus, updateContact, removeContact,
   }
 }
