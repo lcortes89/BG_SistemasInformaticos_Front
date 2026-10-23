@@ -7,9 +7,9 @@ export default class AdminUserRepository extends BaseRepository {
     super('/admin/users')
   }
 
-  // GET /api/admin/users -> AdminUserDTO[]
-  async findAll() {
-    return this.get('')
+  // GET /api/admin/users?page=0&size=5 -> PageResponseDTO of AdminUserDTO, sorted by email (BGSI-316)
+  async findPage(page, size) {
+    return this.get('', { page, size })
   }
 
   // POST /api/admin/users/invitations { email } -> 201 AdminUserDTO (409 if the email exists)

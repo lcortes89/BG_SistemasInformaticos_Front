@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
+import Pagination from '@/shared/Pagination.vue'
 import ModalDialog from '@/shared/ModalDialog.vue'
 import ConfirmDialog from '@/shared/ConfirmDialog.vue'
 import AdminUsersTable from '@/components/admin/AdminUsersTable.vue'
@@ -13,7 +14,9 @@ const props = defineProps({
   service: { type: Object, default: undefined },
 })
 
-const { admins, isLoading, error, feedback, actionError, busyId, load, run, invited } = useAdminUsers(props.service)
+const {
+  admins, page, totalPages, totalElements, isLoading, error, feedback, actionError, busyId, load, run, invited,
+} = useAdminUsers(props.service)
 const invite = useInviteAdminForm(props.service)
 
 // BGSI-277: the "¿Seguro?" of each action. After it, the backend asks for the password (BGSI-275)
@@ -68,9 +71,10 @@ async function sendInvitation() {
   await invited(email)
 }
 
-const countLabel = computed(() => `${admins.value.length} ${admins.value.length === 1 ? 'administrador' : 'administradores'}`)
+// The total, not only the admins of the page (BGSI-316)
+const countLabel = computed(() => `${totalElements.value} ${totalElements.value === 1 ? 'administrador' : 'administradores'}`)
 
-onMounted(load)
+onMounted(() => load(0))
 </script>
 
 <template>
@@ -99,7 +103,10 @@ onMounted(load)
 
     <LoadingSpinner v-if="isLoading" label="Cargando administradores..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
-    <AdminUsersTable v-else :admins="admins" :busy-id="busyId" @action="(action, admin) => (pending = { action, admin })" />
+    <template v-else>
+      <AdminUsersTable :admins="admins" :busy-id="busyId" @action="(action, admin) => (pending = { action, admin })" />
+      <Pagination :current-page="page" :total-pages="totalPages" @change="load" />
+    </template>
 
     <Transition name="slide-fade">
       <ModalDialog v-if="inviteOpen" title="Invitar administrador" @close="inviteOpen = false">

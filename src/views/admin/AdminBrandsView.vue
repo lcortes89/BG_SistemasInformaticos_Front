@@ -14,6 +14,7 @@ const {
   items: brands, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
   loadPage, save, remove, setActive,
 } = useAdminCrud(new AdminBrandService(), {
+  pageSize: 6, // BGSI-316
   conflictMessage: 'No se puede borrar: esta marca tiene productos. Bórralos o cámbialos de marca primero.',
 })
 

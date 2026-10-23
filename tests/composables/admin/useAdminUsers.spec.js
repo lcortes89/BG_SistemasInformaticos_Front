@@ -4,11 +4,13 @@ import AdminUserModel from '@/core/models/adminuser/AdminUserModel'
 
 const maria = new AdminUserModel(2, 'maria@bg.es', 'ACTIVE', true, null, false)
 const error = (status, message = 'Error') => Object.assign(new Error(message), { status })
+// BGSI-316: what AdminUserService.getPage returns
+const pageOf = (items, page = 0, totalPages = 1, totalElements = items.length) => ({ items, page, totalPages, totalElements })
 
 // BGSI-277
 describe('useAdminUsers', () => {
   it('loads the list', async () => {
-    const service = { getAll: vi.fn().mockResolvedValue([maria]) }
+    const service = { getPage: vi.fn().mockResolvedValue(pageOf([maria])) }
     const { admins, load } = useAdminUsers(service)
 
     await load()
@@ -17,7 +19,7 @@ describe('useAdminUsers', () => {
   })
 
   it('shows the error when the list cannot be loaded', async () => {
-    const { error: loadError, load } = useAdminUsers({ getAll: vi.fn().mockRejectedValue(error(500, 'Servidor caído')) })
+    const { error: loadError, load } = useAdminUsers({ getPage: vi.fn().mockRejectedValue(error(500, 'Servidor caído')) })
 
     await load()
 
@@ -25,19 +27,19 @@ describe('useAdminUsers', () => {
   })
 
   it('runs an action, shows what happened and reloads the list', async () => {
-    const service = { getAll: vi.fn().mockResolvedValue([maria]), block: vi.fn().mockResolvedValue(maria) }
+    const service = { getPage: vi.fn().mockResolvedValue(pageOf([maria])), block: vi.fn().mockResolvedValue(maria) }
     const { feedback, run } = useAdminUsers(service)
 
     expect(await run('block', maria)).toBe(true)
 
     expect(service.block).toHaveBeenCalledWith(2)
     expect(feedback.value).toBe('maria@bg.es está bloqueado. Ya no puede entrar al panel.')
-    expect(service.getAll).toHaveBeenCalled()
+    expect(service.getPage).toHaveBeenCalled()
   })
 
   it('has a message for every action', async () => {
     const service = {
-      getAll: vi.fn().mockResolvedValue([]),
+      getPage: vi.fn().mockResolvedValue(pageOf([])),
       unblock: vi.fn(), resetTwoFactor: vi.fn(), resendInvitation: vi.fn(), remove: vi.fn(),
     }
     const { feedback, run } = useAdminUsers(service)
@@ -54,7 +56,7 @@ describe('useAdminUsers', () => {
 
   it('does nothing when the password dialog is closed (BGSI-275)', async () => {
     const cancelled = Object.assign(new Error('Acción cancelada'), { cancelled: true })
-    const service = { getAll: vi.fn(), block: vi.fn().mockRejectedValue(cancelled) }
+    const service = { getPage: vi.fn(), block: vi.fn().mockRejectedValue(cancelled) }
     const { feedback, actionError, run } = useAdminUsers(service)
 
     expect(await run('block', maria)).toBe(false)
@@ -64,13 +66,13 @@ describe('useAdminUsers', () => {
   })
 
   it('explains a 409 and reloads the list (the admin changed meanwhile)', async () => {
-    const service = { getAll: vi.fn().mockResolvedValue([maria]), block: vi.fn().mockRejectedValue(error(409)) }
+    const service = { getPage: vi.fn().mockResolvedValue(pageOf([maria])), block: vi.fn().mockRejectedValue(error(409)) }
     const { actionError, run } = useAdminUsers(service)
 
     await run('block', maria)
 
     expect(actionError.value).toContain('el estado de este administrador ha cambiado')
-    expect(service.getAll).toHaveBeenCalled()
+    expect(service.getPage).toHaveBeenCalled()
   })
 
   it('shows the message of other errors', async () => {
@@ -82,12 +84,49 @@ describe('useAdminUsers', () => {
   })
 
   it('after an invitation says it was sent and reloads', async () => {
-    const service = { getAll: vi.fn().mockResolvedValue([maria]) }
+    const service = { getPage: vi.fn().mockResolvedValue(pageOf([maria])) }
     const { feedback, invited } = useAdminUsers(service)
 
     await invited('nuevo@bg.es')
 
     expect(feedback.value).toBe('Invitación enviada a nuevo@bg.es. Tiene 24 horas para crear su contraseña.')
-    expect(service.getAll).toHaveBeenCalled()
+    expect(service.getPage).toHaveBeenCalled()
+  })
+
+  // BGSI-316
+  it('loads one page of 5 admins with the totals', async () => {
+    const service = { getPage: vi.fn().mockResolvedValue(pageOf([maria], 1, 2, 7)) }
+    const { admins, page, totalPages, totalElements, load } = useAdminUsers(service)
+
+    await load(1)
+
+    expect(service.getPage).toHaveBeenCalledWith(1, 5)
+    expect(admins.value).toEqual([maria])
+    expect(page.value).toBe(1)
+    expect(totalPages.value).toBe(2)
+    expect(totalElements.value).toBe(7)
+  })
+
+  it('reloads the same page after an action', async () => {
+    const service = { getPage: vi.fn().mockResolvedValue(pageOf([maria, maria], 1, 2, 7)), block: vi.fn() }
+    const { load, run } = useAdminUsers(service)
+    await load(1)
+
+    await run('block', maria)
+
+    expect(service.getPage).toHaveBeenLastCalledWith(1, 5)
+  })
+
+  it('goes back one page after deleting the last admin of a page', async () => {
+    const service = {
+      getPage: vi.fn().mockImplementation(async (page) => pageOf([maria], page, 2, 6)),
+      remove: vi.fn(),
+    }
+    const { load, run } = useAdminUsers(service)
+    await load(1)
+
+    await run('remove', maria)
+
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 5)
   })
 })

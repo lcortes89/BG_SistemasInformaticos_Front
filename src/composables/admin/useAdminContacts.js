@@ -1,7 +1,8 @@
 import { ref } from 'vue'
 import AdminContactService from '@/core/apis/contact/AdminContactService'
 
-export function useAdminContacts(service = new AdminContactService(), pageSize = 10) {
+// BGSI-316: 5 contacts per page
+export function useAdminContacts(service = new AdminContactService(), pageSize = 5) {
   const contacts = ref([])
   const status = ref(null) // null = all
   const page = ref(0)

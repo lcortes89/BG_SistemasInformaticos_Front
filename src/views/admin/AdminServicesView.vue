@@ -14,7 +14,7 @@ import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 const {
   items: services, filters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
   loadPage, setFilter, save, remove, setActive,
-} = useAdminCrud(new AdminServiceService())
+} = useAdminCrud(new AdminServiceService(), { pageSize: 6 })
 
 const brandService = new AdminBrandService()
 const brands = ref([])

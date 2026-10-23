@@ -19,20 +19,29 @@ const ACTIONS = {
   remove: { call: (service, admin) => service.remove(admin.id), done: (admin) => `${admin.email} se ha borrado.` },
 }
 
-// "Administradores": the list and the actions on the other admins (BGSI-277)
-export function useAdminUsers(service = new AdminUserService()) {
+// "Administradores": the list and the actions on the other admins (BGSI-277).
+// BGSI-316: 5 admins per page
+export function useAdminUsers(service = new AdminUserService(), pageSize = 5) {
   const admins = ref([])
+  const page = ref(0)
+  const totalPages = ref(0)
+  const totalElements = ref(0)
   const isLoading = ref(false)
   const error = ref(null)
   const feedback = ref(null)
   const actionError = ref(null)
   const busyId = ref(null) // the row whose action is running
 
-  async function load() {
+  // pageNumber: by default the page on screen (a reload after an action stays on it)
+  async function load(pageNumber = page.value) {
     isLoading.value = admins.value.length === 0 // a reload after an action keeps the table on screen
     error.value = null
     try {
-      admins.value = await service.getAll()
+      const result = await service.getPage(pageNumber, pageSize)
+      admins.value = result.items
+      page.value = result.page
+      totalPages.value = result.totalPages
+      totalElements.value = result.totalElements
     } catch (e) {
       error.value = e.message
     } finally {
@@ -48,7 +57,9 @@ export function useAdminUsers(service = new AdminUserService()) {
     try {
       await ACTIONS[action].call(service, admin)
       feedback.value = ACTIONS[action].done(admin)
-      await load()
+      // The last admin of a page was deleted: go back one page (no empty page)
+      const lastOfPage = action === 'remove' && admins.value.length === 1 && page.value > 0
+      await load(lastOfPage ? page.value - 1 : page.value)
       return true
     } catch (e) {
       // BGSI-275: closing "Confirma tu contraseña" is not an error, nothing changes
@@ -72,5 +83,5 @@ export function useAdminUsers(service = new AdminUserService()) {
     await load()
   }
 
-  return { admins, isLoading, error, feedback, actionError, busyId, load, run, invited }
+  return { admins, page, totalPages, totalElements, isLoading, error, feedback, actionError, busyId, load, run, invited }
 }

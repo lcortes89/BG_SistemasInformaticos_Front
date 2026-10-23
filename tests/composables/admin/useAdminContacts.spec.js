@@ -10,13 +10,14 @@ function fakeService() {
 }
 
 describe('useAdminContacts', () => {
+  // BGSI-316: 5 contacts per page
   it('loads the first page of all contacts', async () => {
     const service = fakeService()
     const { contacts, totalPages, totalElements, isLoading, loadPage } = useAdminContacts(service)
 
     await loadPage(0)
 
-    expect(service.getPage).toHaveBeenCalledWith(null, 0, 10)
+    expect(service.getPage).toHaveBeenCalledWith(null, 0, 5)
     expect(contacts.value).toHaveLength(1)
     expect(totalPages.value).toBe(3)
     expect(totalElements.value).toBe(25)
@@ -30,7 +31,7 @@ describe('useAdminContacts', () => {
     await changeStatus('CONTACTED')
 
     expect(status.value).toBe('CONTACTED')
-    expect(service.getPage).toHaveBeenCalledWith('CONTACTED', 0, 10)
+    expect(service.getPage).toHaveBeenCalledWith('CONTACTED', 0, 5)
   })
 
   it('stores the error when the API fails', async () => {
@@ -76,7 +77,7 @@ describe('useAdminContacts', () => {
 
     expect(ok).toBe(true)
     expect(service.remove).toHaveBeenCalledWith(1)
-    expect(service.getPage).toHaveBeenLastCalledWith(null, 0, 10)
+    expect(service.getPage).toHaveBeenLastCalledWith(null, 0, 5)
     expect(feedback.value).toBe('Contacto de Ana López borrado')
     expect(actionError.value).toBeNull()
   })
@@ -89,7 +90,7 @@ describe('useAdminContacts', () => {
 
     await removeContact({ id: 7, name: 'Luis' })
 
-    expect(service.getPage).toHaveBeenLastCalledWith(null, 1, 10)
+    expect(service.getPage).toHaveBeenLastCalledWith(null, 1, 5)
   })
 
   it('says nothing when the password dialog is closed', async () => {
