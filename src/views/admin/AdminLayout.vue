@@ -71,7 +71,12 @@ function logoutNow() {
   <div class="admin-layout">
     <aside ref="sidebar" class="admin-layout__sidebar">
       <div class="admin-layout__brand">
-        <img :src="logo" alt="BG Sistemas Informáticos" class="admin-layout__logo" />
+        <!-- BGSI-318: the logo opens the public website in a new tab (the panel stays open in this one).
+             A real link, so right click offers "Open in new window", "Copy link address"... -->
+        <a href="/" target="_blank" rel="noopener" class="admin-layout__site-link" data-test="admin-site-link"
+           title="Ver la web (se abre en una pestaña nueva)" aria-label="Ver la web (se abre en una pestaña nueva)">
+          <img :src="logo" alt="" class="admin-layout__logo" />
+        </a>
         <button type="button" class="admin-layout__burger" data-test="admin-menu-toggle" :aria-expanded="isMenuOpen"
                 aria-controls="admin-nav" :aria-label="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'" @click="toggleMenu">
           <span /><span /><span />
@@ -145,6 +150,14 @@ function logoutNow() {
   &__brand { display: flex; align-items: center; justify-content: space-between; margin: 0 0 1.5rem 0.5rem; }
 
   &__logo { display: block; height: 48px; }
+
+  // BGSI-318: the logo looks the same; only the keyboard focus is marked
+  &__site-link {
+    display: inline-block;
+    border-radius: var(--radius);
+
+    &:focus-visible { outline: 2px solid var(--color-orange); outline-offset: 4px; }
+  }
 
   &__burger { display: none; }
 
