@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import RowActionsMenu from '@/shared/RowActionsMenu.vue'
 
 defineProps({
   admins: { type: Array, required: true }, // AdminUserModel[]
@@ -8,6 +9,17 @@ defineProps({
 
 // action: (actionName, admin) -> the view asks "¿Seguro?" first
 const emit = defineEmits(['action'])
+
+// BGSI-312: the actions of each row, in the "⋯" menu (only the ones that make sense for its status)
+function actionsFor(admin) {
+  const items = []
+  if (admin.isPending()) items.push({ key: 'resendInvitation', label: 'Reenviar invitación', icon: 'mail' })
+  if (admin.isActive()) items.push({ key: 'block', label: 'Bloquear', icon: 'lock' })
+  if (admin.isBlocked()) items.push({ key: 'unblock', label: 'Desbloquear', icon: 'unlock' })
+  if (admin.twoFactorEnabled) items.push({ key: 'resetTwoFactor', label: 'Quitar doble verificación', icon: 'shield' })
+  items.push({ key: 'remove', label: 'Borrar', icon: 'trash', danger: true })
+  return items
+}
 </script>
 
 <template>
@@ -18,7 +30,7 @@ const emit = defineEmits(['action'])
         <th scope="col">Estado</th>
         <th scope="col">Doble verificación</th>
         <th scope="col">Último acceso</th>
-        <th scope="col">Acciones</th>
+        <th scope="col" class="row-actions-cell"><span class="sr-only">Acciones</span></th>
       </tr>
     </thead>
     <tbody>
@@ -44,32 +56,12 @@ const emit = defineEmits(['action'])
           <span v-else class="admin-users-table__2fa">No activada</span>
         </td>
         <td data-label="Último acceso" class="admin-users-table__date">{{ admin.getLastLogin() }}</td>
-        <td data-label="Acciones">
-          <RouterLink v-if="admin.you" :to="{ name: 'admin-account' }" class="admin-users-table__own">
-            Ir a Mi cuenta →
-          </RouterLink>
-          <div v-else class="admin-table__actions admin-users-table__actions" :aria-busy="busyId === admin.id">
-            <button v-if="admin.isPending()" type="button" class="admin-table__action"
-                    :disabled="busyId === admin.id" @click="emit('action', 'resendInvitation', admin)">
-              Reenviar invitación
-            </button>
-            <button v-if="admin.isActive()" type="button" class="admin-table__action"
-                    :disabled="busyId === admin.id" @click="emit('action', 'block', admin)">
-              Bloquear
-            </button>
-            <button v-if="admin.isBlocked()" type="button" class="admin-table__action"
-                    :disabled="busyId === admin.id" @click="emit('action', 'unblock', admin)">
-              Desbloquear
-            </button>
-            <button v-if="admin.twoFactorEnabled" type="button" class="admin-table__action"
-                    :disabled="busyId === admin.id" @click="emit('action', 'resetTwoFactor', admin)">
-              Quitar 2FA
-            </button>
-            <button type="button" class="admin-table__action admin-table__action--danger"
-                    :disabled="busyId === admin.id" @click="emit('action', 'remove', admin)">
-              Borrar
-            </button>
-          </div>
+        <td v-if="admin.you" data-label="Acciones" class="admin-users-table__own-cell">
+          <RouterLink :to="{ name: 'admin-account' }" class="admin-users-table__own">Ir a Mi cuenta →</RouterLink>
+        </td>
+        <td v-else class="row-actions-cell">
+          <RowActionsMenu :items="actionsFor(admin)" :label="`Acciones de ${admin.email}`"
+                          :disabled="busyId === admin.id" @select="emit('action', $event, admin)" />
         </td>
       </tr>
     </tbody>
@@ -84,7 +76,7 @@ const emit = defineEmits(['action'])
 
   &__email { overflow-wrap: anywhere; }
 
-  &__date { white-space: nowrap; }
+  &__date { min-width: 6.5rem; }
 
   &__you {
     padding: 0.1rem 0.5rem;
@@ -102,7 +94,7 @@ const emit = defineEmits(['action'])
   &__2fa { font-size: 0.9rem; color: var(--color-muted); }
   &__2fa--on { font-weight: 600; color: #15803d; }
 
-  &__actions { flex-wrap: wrap; gap: 0.5rem 1rem; }
+  &__own-cell { white-space: nowrap; text-align: right !important; }
 
   &__own { font-size: 0.9rem; font-weight: 600; color: var(--color-navy); }
 }

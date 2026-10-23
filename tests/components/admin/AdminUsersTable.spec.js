@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { mount, RouterLinkStub } from '@vue/test-utils'
 import AdminUsersTable from '@/components/admin/AdminUsersTable.vue'
 import AdminUserModel from '@/core/models/adminuser/AdminUserModel'
+import { chooseRowAction, rowActionLabels } from '../../helpers/row-actions'
 
 const me = new AdminUserModel(1, 'luisa@bg.es', 'ACTIVE', true, '2026-10-22T06:55:00Z', true)
 const active = new AdminUserModel(2, 'maria@bg.es', 'ACTIVE', true, null, false)
@@ -12,7 +13,7 @@ const mountTable = (admins, busyId = null) => mount(AdminUsersTable, {
   props: { admins, busyId },
   global: { stubs: { RouterLink: RouterLinkStub } },
 })
-const buttons = (wrapper, id) => wrapper.find(`[data-test="admin-${id}"]`).findAll('button').map((b) => b.text())
+const row = (wrapper, id) => wrapper.find(`[data-test="admin-${id}"]`)
 
 // BGSI-277
 describe('AdminUsersTable', () => {
@@ -27,18 +28,19 @@ describe('AdminUsersTable', () => {
     expect(wrapper.find('[data-test="admin-4"]').text()).toContain('No activada')
   })
 
-  it('offers the actions that fit each status', () => {
+  // BGSI-312: in the "⋯" menu, only the actions that fit the status
+  it('offers the actions that fit each status', async () => {
     const wrapper = mountTable([active, pending, blocked])
 
-    expect(buttons(wrapper, 2)).toEqual(['Bloquear', 'Quitar 2FA', 'Borrar'])
-    expect(buttons(wrapper, 3)).toEqual(['Reenviar invitación', 'Borrar'])
-    expect(buttons(wrapper, 4)).toEqual(['Desbloquear', 'Borrar'])
+    expect(await rowActionLabels(row(wrapper, 2))).toEqual(['Bloquear', 'Quitar doble verificación', 'Borrar'])
+    expect(await rowActionLabels(row(wrapper, 3))).toEqual(['Reenviar invitación', 'Borrar'])
+    expect(await rowActionLabels(row(wrapper, 4))).toEqual(['Desbloquear', 'Borrar'])
   })
 
   it('has no actions on your own row, only the link to Mi cuenta', () => {
     const wrapper = mountTable([me])
 
-    expect(buttons(wrapper, 1)).toEqual([])
+    expect(row(wrapper, 1).find('[data-test="row-actions"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="admin-1"]').text()).toContain('Tú')
     expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({ name: 'admin-account' })
   })
@@ -46,15 +48,15 @@ describe('AdminUsersTable', () => {
   it('emits the action with the admin', async () => {
     const wrapper = mountTable([active])
 
-    await wrapper.find('[data-test="admin-2"] .admin-table__action--danger').trigger('click')
+    await chooseRowAction(row(wrapper, 2), 'Borrar')
 
     expect(wrapper.emitted('action')[0]).toEqual(['remove', active])
   })
 
-  it('disables the buttons of the row whose action is running', () => {
+  it('disables the menu of the row whose action is running', () => {
     const wrapper = mountTable([active, pending], 2)
 
-    expect(wrapper.find('[data-test="admin-2"] button').attributes('disabled')).toBeDefined()
-    expect(wrapper.find('[data-test="admin-3"] button').attributes('disabled')).toBeUndefined()
+    expect(row(wrapper, 2).find('[data-test="row-actions"]').attributes('disabled')).toBeDefined()
+    expect(row(wrapper, 3).find('[data-test="row-actions"]').attributes('disabled')).toBeUndefined()
   })
 })

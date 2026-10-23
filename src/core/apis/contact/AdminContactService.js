@@ -26,4 +26,9 @@ export default class AdminContactService {
     const dto = await this.#repo.update(id, changes)
     return ContactModel.create(dto, contactMapper)
   }
+
+  // BGSI-308: the contact is deleted for good
+  async remove(id) {
+    await this.#repo.remove(id)
+  }
 }

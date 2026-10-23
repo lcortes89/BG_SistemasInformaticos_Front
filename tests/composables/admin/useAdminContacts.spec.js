@@ -5,6 +5,7 @@ function fakeService() {
   return {
     getPage: vi.fn().mockResolvedValue({ items: [{ id: 1 }], page: 0, totalPages: 3, totalElements: 25 }),
     update: vi.fn().mockResolvedValue({ id: 1 }),
+    remove: vi.fn().mockResolvedValue(undefined),
   }
 }
 
@@ -61,6 +62,54 @@ describe('useAdminContacts', () => {
 
     expect(ok).toBe(false)
     expect(feedback.value).toBeNull()
+    expect(actionError.value).toBe('Contact with id 9 not found')
+  })
+
+  // ---------- BGSI-308: delete ----------
+
+  it('deletes a contact, says so and reloads the same page', async () => {
+    const service = fakeService()
+    const { feedback, actionError, loadPage, removeContact } = useAdminContacts(service)
+    await loadPage(0)
+
+    const ok = await removeContact({ id: 1, name: 'Ana López' })
+
+    expect(ok).toBe(true)
+    expect(service.remove).toHaveBeenCalledWith(1)
+    expect(service.getPage).toHaveBeenLastCalledWith(null, 0, 10)
+    expect(feedback.value).toBe('Contacto de Ana López borrado')
+    expect(actionError.value).toBeNull()
+  })
+
+  it('goes back one page after deleting the last contact of a page', async () => {
+    const service = fakeService()
+    service.getPage.mockResolvedValueOnce({ items: [{ id: 7 }], page: 2, totalPages: 3, totalElements: 21 })
+    const { loadPage, removeContact } = useAdminContacts(service)
+    await loadPage(2)
+
+    await removeContact({ id: 7, name: 'Luis' })
+
+    expect(service.getPage).toHaveBeenLastCalledWith(null, 1, 10)
+  })
+
+  it('says nothing when the password dialog is closed', async () => {
+    const service = { ...fakeService(), remove: vi.fn().mockRejectedValue(Object.assign(new Error('cancelled'), { cancelled: true })) }
+    const { feedback, actionError, removeContact } = useAdminContacts(service)
+
+    const ok = await removeContact({ id: 1, name: 'Ana López' })
+
+    expect(ok).toBe(false)
+    expect(feedback.value).toBeNull()
+    expect(actionError.value).toBeNull()
+  })
+
+  it('shows the error when deleting fails', async () => {
+    const service = { ...fakeService(), remove: vi.fn().mockRejectedValue(new Error('Contact with id 9 not found')) }
+    const { actionError, removeContact } = useAdminContacts(service)
+
+    const ok = await removeContact({ id: 9, name: 'X' })
+
+    expect(ok).toBe(false)
     expect(actionError.value).toBe('Contact with id 9 not found')
   })
 })

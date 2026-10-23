@@ -3,6 +3,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import { fakeApi, page } from '../../helpers/fake-api'
+import { chooseRowAction, rowActionLabels } from '../../helpers/row-actions'
 import { routes } from '@/router/routes'
 import AdminContactsView from '@/views/admin/AdminContactsView.vue'
 import AdminRatesView from '@/views/admin/AdminRatesView.vue'
@@ -52,7 +53,7 @@ describe('admin screens', () => {
     const wrapper = await mountWithRouter(AdminContactsView)
     expect(wrapper.text()).toContain('Ana López')
 
-    await buttonWithText(wrapper, 'Marcar contactado').trigger('click')
+    await chooseRowAction(wrapper, 'Marcar contactado')
     await flushPromises()
 
     expect(calls.find((call) => call.key === 'PATCH /admin/contacts/4').body).toEqual({ status: 'CONTACTED' })
@@ -66,12 +67,43 @@ describe('admin screens', () => {
     })
     const wrapper = await mountWithRouter(AdminContactsView)
 
-    await buttonWithText(wrapper, 'Archivar').trigger('click')
+    await chooseRowAction(wrapper, 'Archivar')
     expect(calls.some((call) => call.key.startsWith('PATCH'))).toBe(false)
     await wrapper.find('.confirm-dialog__confirm').trigger('click')
     await flushPromises()
 
     expect(wrapper.find('[role="status"]').text()).toBe('Contacto archivado')
+  })
+
+  // BGSI-308: "¿Seguro?" first, then the password (the interceptor), then it is deleted
+  it('Contactos: deletes a contact after confirming', async () => {
+    let list = [contactDto]
+    const calls = fakeApi({
+      'GET /admin/contacts': () => page(list),
+      [`DELETE /admin/contacts/${contactDto.id}`]: () => { list = []; return null },
+    })
+    const wrapper = await mountWithRouter(AdminContactsView)
+
+    await chooseRowAction(wrapper, 'Borrar')
+    expect(wrapper.find('.confirm-dialog').text()).toContain('Se borra para siempre')
+    expect(calls.some((call) => call.key.startsWith('DELETE'))).toBe(false)
+    await wrapper.find('.confirm-dialog__confirm').trigger('click')
+    await flushPromises()
+
+    expect(calls.map((call) => call.key)).toContain(`DELETE /admin/contacts/${contactDto.id}`)
+    expect(wrapper.find('[role="status"]').text()).toBe(`Contacto de ${contactDto.name} borrado`)
+    expect(wrapper.text()).toContain('No hay contactos')
+  })
+
+  it('Contactos: cancelling the question does not delete', async () => {
+    const calls = fakeApi({ 'GET /admin/contacts': page([contactDto]) })
+    const wrapper = await mountWithRouter(AdminContactsView)
+
+    await chooseRowAction(wrapper, 'Borrar')
+    await wrapper.find('.confirm-dialog__cancel').trigger('click')
+
+    expect(wrapper.find('.confirm-dialog').exists()).toBe(false)
+    expect(calls.some((call) => call.key.startsWith('DELETE'))).toBe(false)
   })
 
   it('Tarifas: shows the questions with their options and prices', async () => {
@@ -196,13 +228,13 @@ describe('admin screens', () => {
     })
     const wrapper = await mountWithRouter(AdminUsersView)
 
-    await buttonWithText(wrapper, 'Bloquear').trigger('click')
+    await chooseRowAction(wrapper, 'Bloquear')
     expect(wrapper.find('.confirm-dialog').text()).toContain('maria@bg.es no podrá entrar al panel')
     await wrapper.find('.confirm-dialog__confirm').trigger('click')
     await flushPromises()
 
     expect(wrapper.find('[role="status"]').text()).toBe('maria@bg.es está bloqueado. Ya no puede entrar al panel.')
-    expect(wrapper.find('[data-test="admin-2"]').text()).toContain('Desbloquear')
+    expect(await rowActionLabels(wrapper.find('[data-test="admin-2"]'))).toContain('Desbloquear')
   })
 
   it('Administradores: cancelling the question does nothing', async () => {
@@ -211,7 +243,7 @@ describe('admin screens', () => {
     })
     const wrapper = await mountWithRouter(AdminUsersView)
 
-    await buttonWithText(wrapper, 'Borrar').trigger('click')
+    await chooseRowAction(wrapper, 'Borrar')
     await wrapper.find('.confirm-dialog__cancel').trigger('click')
 
     expect(wrapper.find('.confirm-dialog').exists()).toBe(false)

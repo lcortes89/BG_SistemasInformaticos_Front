@@ -17,4 +17,9 @@ export default class AdminContactRepository extends BaseRepository {
   async update(id, changes) {
     return this.patch(`/${id}`, changes)
   }
+
+  // BGSI-308: DELETE /api/admin/contacts/{id} -> 204 (needs the password confirmation, BGSI-275)
+  async remove(id) {
+    return this.delete(`/${id}`)
+  }
 }
