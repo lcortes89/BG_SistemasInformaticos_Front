@@ -13,6 +13,9 @@ const route = useRoute()
 // The admin panel (AdminLayout) has its own sidebar and top bar
 const isAdminPanel = computed(() => !!route.meta.requiresAuth)
 
+// BGSI-324: the whole admin area (login, password pages and panel) only shows the copyright bar
+const isAdminArea = computed(() => route.path.startsWith('/admin'))
+
 // Pages with a hero: the header floats over it, fully transparent
 const overlayHeader = computed(() => !!route.meta.overlayHeader)
 
@@ -31,7 +34,7 @@ onMounted(loadHeroImage)
 <template>
   <AppHeader v-if="!isAdminPanel" :overlay="overlayHeader" :show-nav="!route.meta.hideNav" />
   <!-- The header is fixed: pages without hero leave its space free at the top -->
-  <main :class="{ 'has-header-space': !isAdminPanel && !overlayHeader }">
+  <main :class="{ 'has-header-space': !isAdminPanel && !overlayHeader, 'is-admin-area': isAdminArea }">
     <RouterView />
   </main>
 
@@ -40,13 +43,16 @@ onMounted(loadHeroImage)
     <DemoCta ref="demoCta" />
   </template>
   <!-- Pages without the orange card (Contacto): soft fade from white into the footer -->
-  <div v-else-if="!isAdminPanel" class="footer-fade" aria-hidden="true"></div>
+  <div v-else-if="!isAdminArea" class="footer-fade" aria-hidden="true"></div>
 
-  <AppFooter v-if="!isAdminPanel" />
+  <AppFooter :compact="isAdminArea" />
 </template>
 
 <style>
 .has-header-space { padding-top: 72px; }
+
+/* BGSI-324: short admin pages (login...) fill the screen, so the copyright bar stays at the bottom */
+.is-admin-area { min-height: calc(100vh - 3.3rem); background: var(--color-bg-alt); }
 
 /* BGSI-236: same soft junction as behind the demo card */
 .footer-fade {

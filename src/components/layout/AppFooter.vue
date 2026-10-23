@@ -2,37 +2,44 @@
 import { RouterLink } from 'vue-router'
 import logo from '@/assets/logo/logo_footer.png'
 import WhatsAppIcon from '@/shared/WhatsAppIcon.vue'
+import SocialIcon from '@/shared/SocialIcon.vue'
+import { SOCIAL_LINKS, whatsappUrl } from '@/core/config/social'
+
+// BGSI-324: in the admin area only the copyright bar is shown
+defineProps({
+  compact: { type: Boolean, default: false },
+})
 
 const currentYear = new Date().getFullYear()
 </script>
 
 <template>
-  <footer class="app-footer">
-    <div class="container app-footer__grid">
-      <div class="app-footer__col">
+  <footer class="app-footer" :class="{ 'app-footer--compact': compact }">
+    <div v-if="!compact" class="container app-footer__grid">
+      <div class="app-footer__col app-footer__brand">
         <img :src="logo" alt="BG Sistemas Informáticos" class="app-footer__logo" />
         <p>Digitalización para hostelería y pymes.</p>
-        <a href="https://www.facebook.com/bgconsultoria/" target="_blank" rel="noopener" class="app-footer__link">
-          Facebook
-        </a>
+        <!-- BGSI-320: social networks as icons -->
+        <ul class="app-footer__social" aria-label="Redes sociales">
+          <li v-for="network in SOCIAL_LINKS" :key="network.key">
+            <a :href="network.url" target="_blank" rel="noopener" class="app-footer__social-link"
+               :aria-label="`${network.label} de BG Sistemas (se abre en una pestaña nueva)`" :title="network.label"
+               :data-test="`social-${network.key}`">
+              <SocialIcon :name="network.key" />
+            </a>
+          </li>
+        </ul>
       </div>
 
       <div class="app-footer__col">
-        <h2 class="app-footer__title">Navegación</h2>
-        <RouterLink to="/" class="app-footer__link">Inicio</RouterLink>
-        <RouterLink to="/soluciones" class="app-footer__link">Soluciones</RouterLink>
-        <RouterLink to="/tarifas" class="app-footer__link">Tarifas</RouterLink>
-        <RouterLink to="/clientes" class="app-footer__link">Nuestros Clientes</RouterLink>
-      </div>
-
-      <div class="app-footer__col">
-        <h2 class="app-footer__title">Contacto</h2>
-        <a href="https://wa.me/34615471066" target="_blank" rel="noopener"
-           class="app-footer__link app-footer__whatsapp" aria-label="WhatsApp +34 615 471 066">
-          <WhatsAppIcon />
-          +34 615 471 066
+        <h2 class="app-footer__title">¿Hablamos?</h2>
+        <p>Resolvemos tus dudas sin compromiso.</p>
+        <!-- BGSI-320: "click to chat", without showing the number -->
+        <a :href="whatsappUrl()" target="_blank" rel="noopener" class="app-footer__whatsapp" data-test="footer-whatsapp">
+          <WhatsAppIcon :size="20" />
+          Escríbenos por WhatsApp
+          <span class="sr-only">(se abre en una pestaña nueva)</span>
         </a>
-        <RouterLink to="/contacto" class="app-footer__link">Formulario de contacto</RouterLink>
       </div>
 
       <div class="app-footer__col">
@@ -55,18 +62,22 @@ const currentYear = new Date().getFullYear()
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1.4fr 1fr 1fr;
     gap: 2rem;
   }
 
   &__col {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 0.5rem;
+
+    p { margin: 0; }
   }
 
+  &__brand p { margin-top: 0.5rem; }
+
   &__logo {
-    align-self: flex-start;
     width: auto;
     height: 64px;
   }
@@ -77,8 +88,49 @@ const currentYear = new Date().getFullYear()
     color: #fff;
   }
 
-  // BGSI-242: green icon + number, aligned
-  &__whatsapp { display: inline-flex; align-items: center; gap: 0.5rem; }
+  &__social {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(203, 213, 225, 0.35);
+    border-radius: 50%;
+    color: #fff;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--color-navy);
+      background: var(--color-orange);
+      border-color: var(--color-orange);
+    }
+  }
+
+  &__whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(37, 211, 102, 0.6);
+    border-radius: 999px;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+
+    &:hover,
+    &:focus-visible { background: rgba(37, 211, 102, 0.15); }
+  }
 
   &__link {
     color: #cbd5e1;
@@ -96,10 +148,18 @@ const currentYear = new Date().getFullYear()
     text-align: center;
     border-top: 1px solid var(--color-navy-light);
   }
+
+  // BGSI-324: admin area, only the bar with the copyright
+  &--compact {
+    padding-top: 0;
+
+    .app-footer__copy { margin: 0; border-top: 0; }
+  }
 }
 
 @media (max-width: 900px) {
   .app-footer__grid { grid-template-columns: repeat(2, 1fr); }
+  .app-footer__brand { grid-column: 1 / -1; }
 }
 
 @media (max-width: 560px) {

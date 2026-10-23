@@ -134,7 +134,8 @@ function logoutNow() {
 .admin-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
-  min-height: 100vh;
+  // BGSI-324: the copyright bar (about 3.3rem) goes under the panel, inside the first screen
+  min-height: calc(100vh - 3.3rem);
 
   &__sidebar {
     padding: 1.5rem 1rem;
