@@ -29,7 +29,11 @@ export const routes = [
       { path: 'tarifas', name: 'admin-rates', component: () => import('@/views/admin/AdminRatesView.vue') },
       { path: 'administradores', name: 'admin-users', component: () => import('@/views/admin/AdminUsersView.vue') },
       // BGSI-272: the admin's own account (change password)
-      { path: 'mi-cuenta', name: 'admin-account', component: () => import('@/views/admin/AdminAccountView.vue') },
+      // BGSI-314: "Ajustes de perfil" has three pages. The old "mi-cuenta" address still works
+      { path: 'cambiar-contrasena', name: 'admin-change-password', component: () => import('@/views/admin/AdminAccountView.vue') },
+      { path: 'mi-cuenta', redirect: { name: 'admin-change-password' } },
+      { path: 'cambiar-email', name: 'admin-change-email', component: () => import('@/views/admin/AdminChangeEmailView.vue') },
+      { path: 'verificacion-dos-pasos', name: 'admin-two-factor', component: () => import('@/views/admin/AdminTwoFactorView.vue') },
       // BGSI-261: "Apariencia" is now "Ajustes" (the old address still works)
       // BGSI-297: "Ajustes" is split in two pages of the menu
       { path: 'foto-portada', name: 'admin-settings', component: () => import('@/views/admin/AdminSettingsView.vue') },

@@ -57,7 +57,7 @@ function actionsFor(admin) {
         </td>
         <td data-label="Último acceso" class="admin-users-table__date">{{ admin.getLastLogin() }}</td>
         <td v-if="admin.you" data-label="Acciones" class="admin-users-table__own-cell">
-          <RouterLink :to="{ name: 'admin-account' }" class="admin-users-table__own">Ir a Mi cuenta →</RouterLink>
+          <RouterLink :to="{ name: 'admin-change-password' }" class="admin-users-table__own">Ir a Ajustes de perfil →</RouterLink>
         </td>
         <td v-else class="row-actions-cell">
           <RowActionsMenu :items="actionsFor(admin)" :label="`Acciones de ${admin.email}`"

@@ -21,7 +21,15 @@ describe('admin menu', () => {
     expect(groupOf('admin-contacts')).toBe('Gestión de clientes')
     expect(groupOf('admin-rates')).toBe('Gestión comercial')
     expect(groupOf('admin-mail-settings')).toBe('Gestión Administración')
-    expect(groupOf('admin-account')).toBe('Ajustes de perfil')
+    expect(groupOf('admin-change-password')).toBe('Ajustes de perfil')
+    expect(groupOf('admin-two-factor')).toBe('Ajustes de perfil')
     expect(groupOf('admin-dashboard')).toBeNull()
+  })
+
+  // BGSI-314
+  it('"Ajustes de perfil" has its three pages in order', () => {
+    const profile = ADMIN_MENU.find((group) => group.title === 'Ajustes de perfil')
+
+    expect(profile.links.map((link) => link.label)).toEqual(['Cambiar contraseña', 'Cambiar email', 'Verificación en dos pasos'])
   })
 })

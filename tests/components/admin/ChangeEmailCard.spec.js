@@ -93,4 +93,18 @@ describe('ChangeEmailCard', () => {
 
     expect(wrapper.find('#change-email-new').element.value).toBe('new@bg.es')
   })
+
+  // BGSI-314: on its own page the title is the one of the page
+  it('without title, the head is only shown for the pending badge', async () => {
+    const form = mount(ChangeEmailCard, { props: { currentEmail: 'me@bg.es', service: fakeService(), hideTitle: true } })
+    await flushPromises()
+    expect(form.find('h2').exists()).toBe(false)
+
+    const pending = mount(ChangeEmailCard, {
+      props: { currentEmail: 'me@bg.es', hideTitle: true, service: fakeService({ getPendingEmailChange: vi.fn().mockResolvedValue(PENDING) }) },
+    })
+    await flushPromises()
+    expect(pending.find('h2').classes()).toContain('sr-only')
+    expect(pending.text()).toContain('Pendiente de confirmar')
+  })
 })

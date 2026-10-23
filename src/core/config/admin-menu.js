@@ -32,7 +32,12 @@ export const ADMIN_MENU = [
   {
     title: 'Ajustes de perfil',
     icon: '👤',
-    links: [{ to: { name: 'admin-account' }, label: 'Mi cuenta' }],
+    // BGSI-314: one page for each setting
+    links: [
+      { to: { name: 'admin-change-password' }, label: 'Cambiar contraseña' },
+      { to: { name: 'admin-change-email' }, label: 'Cambiar email' },
+      { to: { name: 'admin-two-factor' }, label: 'Verificación en dos pasos' },
+    ],
   },
 ]
 

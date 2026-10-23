@@ -37,12 +37,13 @@ describe('AdminUsersTable', () => {
     expect(await rowActionLabels(row(wrapper, 4))).toEqual(['Desbloquear', 'Borrar'])
   })
 
-  it('has no actions on your own row, only the link to Mi cuenta', () => {
+  it('has no actions on your own row, only the link to Ajustes de perfil', () => {
     const wrapper = mountTable([me])
 
     expect(row(wrapper, 1).find('[data-test="row-actions"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="admin-1"]').text()).toContain('Tú')
-    expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({ name: 'admin-account' })
+    expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({ name: 'admin-change-password' }) // BGSI-314
+    expect(wrapper.findComponent(RouterLinkStub).text()).toBe('Ir a Ajustes de perfil →')
   })
 
   it('emits the action with the admin', async () => {

@@ -14,7 +14,7 @@ test('asks for the change of email with the password and cancels it', async ({ p
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page).toHaveURL(/\/admin$/)
 
-  await page.goto('/admin/mi-cuenta')
+  await page.goto('/admin/cambiar-email') // BGSI-314
   const card = page.locator('.change-email')
   const newEmailInput = card.getByLabel('Email nuevo', { exact: true })
   // A change left pending by an older run is cancelled first

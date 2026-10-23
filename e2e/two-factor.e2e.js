@@ -41,7 +41,7 @@ test('an admin turns on two-step verification and logs in with the code or a rec
   await expect(page).toHaveURL(/\/admin$/)
 
   // Turn it on: QR + first code
-  await page.goto('/admin/mi-cuenta')
+  await page.goto('/admin/verificacion-dos-pasos') // BGSI-314
   await page.getByRole('button', { name: 'Activar verificación en dos pasos' }).click()
   await expect(page.getByRole('img', { name: /Código QR/ })).toBeVisible()
   const secret = (await page.locator('[data-test="secret"]').textContent()).replace(/\s/g, '')

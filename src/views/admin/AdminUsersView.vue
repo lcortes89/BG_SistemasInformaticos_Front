@@ -33,7 +33,7 @@ const QUESTIONS = {
   }),
   resetTwoFactor: (email) => ({
     title: 'Quitar la verificación en dos pasos',
-    message: `Úsalo solo si ${email} ha perdido el móvil y sus códigos de recuperación. Podrá entrar solo con su contraseña y volver a activarla en Mi cuenta.`,
+    message: `Úsalo solo si ${email} ha perdido el móvil y sus códigos de recuperación. Podrá entrar solo con su contraseña y volver a activarla en Ajustes de perfil.`,
     confirmLabel: 'Quitar verificación',
   }),
   resendInvitation: (email) => ({
