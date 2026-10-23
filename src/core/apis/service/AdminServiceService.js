@@ -33,4 +33,9 @@ export default class AdminServiceService {
   async remove(id) {
     await this.#repo.remove(id)
   }
+
+  // BGSI-310: show (true) or hide (false) on the public website
+  async setActive(id, active) {
+    return ServiceModel.create(await this.#repo.setActive(id, active), serviceMapper)
+  }
 }

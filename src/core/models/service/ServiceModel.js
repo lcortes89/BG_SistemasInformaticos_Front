@@ -2,7 +2,7 @@
 export default class ServiceModel {
 
   constructor(id, name, description, imageUrl, brandId, brandName, featured = false,
-              longDescription = '', features = [], sectors = [], officialUrl = null) {
+              longDescription = '', features = [], sectors = [], officialUrl = null, active = true) {
     this.id = id
     this.name = name
     this.description = description
@@ -14,6 +14,7 @@ export default class ServiceModel {
     this.features = features
     this.sectors = sectors
     this.officialUrl = officialUrl
+    this.active = active // BGSI-310: false = hidden from the public website
   }
 
   static create(dto, mapper) {
@@ -29,6 +30,7 @@ export default class ServiceModel {
       mapper.features(dto),
       mapper.sectors(dto),
       mapper.officialUrl(dto),
+      mapper.active(dto),
     )
   }
 }

@@ -78,7 +78,7 @@ function submit() {
 
     <label class="admin-form__check">
       <input id="client-published" v-model="form.published" type="checkbox" />
-      Publicado en la página de Clientes
+      Activo: se ve en la página de Clientes
     </label>
 
     <p v-if="serverError" class="admin-form__alert" role="alert">{{ serverError }}</p>

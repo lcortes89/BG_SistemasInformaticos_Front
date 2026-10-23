@@ -13,7 +13,7 @@ import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 
 const {
   items: services, filters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-  loadPage, setFilter, save, remove,
+  loadPage, setFilter, save, remove, setActive,
 } = useAdminCrud(new AdminServiceService())
 
 const brandService = new AdminBrandService()
@@ -44,6 +44,14 @@ async function confirmDelete() {
   const service = serviceToDelete.value
   serviceToDelete.value = null
   await remove(service.id, `Producto ${service.name} borrado`)
+}
+
+// BGSI-310: "Activar / Inactivar"
+function toggleActive(service) {
+  const active = !service.active
+  setActive(service.id, active, active
+    ? `Producto ${service.name} activado: vuelve a verse en la web.`
+    : `Producto ${service.name} inactivado: ya no se ve en la web.`)
 }
 
 onMounted(async () => {
@@ -86,7 +94,8 @@ onMounted(async () => {
     <LoadingSpinner v-if="isLoading" label="Cargando productos..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
     <template v-else>
-      <ServicesTable :services="services" @edit="openForm" @delete="serviceToDelete = $event" />
+      <ServicesTable :services="services" @edit="openForm" @toggle="toggleActive"
+                     @delete="serviceToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>
 

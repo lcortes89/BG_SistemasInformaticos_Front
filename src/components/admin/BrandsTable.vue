@@ -1,17 +1,14 @@
 <script setup>
 import RowActionsMenu from '@/shared/RowActionsMenu.vue'
-
-// BGSI-312: the actions of each row, in the "⋯" menu
-const ACTIONS = [
-  { key: 'edit', label: 'Editar', icon: 'edit' },
-  { key: 'delete', label: 'Borrar', icon: 'trash', danger: true },
-]
+import ActiveBadge from '@/shared/ActiveBadge.vue'
+import { editToggleDeleteActions } from '@/components/admin/row-actions'
 
 defineProps({
   brands: { type: Array, required: true }, // BrandModel[]
 })
 
-const emit = defineEmits(['edit', 'delete'])
+// BGSI-312 / 310: the actions of each row, in the "⋯" menu. toggle = Activar / Inactivar
+const emit = defineEmits(['edit', 'toggle', 'delete'])
 </script>
 
 <template>
@@ -28,7 +25,7 @@ const emit = defineEmits(['edit', 'delete'])
       </tr>
     </thead>
     <tbody>
-      <tr v-for="brand in brands" :key="brand.id">
+      <tr v-for="brand in brands" :key="brand.id" :class="{ 'admin-table__row--inactive': !brand.active }">
         <td data-label="Marca">
           <div class="admin-table__identity">
             <img v-if="brand.logoUrl" :src="brand.logoUrl" alt="" class="admin-table__thumb" />
@@ -39,12 +36,10 @@ const emit = defineEmits(['edit', 'delete'])
         <td data-label="Categoría">{{ brand.category }}</td>
         <td data-label="Productos">{{ brand.serviceCount }}</td>
         <td data-label="Estado">
-          <span class="admin-table__badge" :class="brand.active ? 'admin-table__badge--on' : 'admin-table__badge--off'">
-            {{ brand.active ? 'Visible' : 'Oculta' }}
-          </span>
+          <ActiveBadge :active="brand.active" />
         </td>
         <td class="row-actions-cell">
-          <RowActionsMenu :items="ACTIONS" :label="`Acciones de ${brand.name}`" @select="emit($event, brand)" />
+          <RowActionsMenu :items="editToggleDeleteActions(brand.active)" :label="`Acciones de ${brand.name}`" @select="emit($event, brand)" />
         </td>
       </tr>
     </tbody>

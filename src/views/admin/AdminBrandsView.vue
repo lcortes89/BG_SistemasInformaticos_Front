@@ -12,7 +12,7 @@ import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 
 const {
   items: brands, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-  loadPage, save, remove,
+  loadPage, save, remove, setActive,
 } = useAdminCrud(new AdminBrandService(), {
   conflictMessage: 'No se puede borrar: esta marca tiene productos. Bórralos o cámbialos de marca primero.',
 })
@@ -45,6 +45,14 @@ async function confirmDelete() {
   await remove(brand.id, `Marca ${brand.name} borrada`)
 }
 
+// BGSI-310: an inactive brand hides its products from the website too
+function toggleActive(brand) {
+  const active = !brand.active
+  setActive(brand.id, active, active
+    ? `Marca ${brand.name} activada: vuelve a verse en la web con sus productos activos.`
+    : `Marca ${brand.name} inactivada: ni ella ni sus productos se ven en la web.`)
+}
+
 onMounted(() => loadPage(0))
 </script>
 
@@ -71,7 +79,8 @@ onMounted(() => loadPage(0))
     <LoadingSpinner v-if="isLoading" label="Cargando marcas..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
     <template v-else>
-      <BrandsTable :brands="brands" @edit="openForm" @delete="brandToDelete = $event" />
+      <BrandsTable :brands="brands" @edit="openForm" @toggle="toggleActive"
+                   @delete="brandToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>
 

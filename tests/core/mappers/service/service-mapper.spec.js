@@ -31,3 +31,18 @@ describe('serviceMapper: official page of the maker', () => {
     expect(serviceMapper.officialUrl({})).toBeNull()
   })
 })
+
+describe('serviceMapper: active (BGSI-310)', () => {
+  it('reads the state, active when the backend does not send it (public API)', () => {
+    expect(serviceMapper.active({ active: false })).toBe(false)
+    expect(serviceMapper.active({})).toBe(true)
+  })
+
+  it('sends the state of the form', () => {
+    const form = { name: 'BDP One', brandId: '1', description: '', imageUrl: '', featured: false,
+      longDescription: '', featuresText: '', sectorsText: '' }
+
+    expect(serviceMapper.toRequest({ ...form, active: false }).active).toBe(false)
+    expect(serviceMapper.toRequest(form).active).toBe(true)
+  })
+})

@@ -12,7 +12,7 @@ import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 
 const {
   items: clients, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-  loadPage, save, remove,
+  loadPage, save, remove, setActive,
 } = useAdminCrud(new AdminClientService())
 
 const formOpen = ref(false)
@@ -43,6 +43,14 @@ async function confirmDelete() {
   await remove(client.id, `Cliente ${client.name} borrado`)
 }
 
+// BGSI-310: "Activar / Inactivar" (active = published on the Clientes page)
+function toggleActive(client) {
+  const active = !client.published
+  setActive(client.id, active, active
+    ? `Cliente ${client.name} activado: vuelve a verse en la web.`
+    : `Cliente ${client.name} inactivado: ya no se ve en la web.`)
+}
+
 onMounted(() => loadPage(0))
 </script>
 
@@ -69,7 +77,8 @@ onMounted(() => loadPage(0))
     <LoadingSpinner v-if="isLoading" label="Cargando clientes..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
     <template v-else>
-      <ClientsTable :clients="clients" @edit="openForm" @delete="clientToDelete = $event" />
+      <ClientsTable :clients="clients" @edit="openForm" @toggle="toggleActive"
+                    @delete="clientToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>
 

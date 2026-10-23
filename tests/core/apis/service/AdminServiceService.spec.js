@@ -23,7 +23,17 @@ describe('AdminServiceService', () => {
 
     expect(repo.create).toHaveBeenCalledWith({
       name: 'BDP One', brandId: 1, description: null, imageUrl: null, featured: true,
-      longDescription: null, features: [], sectors: [], officialUrl: null,
+      longDescription: null, features: [], sectors: [], officialUrl: null, active: true,
     })
+  })
+
+  it('activates or inactivates a product and returns it (BGSI-310)', async () => {
+    const repo = { setActive: vi.fn().mockResolvedValue({ ...serviceDto, active: false }) }
+
+    const result = await new AdminServiceService(repo).setActive(2, false)
+
+    expect(repo.setActive).toHaveBeenCalledWith(2, false)
+    expect(result).toBeInstanceOf(ServiceModel)
+    expect(result.active).toBe(false)
   })
 })

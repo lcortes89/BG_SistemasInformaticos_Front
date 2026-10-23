@@ -81,3 +81,27 @@ describe('ServiceForm: official page of the maker', () => {
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 })
+
+describe('ServiceForm: active (BGSI-310)', () => {
+  it('a new product is active', async () => {
+    const wrapper = mount(ServiceForm, { props: { brands } })
+    await wrapper.find('#service-name').setValue('BellaBot')
+    await wrapper.find('#service-brand').setValue(4)
+
+    expect(wrapper.find('#service-active').element.checked).toBe(true)
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.emitted('submit')[0][0]).toMatchObject({ active: true })
+  })
+
+  it('keeps an inactive product inactive, and can activate it', async () => {
+    const service = { name: 'BDP Retail', brandId: 1, description: '', imageUrl: '', featured: false, active: false }
+    const wrapper = mount(ServiceForm, { props: { brands, service } })
+
+    expect(wrapper.find('#service-active').element.checked).toBe(false)
+    await wrapper.find('#service-active').setValue(true)
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.emitted('submit')[0][0]).toMatchObject({ active: true })
+  })
+})

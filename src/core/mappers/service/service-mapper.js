@@ -14,6 +14,8 @@ export const serviceMapper = {
   features: (dto) => dto.features ?? [],
   sectors: (dto) => dto.sectors ?? [],
   officialUrl: (dto) => dto.officialUrl ?? null,
+  // BGSI-310: the public API only sends active products, so "not sent" = active
+  active: (dto) => dto.active ?? true,
 
   // Admin form -> body of POST/PUT /api/admin/services (ServiceRequestDTO)
   toRequest: (form) => ({
@@ -26,5 +28,6 @@ export const serviceMapper = {
     features: linesToList(form.featuresText),
     sectors: linesToList(form.sectorsText),
     officialUrl: (form.officialUrl ?? '').trim() || null,
+    active: form.active ?? true,
   }),
 }

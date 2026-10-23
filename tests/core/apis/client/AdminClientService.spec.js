@@ -25,4 +25,14 @@ describe('AdminClientService', () => {
       name: 'Bar La Plaza', businessType: 'Bar', testimonial: 'Great', logoUrl: null, rating: 4, published: true,
     })
   })
+
+  it('activates or inactivates a client and returns it (BGSI-310)', async () => {
+    const repo = { setActive: vi.fn().mockResolvedValue({ ...clientDto, published: true }) }
+
+    const result = await new AdminClientService(repo).setActive(1, true)
+
+    expect(repo.setActive).toHaveBeenCalledWith(1, true)
+    expect(result).toBeInstanceOf(ClientModel)
+    expect(result.published).toBe(true)
+  })
 })

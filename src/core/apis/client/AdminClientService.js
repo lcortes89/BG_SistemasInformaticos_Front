@@ -31,4 +31,9 @@ export default class AdminClientService {
   async remove(id) {
     await this.#repo.remove(id)
   }
+
+  // BGSI-310: show (true) or hide (false) on the public website
+  async setActive(id, active) {
+    return ClientModel.create(await this.#repo.setActive(id, active), clientMapper)
+  }
 }

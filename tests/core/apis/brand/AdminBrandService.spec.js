@@ -37,4 +37,14 @@ describe('AdminBrandService', () => {
     expect(repo.update).toHaveBeenCalledWith(1, expect.objectContaining({ active: false }))
     expect(repo.remove).toHaveBeenCalledWith(1)
   })
+
+  it('activates or inactivates a brand and returns it (BGSI-310)', async () => {
+    const repo = { setActive: vi.fn().mockResolvedValue({ ...brandDto, active: true }) }
+
+    const result = await new AdminBrandService(repo).setActive(1, true)
+
+    expect(repo.setActive).toHaveBeenCalledWith(1, true)
+    expect(result).toBeInstanceOf(BrandModel)
+    expect(result.active).toBe(true)
+  })
 })
