@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import AdminUserService from '@/core/apis/adminuser/AdminUserService'
 
 // The 409 of the backend: the admin changed meanwhile (e.g. another admin blocked it first)
@@ -31,13 +31,14 @@ export function useAdminUsers(service = new AdminUserService(), pageSize = 5) {
   const feedback = ref(null)
   const actionError = ref(null)
   const busyId = ref(null) // the row whose action is running
+  const filters = reactive({ q: '', status: null }) // BGSI-302: search box (email) + status
 
   // pageNumber: by default the page on screen (a reload after an action stays on it)
   async function load(pageNumber = page.value) {
     isLoading.value = admins.value.length === 0 // a reload after an action keeps the table on screen
     error.value = null
     try {
-      const result = await service.getPage(pageNumber, pageSize)
+      const result = await service.getPage(pageNumber, pageSize, { ...filters })
       admins.value = result.items
       page.value = result.page
       totalPages.value = result.totalPages
@@ -76,6 +77,20 @@ export function useAdminUsers(service = new AdminUserService(), pageSize = 5) {
     }
   }
 
+  // BGSI-302: changing a filter always starts again from the first page
+  async function setFilter(name, value) {
+    filters[name] = value
+    await load(0)
+  }
+
+  const hasFilters = computed(() => filters.q !== '' || filters.status !== null)
+
+  async function clearFilters() {
+    filters.q = ''
+    filters.status = null
+    await load(0)
+  }
+
   // After the invitation form: the new admin appears in the list as "pending"
   async function invited(email) {
     actionError.value = null
@@ -83,5 +98,8 @@ export function useAdminUsers(service = new AdminUserService(), pageSize = 5) {
     await load()
   }
 
-  return { admins, page, totalPages, totalElements, isLoading, error, feedback, actionError, busyId, load, run, invited }
+  return {
+    admins, filters, hasFilters, page, totalPages, totalElements, isLoading, error, feedback, actionError, busyId,
+    load, setFilter, clearFilters, run, invited,
+  }
 }

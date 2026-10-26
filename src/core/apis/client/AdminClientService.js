@@ -10,8 +10,9 @@ export default class AdminClientService {
     this.#repo = repository
   }
 
-  async getPage(page = 0, size = 10) {
-    const response = await this.#repo.findPage(page, size)
+  // filters: { q, active } (BGSI-302)
+  async getPage(page = 0, size = 10, filters = {}) {
+    const response = await this.#repo.findPage(page, size, { q: filters.q, active: filters.active })
     return {
       items: response.content.map((dto) => ClientModel.create(dto, clientMapper)),
       page: response.page,

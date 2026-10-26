@@ -1,4 +1,4 @@
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 // service must have: getPage(page, size, filters), create(form), update(id, form), remove(id)
 // and, for the tables with "Activar / Inactivar", setActive(id, active) (BGSI-310)
@@ -39,6 +39,14 @@ export function useAdminCrud(service, { pageSize = 10, conflictMessage = null } 
   // Changing a filter always starts again from the first page
   async function setFilter(name, value) {
     filters[name] = value
+    await loadPage(0)
+  }
+
+  // BGSI-302: "Limpiar filtros"
+  const hasFilters = computed(() => Object.values(filters).some((value) => value !== null && value !== undefined && value !== ''))
+
+  async function clearFilters() {
+    for (const name of Object.keys(filters)) filters[name] = null
     await loadPage(0)
   }
 
@@ -87,7 +95,7 @@ export function useAdminCrud(service, { pageSize = 10, conflictMessage = null } 
   }
 
   return {
-    items, filters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-    loadPage, setFilter, save, remove, setActive, clearMessages,
+    items, filters, hasFilters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
+    loadPage, setFilter, clearFilters, save, remove, setActive, clearMessages,
   }
 }

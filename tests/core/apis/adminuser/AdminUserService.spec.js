@@ -12,7 +12,7 @@ describe('AdminUserService', () => {
 
     const result = await new AdminUserService(repo).getPage(1, 5)
 
-    expect(repo.findPage).toHaveBeenCalledWith(1, 5)
+    expect(repo.findPage).toHaveBeenCalledWith(1, 5, { q: undefined, status: undefined })
     expect(result.items[0]).toBeInstanceOf(AdminUserModel)
     expect(result.items[0].email).toBe('maria@bg.es')
     expect(result).toMatchObject({ page: 1, totalPages: 2, totalElements: 6 })

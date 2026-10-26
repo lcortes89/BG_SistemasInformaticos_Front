@@ -7,13 +7,16 @@ import ConfirmDialog from '@/shared/ConfirmDialog.vue'
 import ExportMenu from '@/shared/ExportMenu.vue'
 import ServicesTable from '@/components/admin/ServicesTable.vue'
 import ServiceForm from '@/components/admin/ServiceForm.vue'
+import AdminListFilters from '@/components/admin/AdminListFilters.vue'
+import FilterNoResults from '@/components/admin/FilterNoResults.vue'
+import { ACTIVE_OPTIONS } from '@/components/admin/list-filter-options'
 import AdminServiceService from '@/core/apis/service/AdminServiceService'
 import AdminBrandService from '@/core/apis/brand/AdminBrandService'
 import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 
 const {
-  items: services, filters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-  loadPage, setFilter, save, remove, setActive,
+  items: services, filters, hasFilters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
+  loadPage, setFilter, clearFilters, save, remove, setActive,
 } = useAdminCrud(new AdminServiceService(), { pageSize: 6 })
 
 const brandService = new AdminBrandService()
@@ -72,17 +75,23 @@ onMounted(async () => {
         <p>{{ totalElements }} {{ totalElements === 1 ? 'producto' : 'productos' }}</p>
       </div>
       <div class="admin-page__tools">
-        <label for="brand-filter" class="sr-only">Filtrar por marca</label>
-        <select id="brand-filter" :value="filters.brandId ?? ''"
-                @change="setFilter('brandId', $event.target.value ? Number($event.target.value) : null)">
-          <option value="">Todas las marcas</option>
-          <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
-        </select>
-        <!-- BGSI-254: exports what the table shows (same brand filter) -->
-        <ExportMenu resource="services" :params="filters.brandId ? { brandId: filters.brandId } : {}" />
+        <!-- BGSI-254 + BGSI-302: exports what the table shows (same filters) -->
+        <ExportMenu resource="services" :params="{ ...filters }" />
         <button type="button" class="btn btn--primary admin-page__new" @click="openForm()">+ Nuevo producto</button>
       </div>
     </header>
+
+    <AdminListFilters :search="filters.q ?? ''" :status="filters.active ?? null" :status-options="ACTIVE_OPTIONS"
+                      placeholder="Buscar por producto o marca" :other-filters-active="!!filters.brandId"
+                      @update:search="setFilter('q', $event)" @update:status="setFilter('active', $event)"
+                      @clear="clearFilters">
+      <label for="brand-filter" class="sr-only">Filtrar por marca</label>
+      <select id="brand-filter" :value="filters.brandId ?? ''"
+              @change="setFilter('brandId', $event.target.value ? Number($event.target.value) : null)">
+        <option value="">Todas las marcas</option>
+        <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
+      </select>
+    </AdminListFilters>
 
     <Transition name="slide-fade">
       <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
@@ -94,7 +103,8 @@ onMounted(async () => {
     <LoadingSpinner v-if="isLoading" label="Cargando productos..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
     <template v-else>
-      <ServicesTable :services="services" @edit="openForm" @toggle="toggleActive"
+      <FilterNoResults v-if="hasFilters && services.length === 0" what="productos" @clear="clearFilters" />
+      <ServicesTable v-else :services="services" @edit="openForm" @toggle="toggleActive"
                      @delete="serviceToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>

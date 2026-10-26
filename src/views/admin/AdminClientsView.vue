@@ -7,12 +7,15 @@ import ConfirmDialog from '@/shared/ConfirmDialog.vue'
 import ExportMenu from '@/shared/ExportMenu.vue'
 import ClientsTable from '@/components/admin/ClientsTable.vue'
 import ClientForm from '@/components/admin/ClientForm.vue'
+import AdminListFilters from '@/components/admin/AdminListFilters.vue'
+import FilterNoResults from '@/components/admin/FilterNoResults.vue'
+import { ACTIVE_OPTIONS } from '@/components/admin/list-filter-options'
 import AdminClientService from '@/core/apis/client/AdminClientService'
 import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 
 const {
-  items: clients, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-  loadPage, save, remove, setActive,
+  items: clients, filters, hasFilters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
+  loadPage, setFilter, clearFilters, save, remove, setActive,
 } = useAdminCrud(new AdminClientService(), { pageSize: 6 })
 
 const formOpen = ref(false)
@@ -62,10 +65,16 @@ onMounted(() => loadPage(0))
         <p>{{ totalElements }} {{ totalElements === 1 ? 'caso de éxito' : 'casos de éxito' }}</p>
       </div>
       <div class="admin-page__tools">
-        <ExportMenu resource="clients" />
+        <!-- BGSI-302: exports what the table shows (same filters) -->
+        <ExportMenu resource="clients" :params="{ ...filters }" />
         <button type="button" class="btn btn--primary admin-page__new" @click="openForm()">+ Nuevo cliente</button>
       </div>
     </header>
+
+    <AdminListFilters :search="filters.q ?? ''" :status="filters.active ?? null" :status-options="ACTIVE_OPTIONS"
+                      placeholder="Buscar por nombre o tipo de negocio"
+                      @update:search="setFilter('q', $event)" @update:status="setFilter('active', $event)"
+                      @clear="clearFilters" />
 
     <Transition name="slide-fade">
       <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
@@ -77,7 +86,8 @@ onMounted(() => loadPage(0))
     <LoadingSpinner v-if="isLoading" label="Cargando clientes..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
     <template v-else>
-      <ClientsTable :clients="clients" @edit="openForm" @toggle="toggleActive"
+      <FilterNoResults v-if="hasFilters && clients.length === 0" what="clientes" @clear="clearFilters" />
+      <ClientsTable v-else :clients="clients" @edit="openForm" @toggle="toggleActive"
                     @delete="clientToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>

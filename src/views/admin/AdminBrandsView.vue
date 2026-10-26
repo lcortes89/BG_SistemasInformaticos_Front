@@ -7,12 +7,15 @@ import ConfirmDialog from '@/shared/ConfirmDialog.vue'
 import ExportMenu from '@/shared/ExportMenu.vue'
 import BrandsTable from '@/components/admin/BrandsTable.vue'
 import BrandForm from '@/components/admin/BrandForm.vue'
+import AdminListFilters from '@/components/admin/AdminListFilters.vue'
+import FilterNoResults from '@/components/admin/FilterNoResults.vue'
+import { ACTIVE_OPTIONS } from '@/components/admin/list-filter-options'
 import AdminBrandService from '@/core/apis/brand/AdminBrandService'
 import { useAdminCrud } from '@/composables/admin/useAdminCrud'
 
 const {
-  items: brands, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
-  loadPage, save, remove, setActive,
+  items: brands, filters, hasFilters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
+  loadPage, setFilter, clearFilters, save, remove, setActive,
 } = useAdminCrud(new AdminBrandService(), {
   pageSize: 6, // BGSI-316
   conflictMessage: 'No se puede borrar: esta marca tiene productos. Bórralos o cámbialos de marca primero.',
@@ -65,10 +68,16 @@ onMounted(() => loadPage(0))
         <p>{{ totalElements }} {{ totalElements === 1 ? 'marca' : 'marcas' }}</p>
       </div>
       <div class="admin-page__tools">
-        <ExportMenu resource="brands" />
+        <!-- BGSI-302: exports what the table shows (same filters) -->
+        <ExportMenu resource="brands" :params="{ ...filters }" />
         <button type="button" class="btn btn--primary admin-page__new" @click="openForm()">+ Nueva marca</button>
       </div>
     </header>
+
+    <AdminListFilters :search="filters.q ?? ''" :status="filters.active ?? null" :status-options="ACTIVE_OPTIONS"
+                      placeholder="Buscar por nombre o categoría"
+                      @update:search="setFilter('q', $event)" @update:status="setFilter('active', $event)"
+                      @clear="clearFilters" />
 
     <Transition name="slide-fade">
       <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
@@ -80,7 +89,8 @@ onMounted(() => loadPage(0))
     <LoadingSpinner v-if="isLoading" label="Cargando marcas..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
     <template v-else>
-      <BrandsTable :brands="brands" @edit="openForm" @toggle="toggleActive"
+      <FilterNoResults v-if="hasFilters && brands.length === 0" what="marcas" @clear="clearFilters" />
+      <BrandsTable v-else :brands="brands" @edit="openForm" @toggle="toggleActive"
                    @delete="brandToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>

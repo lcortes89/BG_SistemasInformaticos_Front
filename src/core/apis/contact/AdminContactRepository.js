@@ -1,4 +1,5 @@
 import BaseRepository from '@/core/apis/base/BaseRepository'
+import { listParams } from '@/core/apis/base/list-params'
 
 export default class AdminContactRepository extends BaseRepository {
 
@@ -6,11 +7,9 @@ export default class AdminContactRepository extends BaseRepository {
     super('/admin/contacts')
   }
 
-  // GET /api/admin/contacts?status=NEW&page=0&size=10 (the interceptor adds the token)
-  async findPage(status, page, size) {
-    const params = { page, size }
-    if (status) params.status = status
-    return this.get('', params)
+  // GET /api/admin/contacts?status=NEW&q=marta&page=0&size=10 (the interceptor adds the token)
+  async findPage(page, size, filters = {}) {
+    return this.get('', listParams(page, size, filters))
   }
 
   // PATCH /api/admin/contacts/{id}  { status?, note? }

@@ -1,4 +1,5 @@
 import BaseRepository from '@/core/apis/base/BaseRepository'
+import { listParams } from '@/core/apis/base/list-params'
 
 export default class AdminBrandRepository extends BaseRepository {
 
@@ -6,8 +7,9 @@ export default class AdminBrandRepository extends BaseRepository {
     super('/admin/brands')
   }
 
-  async findPage(page, size) {
-    return this.get('', { page, size })
+  // GET /api/admin/brands?page=0&size=6&q=bdp&active=true (filters: BGSI-302)
+  async findPage(page, size, filters = {}) {
+    return this.get('', listParams(page, size, filters))
   }
 
   async create(body) {

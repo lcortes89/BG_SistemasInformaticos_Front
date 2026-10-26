@@ -6,6 +6,9 @@ import ModalDialog from '@/shared/ModalDialog.vue'
 import ConfirmDialog from '@/shared/ConfirmDialog.vue'
 import AdminUsersTable from '@/components/admin/AdminUsersTable.vue'
 import InviteAdminForm from '@/components/admin/InviteAdminForm.vue'
+import AdminListFilters from '@/components/admin/AdminListFilters.vue'
+import FilterNoResults from '@/components/admin/FilterNoResults.vue'
+import { ADMIN_STATUS_OPTIONS } from '@/components/admin/list-filter-options'
 import { useAdminUsers } from '@/composables/admin/useAdminUsers'
 import { useInviteAdminForm } from '@/composables/admin/useInviteAdminForm'
 
@@ -15,7 +18,8 @@ const props = defineProps({
 })
 
 const {
-  admins, page, totalPages, totalElements, isLoading, error, feedback, actionError, busyId, load, run, invited,
+  admins, filters, hasFilters, page, totalPages, totalElements, isLoading, error, feedback, actionError, busyId,
+  load, setFilter, clearFilters, run, invited,
 } = useAdminUsers(props.service)
 const invite = useInviteAdminForm(props.service)
 
@@ -94,6 +98,11 @@ onMounted(() => load(0))
       y se avisa por correo a todos los administradores.
     </p>
 
+    <AdminListFilters :search="filters.q" :status="filters.status" :status-options="ADMIN_STATUS_OPTIONS"
+                      placeholder="Buscar por email"
+                      @update:search="setFilter('q', $event)" @update:status="setFilter('status', $event)"
+                      @clear="clearFilters" />
+
     <Transition name="slide-fade">
       <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
     </Transition>
@@ -104,7 +113,8 @@ onMounted(() => load(0))
     <LoadingSpinner v-if="isLoading" label="Cargando administradores..." />
     <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
     <template v-else>
-      <AdminUsersTable :admins="admins" :busy-id="busyId" @action="(action, admin) => (pending = { action, admin })" />
+      <FilterNoResults v-if="hasFilters && admins.length === 0" what="administradores" @clear="clearFilters" />
+      <AdminUsersTable v-else :admins="admins" :busy-id="busyId" @action="(action, admin) => (pending = { action, admin })" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="load" />
     </template>
 

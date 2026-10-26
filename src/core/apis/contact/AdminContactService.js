@@ -10,9 +10,9 @@ export default class AdminContactService {
     this.#repo = repository
   }
 
-  // status = null -> all contacts
-  async getPage(status = null, page = 0, size = 10) {
-    const response = await this.#repo.findPage(status, page, size)
+  // filters: { status, q }. null = all (q: BGSI-302)
+  async getPage(page = 0, size = 10, filters = {}) {
+    const response = await this.#repo.findPage(page, size, { status: filters.status, q: filters.q })
     return {
       items: response.content.map((dto) => ContactModel.create(dto, contactMapper)),
       page: response.page,

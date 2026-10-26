@@ -88,4 +88,21 @@ describe('useAdminCrud', () => {
     expect(actionError.value).toBe('Service with id 4 not found')
     expect(feedback.value).toBeNull()
   })
+
+  // BGSI-302: "Limpiar filtros"
+  it('knows when there are filters and clears them all from the first page', async () => {
+    const service = fakeService()
+    const { filters, hasFilters, setFilter, clearFilters } = useAdminCrud(service, { pageSize: 6 })
+    expect(hasFilters.value).toBe(false)
+
+    await setFilter('q', 'bar')
+    await setFilter('active', false)
+    expect(hasFilters.value).toBe(true)
+
+    await clearFilters()
+
+    expect(filters).toEqual({ q: null, active: null })
+    expect(hasFilters.value).toBe(false)
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 6, { q: null, active: null })
+  })
 })

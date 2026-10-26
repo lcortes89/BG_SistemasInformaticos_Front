@@ -36,11 +36,11 @@ describe('admin repositories', () => {
     const services = new AdminServiceRepository()
     const contacts = new AdminContactRepository()
 
-    await services.findPage(0, 10, 7); await services.create({}); await services.update(3, {}); await services.remove(3)
-    await contacts.findPage('NEW', 0, 10); await contacts.update(4, { status: 'CONTACTED' })
+    await services.findPage(0, 10, { brandId: 7, q: '', active: null }); await services.create({}); await services.update(3, {}); await services.remove(3)
+    await contacts.findPage(0, 10, { status: 'NEW', q: 'marta' }); await contacts.update(4, { status: 'CONTACTED' })
 
-    expect(calls[0].body.params).toEqual(expect.objectContaining({ brandId: 7 }))
-    expect(calls[4].body.params).toEqual(expect.objectContaining({ status: 'NEW' }))
+    expect(calls[0].body.params).toEqual({ page: 0, size: 10, brandId: 7 }) // BGSI-302: empty filters are not sent
+    expect(calls[4].body.params).toEqual({ page: 0, size: 10, status: 'NEW', q: 'marta' })
     expect(calls.map((call) => call.key)).toContain('PATCH /admin/contacts/4')
   })
 
