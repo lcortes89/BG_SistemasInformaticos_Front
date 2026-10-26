@@ -100,7 +100,7 @@ describe('useAdminUsers', () => {
 
     await load(1)
 
-    expect(service.getPage).toHaveBeenCalledWith(1, 5)
+    expect(service.getPage).toHaveBeenCalledWith(1, 5, { q: '', status: null })
     expect(admins.value).toEqual([maria])
     expect(page.value).toBe(1)
     expect(totalPages.value).toBe(2)
@@ -114,7 +114,7 @@ describe('useAdminUsers', () => {
 
     await run('block', maria)
 
-    expect(service.getPage).toHaveBeenLastCalledWith(1, 5)
+    expect(service.getPage).toHaveBeenLastCalledWith(1, 5, { q: '', status: null })
   })
 
   it('goes back one page after deleting the last admin of a page', async () => {
@@ -127,6 +127,21 @@ describe('useAdminUsers', () => {
 
     await run('remove', maria)
 
-    expect(service.getPage).toHaveBeenLastCalledWith(0, 5)
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 5, { q: '', status: null })
+  })
+
+  // BGSI-302: search box (email) + status
+  it('filters from the first page and clears the filters', async () => {
+    const service = { getPage: vi.fn().mockResolvedValue(pageOf([maria])) }
+    const { hasFilters, setFilter, clearFilters } = useAdminUsers(service)
+
+    await setFilter('q', 'maria')
+    await setFilter('status', 'PENDING')
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 5, { q: 'maria', status: 'PENDING' })
+    expect(hasFilters.value).toBe(true)
+
+    await clearFilters()
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 5, { q: '', status: null })
+    expect(hasFilters.value).toBe(false)
   })
 })

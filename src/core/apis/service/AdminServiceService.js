@@ -11,9 +11,10 @@ export default class AdminServiceService {
     this.#repo = repository
   }
 
-  // filters: { brandId }
+  // filters: { brandId, q, active } (q and active: BGSI-302)
   async getPage(page = 0, size = 10, filters = {}) {
-    const response = await this.#repo.findPage(page, size, filters.brandId ?? null)
+    const response = await this.#repo.findPage(page, size,
+      { brandId: filters.brandId, q: filters.q, active: filters.active })
     return {
       items: response.content.map((dto) => ServiceModel.create(dto, serviceMapper)),
       page: response.page,

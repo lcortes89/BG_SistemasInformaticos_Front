@@ -3,14 +3,16 @@ import { onMounted, ref } from 'vue'
 import LoadingSpinner from '@/shared/LoadingSpinner.vue'
 import Pagination from '@/shared/Pagination.vue'
 import ConfirmDialog from '@/shared/ConfirmDialog.vue'
-import ContactStatusFilter from '@/components/admin/ContactStatusFilter.vue'
+import AdminListFilters from '@/components/admin/AdminListFilters.vue'
+import FilterNoResults from '@/components/admin/FilterNoResults.vue'
+import { CONTACT_STATUS_OPTIONS } from '@/components/admin/list-filter-options'
 import ContactsTable from '@/components/admin/ContactsTable.vue'
 import NoteDialog from '@/components/admin/NoteDialog.vue'
 import { useAdminContacts } from '@/composables/admin/useAdminContacts'
 
 const {
-  contacts, status, page, totalPages, totalElements, isLoading, error, feedback, actionError,
-  loadPage, changeStatus, updateContact, removeContact,
+  contacts, status, search, hasFilters, page, totalPages, totalElements, isLoading, error, feedback, actionError,
+  loadPage, changeStatus, changeSearch, clearFilters, updateContact, removeContact,
 } = useAdminContacts()
 
 const contactToArchive = ref(null) // shows the confirmation dialog
@@ -61,8 +63,12 @@ onMounted(() => loadPage(0))
         <h1>Contactos</h1>
         <p>{{ totalElements }} {{ totalElements === 1 ? 'mensaje' : 'mensajes' }}</p>
       </div>
-      <ContactStatusFilter :model-value="status" @update:model-value="changeStatus" />
     </header>
+
+    <!-- BGSI-302: search box + status (it replaces the status buttons) -->
+    <AdminListFilters :search="search" :status="status" :status-options="CONTACT_STATUS_OPTIONS"
+                      placeholder="Buscar por nombre, email o producto"
+                      @update:search="changeSearch" @update:status="changeStatus" @clear="clearFilters" />
 
     <Transition name="slide-fade">
       <p v-if="feedback" class="admin-contacts__feedback" role="status">{{ feedback }}</p>
@@ -74,7 +80,8 @@ onMounted(() => loadPage(0))
     <LoadingSpinner v-if="isLoading" label="Cargando contactos..." />
     <p v-else-if="error" class="admin-contacts__error" role="alert">{{ error }}</p>
     <template v-else>
-      <ContactsTable :contacts="contacts" @change-status="handleChangeStatus" @edit-note="contactWithNote = $event"
+      <FilterNoResults v-if="hasFilters && contacts.length === 0" what="contactos" @clear="clearFilters" />
+      <ContactsTable v-else :contacts="contacts" @change-status="handleChangeStatus" @edit-note="contactWithNote = $event"
                      @delete="contactToDelete = $event" />
       <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
     </template>

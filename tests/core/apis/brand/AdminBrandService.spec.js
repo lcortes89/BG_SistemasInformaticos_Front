@@ -10,7 +10,7 @@ describe('AdminBrandService', () => {
 
     const result = await new AdminBrandService(repo).getPage(0, 10)
 
-    expect(repo.findPage).toHaveBeenCalledWith(0, 10)
+    expect(repo.findPage).toHaveBeenCalledWith(0, 10, { q: undefined, active: undefined })
     expect(result.items[0]).toBeInstanceOf(BrandModel)
     expect(result.items[0].active).toBe(false)
     expect(result.items[0].serviceCount).toBe(3)

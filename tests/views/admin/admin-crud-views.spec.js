@@ -90,11 +90,60 @@ describe('admin CRUD screens', () => {
     const wrapper = await mountView(AdminServicesView)
     expect(wrapper.text()).toContain('BDP One')
 
-    await wrapper.find('.admin-page__tools select').setValue('1')
+    await wrapper.find('#brand-filter').setValue('1')
     await flushPromises()
 
     const lastServicesCall = calls.filter((call) => call.key === 'GET /admin/services').at(-1)
     expect(lastServicesCall.body.params).toEqual(expect.objectContaining({ brandId: 1 }))
+  })
+
+  // BGSI-302: search box + status, the empty list and "Limpiar filtros"
+  it('Clientes: searches, filters by status and clears the filters', async () => {
+    const calls = fakeApi({
+      'GET /admin/clients': (config) => page(config.params.q === 'nada' ? [] : [clientDto]),
+    })
+    const wrapper = await mountView(AdminClientsView)
+    const lastParams = () => calls.filter((call) => call.key === 'GET /admin/clients').at(-1).body.params
+
+    const search = wrapper.find('[data-test="filter-search"]')
+    await search.setValue('nada')
+    await search.trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+    await wrapper.find('[data-test="filter-status"]').setValue(false)
+    await flushPromises()
+
+    expect(lastParams()).toEqual({ page: 0, size: 6, q: 'nada', active: false })
+    expect(wrapper.find('[data-test="filter-no-results"]').text()).toContain('No hay clientes que coincidan')
+    expect(wrapper.find('table').exists()).toBe(false)
+
+    await wrapper.find('[data-test="filter-no-results"] button').trigger('click')
+    await flushPromises()
+
+    expect(lastParams()).toEqual({ page: 0, size: 6 })
+    expect(wrapper.find('[data-test="filter-search"]').element.value).toBe('')
+    expect(wrapper.find('[data-test="filter-clear"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Bar La Plaza')
+  })
+
+  it('Productos: the brand is one more filter and "Limpiar filtros" also removes it', async () => {
+    const calls = fakeApi({
+      'GET /admin/services': page([serviceDto]),
+      'GET /admin/brands': page([brandDto]),
+    })
+    const wrapper = await mountView(AdminServicesView)
+    const lastParams = () => calls.filter((call) => call.key === 'GET /admin/services').at(-1).body.params
+
+    await wrapper.find('#brand-filter').setValue('1')
+    await flushPromises()
+    await wrapper.find('[data-test="filter-status"]').setValue(true)
+    await flushPromises()
+    expect(lastParams()).toEqual({ page: 0, size: 6, brandId: 1, active: true })
+
+    await wrapper.find('[data-test="filter-clear"]').trigger('click')
+    await flushPromises()
+
+    expect(lastParams()).toEqual({ page: 0, size: 6 })
+    expect(wrapper.find('#brand-filter').element.value).toBe('')
   })
 
   // BGSI-310: "Activar / Inactivar" from the "⋯" menu, with the real repositories (PATCH .../active)

@@ -17,7 +17,7 @@ describe('useAdminContacts', () => {
 
     await loadPage(0)
 
-    expect(service.getPage).toHaveBeenCalledWith(null, 0, 5)
+    expect(service.getPage).toHaveBeenCalledWith(0, 5, { status: null, q: '' })
     expect(contacts.value).toHaveLength(1)
     expect(totalPages.value).toBe(3)
     expect(totalElements.value).toBe(25)
@@ -31,7 +31,7 @@ describe('useAdminContacts', () => {
     await changeStatus('CONTACTED')
 
     expect(status.value).toBe('CONTACTED')
-    expect(service.getPage).toHaveBeenCalledWith('CONTACTED', 0, 5)
+    expect(service.getPage).toHaveBeenCalledWith(0, 5, { status: 'CONTACTED', q: '' })
   })
 
   it('stores the error when the API fails', async () => {
@@ -77,7 +77,7 @@ describe('useAdminContacts', () => {
 
     expect(ok).toBe(true)
     expect(service.remove).toHaveBeenCalledWith(1)
-    expect(service.getPage).toHaveBeenLastCalledWith(null, 0, 5)
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 5, { status: null, q: '' })
     expect(feedback.value).toBe('Contacto de Ana López borrado')
     expect(actionError.value).toBeNull()
   })
@@ -90,7 +90,7 @@ describe('useAdminContacts', () => {
 
     await removeContact({ id: 7, name: 'Luis' })
 
-    expect(service.getPage).toHaveBeenLastCalledWith(null, 1, 5)
+    expect(service.getPage).toHaveBeenLastCalledWith(1, 5, { status: null, q: '' })
   })
 
   it('says nothing when the password dialog is closed', async () => {
@@ -112,5 +112,31 @@ describe('useAdminContacts', () => {
 
     expect(ok).toBe(false)
     expect(actionError.value).toBe('Contact with id 9 not found')
+  })
+
+  // BGSI-302: search box (name, email or product) together with the status
+  it('searches from the first page and keeps the status', async () => {
+    const service = fakeService()
+    const { hasFilters, changeStatus, changeSearch } = useAdminContacts(service)
+    await changeStatus('NEW')
+
+    await changeSearch('marta')
+
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 5, { status: 'NEW', q: 'marta' })
+    expect(hasFilters.value).toBe(true)
+  })
+
+  it('clears the search and the status', async () => {
+    const service = fakeService()
+    const { status, search, hasFilters, changeStatus, changeSearch, clearFilters } = useAdminContacts(service)
+    await changeStatus('ARCHIVED')
+    await changeSearch('marta')
+
+    await clearFilters()
+
+    expect(status.value).toBeNull()
+    expect(search.value).toBe('')
+    expect(hasFilters.value).toBe(false)
+    expect(service.getPage).toHaveBeenLastCalledWith(0, 5, { status: null, q: '' })
   })
 })

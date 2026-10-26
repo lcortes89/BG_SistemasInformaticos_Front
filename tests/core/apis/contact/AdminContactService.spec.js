@@ -13,9 +13,9 @@ describe('AdminContactService', () => {
       findPage: vi.fn().mockResolvedValue({ content: [contactDto], page: 0, size: 10, totalElements: 1, totalPages: 1, last: true }),
     }
 
-    const result = await new AdminContactService(fakeRepository).getPage('NEW', 0, 10)
+    const result = await new AdminContactService(fakeRepository).getPage(0, 10, { status: 'NEW', q: 'marta' })
 
-    expect(fakeRepository.findPage).toHaveBeenCalledWith('NEW', 0, 10)
+    expect(fakeRepository.findPage).toHaveBeenCalledWith(0, 10, { status: 'NEW', q: 'marta' })
     expect(result.items[0]).toBeInstanceOf(ContactModel)
     expect(result.items[0].email).toBe('ana@mail.com')
     expect(result.items[0].getStatusLabel()).toBe('Nuevo')

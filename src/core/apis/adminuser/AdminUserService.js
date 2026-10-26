@@ -14,9 +14,9 @@ export default class AdminUserService {
     return AdminUserModel.create(dto, adminUserMapper)
   }
 
-  // BGSI-316: one page of admins, like the other admin lists
-  async getPage(page = 0, size = 5) {
-    const response = await this.#repo.findPage(page, size)
+  // BGSI-316: one page of admins, like the other admin lists. filters: { q, status } (BGSI-302)
+  async getPage(page = 0, size = 5, filters = {}) {
+    const response = await this.#repo.findPage(page, size, { q: filters.q, status: filters.status })
     return {
       items: response.content.map((dto) => this.#toModel(dto)),
       page: response.page,

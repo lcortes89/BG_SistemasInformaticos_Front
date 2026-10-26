@@ -1,4 +1,5 @@
 import BaseRepository from '@/core/apis/base/BaseRepository'
+import { listParams } from '@/core/apis/base/list-params'
 
 // "Administradores" (BGSI-277). The changes need the password (BGSI-275): the interceptor asks for it
 export default class AdminUserRepository extends BaseRepository {
@@ -7,9 +8,10 @@ export default class AdminUserRepository extends BaseRepository {
     super('/admin/users')
   }
 
-  // GET /api/admin/users?page=0&size=5 -> PageResponseDTO of AdminUserDTO, sorted by email (BGSI-316)
-  async findPage(page, size) {
-    return this.get('', { page, size })
+  // GET /api/admin/users?page=0&size=5&q=ana&status=PENDING -> PageResponseDTO of AdminUserDTO, sorted by email
+  // (BGSI-316; filters: BGSI-302)
+  async findPage(page, size, filters = {}) {
+    return this.get('', listParams(page, size, filters))
   }
 
   // POST /api/admin/users/invitations { email } -> 201 AdminUserDTO (409 if the email exists)

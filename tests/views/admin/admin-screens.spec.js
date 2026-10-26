@@ -60,6 +60,22 @@ describe('admin screens', () => {
     expect(wrapper.find('[role="status"]').text()).toBe('Contacto marcado como contactado')
   })
 
+  // BGSI-302: search box + status (the status buttons are now a select)
+  it('Contactos: searches by text and status', async () => {
+    const calls = fakeApi({ 'GET /admin/contacts': page([contactDto]) })
+    const wrapper = await mountWithRouter(AdminContactsView)
+
+    await wrapper.find('[data-test="filter-status"]').setValue('NEW')
+    await flushPromises()
+    const search = wrapper.find('[data-test="filter-search"]')
+    await search.setValue('ana')
+    await search.trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+
+    expect(calls.at(-1).body.params).toEqual({ page: 0, size: 5, status: 'NEW', q: 'ana' })
+    expect(wrapper.text()).toContain('Ana López')
+  })
+
   it('Contactos: asks before archiving a contact', async () => {
     const calls = fakeApi({
       'GET /admin/contacts': page([contactDto]),
@@ -238,6 +254,22 @@ describe('admin screens', () => {
     expect(calls.at(-1).body.params).toEqual({ page: 1, size: 5 })
     expect(wrapper.findAll('tbody tr')).toHaveLength(1)
     expect(wrapper.text()).toContain('admin6@bg.es')
+  })
+
+  // BGSI-302
+  it('Administradores: filters by email and status', async () => {
+    const calls = fakeApi({ 'GET /admin/users': page([]) })
+    const wrapper = await mountWithRouter(AdminUsersView)
+
+    await wrapper.find('[data-test="filter-status"]').setValue('BLOCKED')
+    await flushPromises()
+    const search = wrapper.find('[data-test="filter-search"]')
+    await search.setValue('carlos')
+    await search.trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+
+    expect(calls.at(-1).body.params).toEqual({ page: 0, size: 5, status: 'BLOCKED', q: 'carlos' })
+    expect(wrapper.find('[data-test="filter-no-results"]').text()).toContain('No hay administradores')
   })
 
   it('Administradores: asks before blocking and then blocks', async () => {

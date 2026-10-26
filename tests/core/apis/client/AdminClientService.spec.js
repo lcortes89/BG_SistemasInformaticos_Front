@@ -10,7 +10,7 @@ describe('AdminClientService', () => {
 
     const result = await new AdminClientService(repo).getPage(0, 10)
 
-    expect(repo.findPage).toHaveBeenCalledWith(0, 10)
+    expect(repo.findPage).toHaveBeenCalledWith(0, 10, { q: undefined, active: undefined })
     expect(result.items[0]).toBeInstanceOf(ClientModel)
     expect(result.items[0].published).toBe(false)
   })

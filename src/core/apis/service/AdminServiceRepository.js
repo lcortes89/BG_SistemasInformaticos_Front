@@ -1,4 +1,5 @@
 import BaseRepository from '@/core/apis/base/BaseRepository'
+import { listParams } from '@/core/apis/base/list-params'
 
 export default class AdminServiceRepository extends BaseRepository {
 
@@ -6,11 +7,9 @@ export default class AdminServiceRepository extends BaseRepository {
     super('/admin/services')
   }
 
-  // brandId = null -> all brands
-  async findPage(page, size, brandId = null) {
-    const params = { page, size }
-    if (brandId) params.brandId = brandId
-    return this.get('', params)
+  // GET /api/admin/services?page=0&size=6&brandId=1&q=one&active=true. Empty filters are not sent (BGSI-302)
+  async findPage(page, size, filters = {}) {
+    return this.get('', listParams(page, size, filters))
   }
 
   async create(body) {

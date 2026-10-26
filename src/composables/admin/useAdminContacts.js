@@ -1,10 +1,11 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AdminContactService from '@/core/apis/contact/AdminContactService'
 
 // BGSI-316: 5 contacts per page
 export function useAdminContacts(service = new AdminContactService(), pageSize = 5) {
   const contacts = ref([])
   const status = ref(null) // null = all
+  const search = ref('') // BGSI-302: text of the search box (name, email or product)
   const page = ref(0)
   const totalPages = ref(0)
   const totalElements = ref(0)
@@ -17,7 +18,7 @@ export function useAdminContacts(service = new AdminContactService(), pageSize =
     isLoading.value = true
     error.value = null
     try {
-      const result = await service.getPage(status.value, pageNumber, pageSize)
+      const result = await service.getPage(pageNumber, pageSize, { status: status.value, q: search.value })
       contacts.value = result.items
       page.value = result.page
       totalPages.value = result.totalPages
@@ -29,9 +30,22 @@ export function useAdminContacts(service = new AdminContactService(), pageSize =
     }
   }
 
-  // Changing the filter always starts again from the first page
+  // Changing a filter always starts again from the first page
   async function changeStatus(newStatus) {
     status.value = newStatus
+    await loadPage(0)
+  }
+
+  async function changeSearch(text) {
+    search.value = text
+    await loadPage(0)
+  }
+
+  const hasFilters = computed(() => status.value !== null || search.value !== '')
+
+  async function clearFilters() {
+    status.value = null
+    search.value = ''
     await loadPage(0)
   }
 
@@ -68,7 +82,7 @@ export function useAdminContacts(service = new AdminContactService(), pageSize =
   }
 
   return {
-    contacts, status, page, totalPages, totalElements, isLoading, error, feedback, actionError,
-    loadPage, changeStatus, updateContact, removeContact,
+    contacts, status, search, hasFilters, page, totalPages, totalElements, isLoading, error, feedback, actionError,
+    loadPage, changeStatus, changeSearch, clearFilters, updateContact, removeContact,
   }
 }
