@@ -87,19 +87,13 @@ The project uses a decoupled architecture, with the frontend and backend maintai
 
 ### 💻 Desktop
 
-| 🏠 Home | 🏷️ Solutions |
-|:---:|:---:|
-| <img src="docs/images/web-home.png" alt="Home" width="420"> | <img src="docs/images/web-solutions.png" alt="Solutions" width="420"> |
-| **🧮 Rates** | **⭐ Clients** |
-| <img src="docs/images/web-rates.png" alt="Rates" width="420"> | <img src="docs/images/web-clients.png" alt="Clients" width="420"> |
-| **✉️ Contact** | **📊 Administration panel** |
-| <img src="docs/images/web-contact.png" alt="Contact" width="420"> | <img src="docs/images/web-admin.png" alt="Administration panel" width="420"> |
+<img src="docs/images/prototype-desktop.png" alt="Home, Solutions and Contact on desktop" width="860">
 
 ### 📱 Mobile
 
-| 🏠 Home | 🏷️ Solutions | 🧮 Rates | ⭐ Clients | ✉️ Contact |
-|:---:|:---:|:---:|:---:|:---:|
-| <img src="docs/images/mobile-home.png" alt="Home on mobile" width="160"> | <img src="docs/images/mobile-solutions.png" alt="Solutions on mobile" width="160"> | <img src="docs/images/mobile-rates.png" alt="Rates on mobile" width="160"> | <img src="docs/images/mobile-clients.png" alt="Clients on mobile" width="160"> | <img src="docs/images/mobile-contact.png" alt="Contact on mobile" width="160"> |
+<img src="docs/images/prototype-mobile.png" alt="Home, Contact and Rates on mobile" width="860">
+
+Every page on desktop and mobile, including the administration panel: **[9. 📸Screenshots](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/Screenshots)**.
 
 [← Features](#features) • [↑ Index](#index) • [Prototype →](#prototype)
 
@@ -107,17 +101,11 @@ The project uses a decoupled architecture, with the frontend and backend maintai
 
 ## 🎨 Prototype
 
-The website was designed before writing any code: first a **sketch** of the structure, then the **mockups** and an **interactive prototype** for desktop and mobile.
+The website was designed before writing any code: first a **sketch** of the structure, then the **mockups** and an **interactive prototype** for desktop and mobile, which became the screens shown above.
 
 ### ✏️ Sketch
 
 <img src="docs/images/sketch.png" alt="Sketch of the website" width="860">
-
-### 🖌️ Mockups
-
-| 💻 Desktop | 📱 Mobile |
-|:---:|:---:|
-| <img src="docs/images/prototype-desktop.png" alt="Prototype for desktop" width="480"> | <img src="docs/images/prototype-mobile.png" alt="Prototype for mobile" width="320"> |
 
 [← Screenshots](#screenshots) • [↑ Index](#index) • [Project Documentation →](#documentation)
 
@@ -142,6 +130,8 @@ The full project documentation is available in the project Wiki:
 ### [7. 🔌API Integration](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/API-Integration)
 
 ### [8. 🧪Testing](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/Testing)
+
+### [9. 📸Screenshots](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/Screenshots)
 
 [← Prototype](#prototype) • [↑ Index](#index) • [Author →](#author)
 
