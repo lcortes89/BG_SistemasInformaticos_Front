@@ -34,7 +34,7 @@ test('an admin invites another one, sends the invitation again and deletes it', 
   await dialog.getByLabel('Contraseña', { exact: true }).fill(E2E_ADMIN_PASSWORD)
   await dialog.getByRole('button', { name: 'Confirmar' }).click()
 
-  await expect(page.getByRole('status')).toHaveText(`Invitación enviada a ${email}. Tiene 24 horas para crear su contraseña.`)
+  await expect(page.getByRole('status').filter({ hasText: `Invitación enviada a ${email}. Tiene 24 horas para crear su contraseña.` })).toBeVisible()
   const row = page.getByRole('row').filter({ hasText: email })
   await expect(row.getByText('Pendiente')).toBeVisible()
   await expect(row.getByText('Nunca')).toBeVisible()
@@ -44,12 +44,12 @@ test('an admin invites another one, sends the invitation again and deletes it', 
   await row.getByRole('button', { name: `Acciones de ${email}` }).click()
   await page.getByRole('menuitem', { name: 'Reenviar invitación' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Reenviar' }).click()
-  await expect(page.getByRole('status')).toHaveText(`Invitación reenviada a ${email}. El enlace anterior ya no sirve.`)
+  await expect(page.getByRole('status').filter({ hasText: `Invitación reenviada a ${email}. El enlace anterior ya no sirve.` })).toBeVisible()
 
   // Delete it: the password was confirmed less than 5 minutes ago, it is not asked again
   await row.getByRole('button', { name: `Acciones de ${email}` }).click()
   await page.getByRole('menuitem', { name: 'Borrar' }).click()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Borrar' }).click()
-  await expect(page.getByRole('status')).toHaveText(`${email} se ha borrado.`)
+  await expect(page.getByRole('status').filter({ hasText: `${email} se ha borrado.` })).toBeVisible()
   await expect(row).toHaveCount(0)
 })
