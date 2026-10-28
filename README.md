@@ -93,21 +93,9 @@ The project uses a decoupled architecture, with the frontend and backend maintai
 
 <img src="docs/images/prototype-mobile.png" alt="Home, Contact and Rates on mobile" width="860">
 
-Every page on desktop and mobile, including the administration panel: **[9. 📸Screenshots](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/Screenshots)**.
+Every page on desktop and mobile, including the administration panel, is on **[9. 📸Screenshots](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/Screenshots)**. The sketch and the design process are on **[3. 📋Project Management & User Stories](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/Project-Management-&-User-Stories)**.
 
-[← Features](#features) • [↑ Index](#index) • [Prototype →](#prototype)
-
-<a id="prototype"></a>
-
-## 🎨 Prototype
-
-The website was designed before writing any code: first a **sketch** of the structure, then the **mockups** and an **interactive prototype** for desktop and mobile, which became the screens shown above.
-
-### ✏️ Sketch
-
-<img src="docs/images/sketch.png" alt="Sketch of the website" width="860">
-
-[← Screenshots](#screenshots) • [↑ Index](#index) • [Project Documentation →](#documentation)
+[← Features](#features) • [↑ Index](#index) • [Project Documentation →](#documentation)
 
 <a id="documentation"></a>
 
@@ -133,7 +121,7 @@ The full project documentation is available in the project Wiki:
 
 ### [9. 📸Screenshots](https://github.com/lcortes89/BG_SistemasInformaticos_Front/wiki/Screenshots)
 
-[← Prototype](#prototype) • [↑ Index](#index) • [Author →](#author)
+[← Screenshots](#screenshots) • [↑ Index](#index) • [Author →](#author)
 
 <a id="author"></a>
 
