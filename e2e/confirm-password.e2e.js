@@ -37,6 +37,6 @@ test('deleting a brand asks for the password and then deletes it', async ({ page
   await dialog.getByRole('button', { name: 'Confirmar' }).click()
 
   await expect(dialog).toBeHidden()
-  await expect(page.getByRole('status')).toHaveText(`Marca ${name} borrada`)
+  await expect(page.getByRole('status').filter({ hasText: `Marca ${name} borrada` })).toBeVisible()
   await expect(row).toHaveCount(0)
 })
