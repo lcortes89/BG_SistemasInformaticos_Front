@@ -1,0 +1,17 @@
+.admin-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.admin-page__header h1 { margin: 0 0 0.25rem; color: var(--color-navy); }
+.admin-page__header p { margin: 0; color: var(--color-muted); }
+.admin-page__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.admin-page__tools select { padding: 0.6rem 0.8rem; font: inherit; border: 1px solid #d1d5db; border-radius: var(--radius); }
+.admin-page__new { font: inherit; font-weight: 600; }
+.admin-page__feedback,
+.admin-page__error { margin: 0 0 1rem; padding: 0.9rem 1rem; border-radius: var(--radius); }
+.admin-page__feedback { color: #14532d; background: #dcfce7; }
+.admin-page__error { color: #7f1d1d; background: #fee2e2; }

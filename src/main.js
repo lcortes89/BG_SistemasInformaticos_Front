@@ -1,5 +1,31 @@
 import { createApp } from 'vue'
-import './style.css'
+import { createPinia } from 'pinia'
 import App from './App.vue'
+import router from './router'
+import { http } from './core/apis/base/BaseRepository'
+import { setupInterceptors } from './core/apis/base/http-interceptors'
+import { useAuthStore } from './stores/auth'
+import { useConfirmationStore } from './stores/confirmation'
+import { syncSessionBetweenTabs } from './stores/auth-tabs'
+import './assets/styles/style.css'
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(createPinia())
+app.use(router)
+
+const authStore = useAuthStore()
+const confirmationStore = useConfirmationStore()
+setupInterceptors(http, {
+  getToken: () => authStore.token,
+  getConfirmToken: () => confirmationStore.validToken(authStore.email),
+  requestConfirmation: () => confirmationStore.request(),
+  onUnauthorized: () => {
+    authStore.logout()
+    router.push({ name: 'admin-login', query: { expired: '1' } })
+  },
+})
+
+// BGSI-257: logging out in one tab logs out every tab of the browser
+syncSessionBetweenTabs(authStore, router)
+
+app.mount('#app')

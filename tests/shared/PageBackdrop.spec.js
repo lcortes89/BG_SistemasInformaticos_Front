@@ -1,0 +1,30 @@
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
+import PageBackdrop from '@/shared/PageBackdrop.vue'
+
+describe('PageBackdrop (BGSI-227)', () => {
+  it('renders the content of the view over the photo', () => {
+    const wrapper = mount(PageBackdrop, { slots: { default: '<h1>Nuestros Clientes</h1>' } })
+
+    expect(wrapper.find('.page-backdrop__content h1').text()).toBe('Nuestros Clientes')
+    expect(wrapper.find('.page-backdrop__image').attributes('aria-hidden')).toBe('true')
+  })
+
+  it('uses the photo it receives instead of the default one', () => {
+    const wrapper = mount(PageBackdrop, { props: { image: '/fotos/otra.jpg' } })
+
+    expect(wrapper.find('.page-backdrop__image').attributes('style')).toContain('/fotos/otra.jpg')
+  })
+})
+
+describe('PageBackdrop with the photo of "Apariencia" (BGSI-231)', () => {
+  it('uses the photo chosen by the admin', async () => {
+    const { useHeroImage } = await import('@/composables/layout/useHeroImage')
+    useHeroImage().setHeroImage('http://x.com/admin.jpg')
+
+    const wrapper = mount(PageBackdrop)
+
+    expect(wrapper.find('.page-backdrop__image').attributes('style')).toContain('http://x.com/admin.jpg')
+    useHeroImage().setHeroImage(null)
+  })
+})

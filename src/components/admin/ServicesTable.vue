@@ -1,0 +1,53 @@
+<script setup>
+import ExpandableText from '@/shared/ExpandableText.vue'
+import RowActionsMenu from '@/shared/RowActionsMenu.vue'
+import ActiveBadge from '@/shared/ActiveBadge.vue'
+import { editToggleDeleteActions } from '@/components/admin/row-actions'
+
+defineProps({
+  services: { type: Array, required: true }, // ServiceModel[]
+})
+
+// BGSI-312 / 310: the actions of each row, in the "⋯" menu. toggle = Activar / Inactivar
+const emit = defineEmits(['edit', 'toggle', 'delete'])
+</script>
+
+<template>
+  <p v-if="services.length === 0" class="admin-table__empty">No hay productos para este filtro.</p>
+
+  <table v-else class="admin-table">
+    <thead>
+      <tr>
+        <th scope="col">Producto</th>
+        <th scope="col">Marca</th>
+        <th scope="col">Descripción</th>
+        <th scope="col">Inicio</th>
+        <th scope="col">Estado</th>
+        <th scope="col" class="row-actions-cell"><span class="sr-only">Acciones</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="service in services" :key="service.id" :class="{ 'admin-table__row--inactive': !service.active }">
+        <td data-label="Producto">
+          <div class="admin-table__identity">
+            <img v-if="service.imageUrl" :src="service.imageUrl" alt="" class="admin-table__thumb" />
+            <strong>{{ service.name }}</strong>
+          </div>
+        </td>
+        <td data-label="Marca">{{ service.brandName }}</td>
+        <td data-label="Descripción" class="admin-table__text">
+          <ExpandableText v-if="service.description" :text="service.description" />
+          <span v-else>—</span>
+        </td>
+        <td data-label="Inicio">
+          <span v-if="service.featured" class="admin-table__badge admin-table__badge--on">Destacado</span>
+          <span v-else>—</span>
+        </td>
+        <td data-label="Estado"><ActiveBadge :active="service.active" /></td>
+        <td class="row-actions-cell">
+          <RowActionsMenu :items="editToggleDeleteActions(service.active)" :label="`Acciones de ${service.name}`" @select="emit($event, service)" />
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</template>

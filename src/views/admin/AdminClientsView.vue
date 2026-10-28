@@ -1,0 +1,113 @@
+<script setup>
+import { onMounted, ref } from 'vue'
+import LoadingSpinner from '@/shared/LoadingSpinner.vue'
+import Pagination from '@/shared/Pagination.vue'
+import ModalDialog from '@/shared/ModalDialog.vue'
+import ConfirmDialog from '@/shared/ConfirmDialog.vue'
+import ExportMenu from '@/shared/ExportMenu.vue'
+import ClientsTable from '@/components/admin/ClientsTable.vue'
+import ClientForm from '@/components/admin/ClientForm.vue'
+import AdminListFilters from '@/components/admin/AdminListFilters.vue'
+import FilterNoResults from '@/components/admin/FilterNoResults.vue'
+import { ACTIVE_OPTIONS } from '@/components/admin/list-filter-options'
+import AdminClientService from '@/core/apis/client/AdminClientService'
+import { useAdminCrud } from '@/composables/admin/useAdminCrud'
+
+const {
+  items: clients, filters, hasFilters, page, totalPages, totalElements, isLoading, isSaving, error, feedback, actionError,
+  loadPage, setFilter, clearFilters, save, remove, setActive,
+} = useAdminCrud(new AdminClientService(), { pageSize: 6 })
+
+const formOpen = ref(false)
+const clientToEdit = ref(null) // null = new client
+const clientToDelete = ref(null)
+const formError = ref(null)
+
+function openForm(client = null) {
+  clientToEdit.value = client
+  formError.value = null
+  formOpen.value = true
+}
+
+async function submitForm(form) {
+  formError.value = null
+  try {
+    const isEdit = !!clientToEdit.value
+    await save(clientToEdit.value?.id ?? null, form, isEdit ? 'Cliente actualizado' : 'Cliente creado')
+    formOpen.value = false
+  } catch (e) {
+    formError.value = e.message
+  }
+}
+
+async function confirmDelete() {
+  const client = clientToDelete.value
+  clientToDelete.value = null
+  await remove(client.id, `Cliente ${client.name} borrado`)
+}
+
+// BGSI-310: "Activar / Inactivar" (active = published on the Clientes page)
+function toggleActive(client) {
+  const active = !client.published
+  setActive(client.id, active, active
+    ? `Cliente ${client.name} activado: vuelve a verse en la web.`
+    : `Cliente ${client.name} inactivado: ya no se ve en la web.`)
+}
+
+onMounted(() => loadPage(0))
+</script>
+
+<template>
+  <section>
+    <header class="admin-page__header">
+      <div>
+        <h1>Clientes</h1>
+        <p>{{ totalElements }} {{ totalElements === 1 ? 'caso de éxito' : 'casos de éxito' }}</p>
+      </div>
+      <div class="admin-page__tools">
+        <!-- BGSI-302: exports what the table shows (same filters) -->
+        <ExportMenu resource="clients" :params="{ ...filters }" />
+        <button type="button" class="btn btn--primary admin-page__new" @click="openForm()">+ Nuevo cliente</button>
+      </div>
+    </header>
+
+    <AdminListFilters :search="filters.q ?? ''" :status="filters.active ?? null" :status-options="ACTIVE_OPTIONS"
+                      placeholder="Buscar por nombre o tipo de negocio"
+                      @update:search="setFilter('q', $event)" @update:status="setFilter('active', $event)"
+                      @clear="clearFilters" />
+
+    <Transition name="slide-fade">
+      <p v-if="feedback" class="admin-page__feedback" role="status">{{ feedback }}</p>
+    </Transition>
+    <Transition name="slide-fade">
+      <p v-if="actionError" class="admin-page__error" role="alert">{{ actionError }}</p>
+    </Transition>
+
+    <LoadingSpinner v-if="isLoading" label="Cargando clientes..." />
+    <p v-else-if="error" class="admin-page__error" role="alert">{{ error }}</p>
+    <template v-else>
+      <FilterNoResults v-if="hasFilters && clients.length === 0" what="clientes" @clear="clearFilters" />
+      <ClientsTable v-else :clients="clients" @edit="openForm" @toggle="toggleActive"
+                    @delete="clientToDelete = $event" />
+      <Pagination :current-page="page" :total-pages="totalPages" @change="loadPage" />
+    </template>
+
+    <Transition name="slide-fade">
+      <ModalDialog v-if="formOpen" :title="clientToEdit ? 'Editar cliente' : 'Nuevo cliente'" @close="formOpen = false">
+        <ClientForm :client="clientToEdit" :is-saving="isSaving" :server-error="formError"
+                    @submit="submitForm" @cancel="formOpen = false" />
+      </ModalDialog>
+    </Transition>
+
+    <Transition name="slide-fade">
+      <ConfirmDialog
+        v-if="clientToDelete"
+        title="Borrar cliente"
+        :message="`¿Seguro que quieres borrar a ${clientToDelete.name}? Esta acción no se puede deshacer.`"
+        confirm-label="Borrar"
+        @confirm="confirmDelete"
+        @cancel="clientToDelete = null"
+      />
+    </Transition>
+  </section>
+</template>

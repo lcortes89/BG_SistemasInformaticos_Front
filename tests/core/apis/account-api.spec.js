@@ -1,0 +1,51 @@
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import { fakeApi } from '../../helpers/fake-api'
+import AccountService from '@/core/apis/account/AccountService'
+
+// BGSI-272: PUT /api/admin/account/password
+describe('AccountService', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('sends both passwords and returns the new token', async () => {
+    const calls = fakeApi({ 'PUT /admin/account/password': { token: 'new-token' } })
+
+    const token = await new AccountService().changePassword('OldPass2026', 'NewPass2026')
+
+    expect(token).toBe('new-token')
+    expect(calls[0].body).toEqual({ currentPassword: 'OldPass2026', newPassword: 'NewPass2026' })
+  })
+
+  it('confirms the password and returns the 5-minute token (BGSI-275)', async () => {
+    const calls = fakeApi({ 'POST /admin/account/confirm': { confirmToken: 'tok', expiresInSeconds: 300 } })
+
+    const result = await new AccountService().confirmPassword('Correct2026')
+
+    expect(result).toEqual({ token: 'tok', expiresInSeconds: 300 })
+    expect(calls[0].body).toEqual({ password: 'Correct2026' })
+  })
+
+  // BGSI-276
+  it('calls the two-step verification endpoints', async () => {
+    const calls = fakeApi({
+      'GET /admin/account/2fa': { enabled: true, recoveryCodesLeft: 8 },
+      'POST /admin/account/2fa/setup': { secret: 'ABC', otpauthUri: 'otpauth://totp/x' },
+      'POST /admin/account/2fa/enable': { recoveryCodes: ['aaaa-bbbb'] },
+      'DELETE /admin/account/2fa': '',
+      'POST /admin/account/confirm': { confirmToken: 'tok', expiresInSeconds: 300 },
+    })
+    const service = new AccountService()
+
+    expect(await service.getTwoFactor()).toEqual({ enabled: true, recoveryCodesLeft: 8 })
+    expect(await service.setupTwoFactor()).toEqual({ secret: 'ABC', otpauthUri: 'otpauth://totp/x' })
+    expect(await service.enableTwoFactor(' 123456 ')).toEqual(['aaaa-bbbb'])
+    await service.disableTwoFactor()
+    await service.confirmPassword('Correct2026', '654321')
+
+    expect(calls.map((call) => call.key)).toEqual([
+      'GET /admin/account/2fa', 'POST /admin/account/2fa/setup', 'POST /admin/account/2fa/enable',
+      'DELETE /admin/account/2fa', 'POST /admin/account/confirm',
+    ])
+    expect(calls[2].body).toEqual({ code: '123456' })
+    expect(calls[4].body).toEqual({ password: 'Correct2026', code: '654321' })
+  })
+})

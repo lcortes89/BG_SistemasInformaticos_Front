@@ -1,0 +1,24 @@
+import BaseRepository from '@/core/apis/base/BaseRepository'
+import { listParams } from '@/core/apis/base/list-params'
+
+export default class AdminContactRepository extends BaseRepository {
+
+  constructor() {
+    super('/admin/contacts')
+  }
+
+  // GET /api/admin/contacts?status=NEW&q=marta&page=0&size=10 (the interceptor adds the token)
+  async findPage(page, size, filters = {}) {
+    return this.get('', listParams(page, size, filters))
+  }
+
+  // PATCH /api/admin/contacts/{id}  { status?, note? }
+  async update(id, changes) {
+    return this.patch(`/${id}`, changes)
+  }
+
+  // BGSI-308: DELETE /api/admin/contacts/{id} -> 204 (needs the password confirmation, BGSI-275)
+  async remove(id) {
+    return this.delete(`/${id}`)
+  }
+}
