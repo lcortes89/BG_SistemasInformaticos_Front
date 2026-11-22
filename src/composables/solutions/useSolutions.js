@@ -54,9 +54,19 @@ export function useSolutions(service = new BrandService(), pageSize = 4) {
     await loadServicesPage(0)
   }
 
+  // BGSI-330: "Ver todas las marcas" on mobile goes back to the list of brands
+  function clearBrand() {
+    selectedBrand.value = null
+    services.value = []
+    servicesPage.value = 0
+    servicesTotalPages.value = 0
+    servicesTotal.value = 0
+    servicesError.value = null
+  }
+
   return {
     brands, isLoadingBrands, brandsError, loadBrands,
-    selectedBrand, services, isLoadingServices, servicesError, selectBrand,
+    selectedBrand, services, isLoadingServices, servicesError, selectBrand, clearBrand,
     servicesPage, servicesTotalPages, servicesTotal, pageSize, loadServicesPage,
   }
 }
