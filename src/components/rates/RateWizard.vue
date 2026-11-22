@@ -113,6 +113,6 @@ onMounted(loadSteps)
 
 @media (max-width: 560px) {
   .wizard__question { font-size: 1.3rem; }
-  .wizard__options { grid-template-columns: 1fr; }
+  .wizard__options { grid-template-columns: 1fr; gap: 0.5rem; } // BGSI-330
 }
 </style>

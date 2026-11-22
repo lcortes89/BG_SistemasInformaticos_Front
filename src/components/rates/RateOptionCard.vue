@@ -49,4 +49,24 @@ defineEmits(['select'])
 @media (prefers-reduced-motion: reduce) {
   .option, .option:hover { transition: none; transform: none; }
 }
+
+// BGSI-330: one row per option on mobile (option A): icon on the left, text and description on the right
+@media (max-width: 560px) {
+  .option {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    grid-template-areas:
+      "icon label"
+      "icon description";
+    align-items: center;
+    gap: 0.1rem 0.75rem;
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+
+    &:hover { transform: none; }
+    &__icon { grid-area: icon; font-size: 1.5rem; text-align: center; }
+    &__label { grid-area: label; font-size: 0.95rem; }
+    &__description { grid-area: description; font-size: 0.8rem; line-height: 1.35; }
+  }
+}
 </style>

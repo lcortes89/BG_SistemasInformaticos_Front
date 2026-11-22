@@ -54,3 +54,18 @@ describe('useSolutions', () => {
     expect(brandsError.value).toBe('Server down')
   })
 })
+
+// BGSI-330: "Ver todas las marcas" on mobile goes back to the list of brands
+describe('useSolutions clearBrand', () => {
+  it('forgets the chosen brand and its products', async () => {
+    const fakeService = { getAll: vi.fn(), getServices: vi.fn().mockResolvedValue(firstPage) }
+    const { selectedBrand, services, servicesTotal, selectBrand, clearBrand } = useSolutions(fakeService)
+    await selectBrand(bdp)
+
+    clearBrand()
+
+    expect(selectedBrand.value).toBeNull()
+    expect(services.value).toEqual([])
+    expect(servicesTotal.value).toBe(0)
+  })
+})

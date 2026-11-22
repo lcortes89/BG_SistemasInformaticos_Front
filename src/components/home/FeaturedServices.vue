@@ -52,6 +52,8 @@ defineProps({
 }
 
 @media (max-width: 560px) {
-  .featured__grid { grid-template-columns: 1fr; }
+  .featured { padding: 2.5rem 0; } // BGSI-330
+  .featured__title { margin-bottom: 1.25rem; }
+  .featured__grid { grid-template-columns: 1fr; gap: 0.6rem; }
 }
 </style>

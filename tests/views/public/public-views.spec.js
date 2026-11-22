@@ -87,3 +87,61 @@ describe('public views', () => {
     expect(wrapper.find('textarea').element.value).toBe('Hola, me gustaría solicitar una demo de vuestros sistemas.')
   })
 })
+
+// BGSI-330: on mobile, choosing a brand shows only its products, with the bar of brands on top
+describe('Soluciones on mobile', () => {
+  const pudu = { ...brandDto, id: 2, name: 'PUDU' }
+  const puduService = { ...serviceDto, id: 4, name: 'PuduBot 2', brandId: 2, brandName: 'PUDU' }
+
+  function screen(isMobile) {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: isMobile, addEventListener: vi.fn(), removeEventListener: vi.fn() })
+  }
+
+  beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn()
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    fakeApi({
+      'GET /brands': [brandDto, pudu],
+      'GET /brands/1/services': page([serviceDto]),
+      'GET /brands/2/services': page([puduService]),
+    })
+  })
+  afterEach(() => {
+    delete window.matchMedia
+    vi.restoreAllMocks()
+  })
+
+  it('hides the list of brands, shows the bar and goes back with "Ver todas las marcas"', async () => {
+    screen(true)
+    const wrapper = await mountAt(SolutionsView, '/soluciones')
+
+    await wrapper.find('.brand-card__button').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.findAll('.brand-card')).toHaveLength(0)
+    expect(wrapper.find('.brand-bar').classes()).toContain('is-visible')
+    expect(wrapper.text()).toContain('BDP One')
+
+    await wrapper.findAll('.brand-bar__chip')[1].trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('PuduBot 2')
+
+    await wrapper.find('[data-test="all-brands"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.findAll('.brand-card')).toHaveLength(2)
+    expect(wrapper.find('.brand-bar').classes()).not.toContain('is-visible')
+    expect(wrapper.text()).not.toContain('PuduBot 2')
+  })
+
+  it('on desktop the list of brands stays', async () => {
+    screen(false)
+    const wrapper = await mountAt(SolutionsView, '/soluciones')
+
+    await wrapper.find('.brand-card__button').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.findAll('.brand-card')).toHaveLength(2)
+    expect(wrapper.find('[data-test="all-brands"]').exists()).toBe(false)
+  })
+})
