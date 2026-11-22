@@ -12,11 +12,15 @@ export function lockedMessage(minutes) {
 
 const EXPIRED_MESSAGE = 'Han pasado más de 5 minutos. Vuelve a escribir tu contraseña.'
 
+// BGSI-240: right password, but the new admin has not opened the verification email yet
+const NOT_VERIFIED_MESSAGE = 'Tu cuenta aún no está verificada. Revisa tu correo y abre el enlace que te enviamos.'
+
 export function useLoginForm(authStore = useAuthStore()) {
   const form = reactive({ email: '', password: '', code: '' })
   const errors = reactive({})
   const isSubmitting = ref(false)
   const submitError = ref(null)
+  const submitNotice = ref(null) // BGSI-240: amber notice, not an error
   // BGSI-276: 'password' -> 'code' when the admin has two-step verification
   const step = ref('password')
   const useRecoveryCode = ref(false)
@@ -32,6 +36,7 @@ export function useLoginForm(authStore = useAuthStore()) {
 
   async function submit() {
     submitError.value = null
+    submitNotice.value = null
     if (!validate()) return false
 
     isSubmitting.value = true
@@ -47,7 +52,8 @@ export function useLoginForm(authStore = useAuthStore()) {
       return true
     } catch (e) {
       // 401: wrong credentials. We never say which of the two fields failed (security)
-      if (e.status === 401) submitError.value = 'Email o contraseña incorrectos'
+      if (e.status === 401 && e.details?.reason === 'EMAIL_NOT_VERIFIED') submitNotice.value = NOT_VERIFIED_MESSAGE
+      else if (e.status === 401) submitError.value = 'Email o contraseña incorrectos'
       else if (e.status === 429) submitError.value = lockedMessage(e.details?.retryAfterMinutes)
       else submitError.value = e.message
       form.password = ''
@@ -104,7 +110,7 @@ export function useLoginForm(authStore = useAuthStore()) {
   }
 
   return {
-    form, errors, isSubmitting, submitError, submit,
+    form, errors, isSubmitting, submitError, submitNotice, submit,
     step, useRecoveryCode, submitCode, backToPassword, toggleRecoveryCode,
   }
 }
