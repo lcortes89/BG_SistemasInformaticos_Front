@@ -129,6 +129,6 @@ onMounted(loadBrands)
 
 @media (max-width: 560px) {
   .solutions { padding: 0.5rem 0 2rem; }
-  .solutions__grid { grid-template-columns: 1fr; }
+  .solutions__grid { grid-template-columns: 1fr; gap: 0.6rem; } // BGSI-330
 }
 </style>
