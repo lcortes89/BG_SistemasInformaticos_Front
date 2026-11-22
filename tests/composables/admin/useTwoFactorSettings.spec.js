@@ -104,3 +104,63 @@ describe('useTwoFactorSettings', () => {
     expect(twoFactor.feedback.value).toBe('Verificación en dos pasos desactivada.')
   })
 })
+
+// BGSI-338: names of the entries in the app, to know which one to delete
+describe('useTwoFactorSettings with the names of the entries', () => {
+  const NAME = 'BG Sistemas \u00B7 luisa@bg.es \u00B7 22/11/26'
+
+  function serviceOn() {
+    const service = fakeService(true)
+    service.getTwoFactor.mockResolvedValue({ enabled: true, recoveryCodesLeft: 7, entryName: NAME })
+    return service
+  }
+
+  it('loads the name of the current entry', async () => {
+    const twoFactor = useTwoFactorSettings(serviceOn(), fakeQr)
+
+    await twoFactor.load()
+
+    expect(twoFactor.entryName.value).toBe(NAME)
+    expect(twoFactor.removedEntryName.value).toBeNull()
+  })
+
+  it('after turning it off it remembers the entry to delete, until it is turned on again', async () => {
+    const twoFactor = useTwoFactorSettings(serviceOn(), fakeQr)
+    await twoFactor.load()
+
+    await twoFactor.disable()
+
+    expect(twoFactor.removedEntryName.value).toBe(NAME)
+    expect(twoFactor.entryName.value).toBeNull()
+
+    await twoFactor.start()
+
+    expect(twoFactor.removedEntryName.value).toBeNull()
+  })
+
+  it('closing "Confirma tu contraseña" does not ask to delete anything', async () => {
+    const service = serviceOn()
+    service.disableTwoFactor.mockRejectedValueOnce(Object.assign(new Error('x'), { cancelled: true }))
+    const twoFactor = useTwoFactorSettings(service, fakeQr)
+    await twoFactor.load()
+
+    await twoFactor.disable()
+
+    expect(twoFactor.removedEntryName.value).toBeNull()
+    expect(twoFactor.entryName.value).toBe(NAME)
+  })
+
+  it('reads the name of the new entry from the QR', async () => {
+    const service = fakeService(false)
+    service.setupTwoFactor.mockResolvedValue({
+      secret: 'ABC',
+      otpauthUri: 'otpauth://totp/BG%20Sistemas%3Aluisa%40bg.es%20%C2%B7%2023%2F11%2F26?secret=ABC&issuer=BG%20Sistemas',
+    })
+    const twoFactor = useTwoFactorSettings(service, fakeQr)
+    expect(twoFactor.newEntryName.value).toBeNull()
+
+    await twoFactor.start()
+
+    expect(twoFactor.newEntryName.value).toBe('BG Sistemas \u00B7 luisa@bg.es \u00B7 23/11/26')
+  })
+})
