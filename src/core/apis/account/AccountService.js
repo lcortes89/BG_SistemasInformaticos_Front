@@ -23,7 +23,7 @@ export default class AccountService {
   // BGSI-276: two-step verification
   async getTwoFactor() {
     const dto = await this.#repo.getTwoFactor()
-    return { enabled: dto.enabled, recoveryCodesLeft: dto.recoveryCodesLeft }
+    return { enabled: dto.enabled, recoveryCodesLeft: dto.recoveryCodesLeft, entryName: dto.entryName ?? null } // BGSI-338
   }
 
   async setupTwoFactor() {

@@ -1,6 +1,17 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import QRCode from 'qrcode'
 import AccountService from '@/core/apis/account/AccountService'
+
+// BGSI-338: "otpauth://totp/BG%20Sistemas%3Aluisa%40bg.es%20%C2%B7%2023%2F11%2F26?secret=..." -> "BG Sistemas · luisa@bg.es · 23/11/26"
+export function entryNameFromUri(otpauthUri) {
+  const label = otpauthUri?.match(/^otpauth:\/\/totp\/([^?]+)/)?.[1]
+  if (!label) return null
+  try {
+    return decodeURIComponent(label).replace(':', ' \u00B7 ')
+  } catch {
+    return null
+  }
+}
 
 // BGSI-276: "Mi cuenta > Verificación en dos pasos".
 // view: 'loading' | 'off' | 'setup' (QR + first code) | 'codes' (10 recovery codes, only once) | 'on'
@@ -13,12 +24,17 @@ export function useTwoFactorSettings(service = new AccountService(), toQr = (tex
   const error = ref(null)
   const feedback = ref(null)
   const isBusy = ref(false)
+  // BGSI-338: names of the entries in the app (Google/Microsoft Authenticator)
+  const entryName = ref(null) // the current one, when 2FA is on
+  const removedEntryName = ref(null) // the one to delete after turning 2FA off
+  const newEntryName = computed(() => (setup.value ? entryNameFromUri(setup.value.otpauthUri) : null))
 
   async function load() {
     error.value = null
     try {
       const status = await service.getTwoFactor()
       recoveryCodesLeft.value = status.recoveryCodesLeft
+      entryName.value = status.entryName ?? null
       view.value = status.enabled ? 'on' : 'off'
     } catch (e) {
       error.value = e.message
@@ -49,6 +65,7 @@ export function useTwoFactorSettings(service = new AccountService(), toQr = (tex
       const data = await service.setupTwoFactor()
       setup.value = { ...data, qr: await toQr(data.otpauthUri) }
       code.value = ''
+      removedEntryName.value = null
       view.value = 'setup'
     })
   }
@@ -61,6 +78,7 @@ export function useTwoFactorSettings(service = new AccountService(), toQr = (tex
     }
     await run(async () => {
       recoveryCodes.value = await service.enableTwoFactor(code.value)
+      entryName.value = newEntryName.value
       setup.value = null
       code.value = ''
       view.value = 'codes'
@@ -86,6 +104,8 @@ export function useTwoFactorSettings(service = new AccountService(), toQr = (tex
   async function disable() {
     await run(async () => {
       await service.disableTwoFactor()
+      removedEntryName.value = entryName.value
+      entryName.value = null
       view.value = 'off'
       feedback.value = 'Verificación en dos pasos desactivada.'
     })
@@ -102,6 +122,7 @@ export function useTwoFactorSettings(service = new AccountService(), toQr = (tex
 
   return {
     view, recoveryCodesLeft, setup, code, recoveryCodes, error, feedback, isBusy,
+    entryName, removedEntryName, newEntryName,
     load, start, confirm, cancelSetup, finish, disable, codesAsText,
   }
 }

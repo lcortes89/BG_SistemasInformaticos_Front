@@ -108,3 +108,48 @@ describe('TwoFactorCard', () => {
     expect(wrapper.text()).toContain('Desactivada')
   })
 })
+
+// BGSI-338: which entry of the app is the right one and which one to delete
+describe('TwoFactorCard with the names of the entries', () => {
+  const NAME = 'BG Sistemas \u00B7 luisa@bg.es \u00B7 22/11/26'
+
+  function serviceOn() {
+    const service = fakeService(true)
+    service.getTwoFactor.mockResolvedValue({ enabled: true, recoveryCodesLeft: 10, entryName: NAME })
+    return service
+  }
+
+  it('shows how the entry is called in the app', async () => {
+    const wrapper = await mountCard(serviceOn())
+
+    expect(wrapper.find('[data-test="entry-name"]').text()).toBe(NAME)
+  })
+
+  it('after turning it off it says which entry to delete and how', async () => {
+    const wrapper = await mountCard(serviceOn())
+
+    await wrapper.find('[data-test="disable"]').trigger('click')
+    await flushPromises()
+
+    const notice = wrapper.find('[data-test="remove-entry"]')
+    expect(notice.text()).toContain(NAME)
+    expect(notice.text()).toContain('Google Authenticator')
+    expect(notice.text()).toContain('Microsoft Authenticator')
+  })
+
+  it('on the QR screen it shows the name of the new entry', async () => {
+    const service = fakeService()
+    service.setupTwoFactor.mockResolvedValue({
+      secret: 'ABC',
+      otpauthUri: 'otpauth://totp/BG%20Sistemas%3Aluisa%40bg.es%20%C2%B7%2023%2F11%2F26?secret=ABC',
+    })
+    const wrapper = await mountCard(service)
+
+    await wrapper.find('[data-test="start"]').trigger('click')
+    await flushPromises()
+
+    const notice = wrapper.find('[data-test="new-entry"]')
+    expect(notice.text()).toContain('BG Sistemas \u00B7 luisa@bg.es \u00B7 23/11/26')
+    expect(notice.text()).toContain('bórrala')
+  })
+})

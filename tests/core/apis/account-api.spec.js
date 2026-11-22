@@ -27,7 +27,7 @@ describe('AccountService', () => {
   // BGSI-276
   it('calls the two-step verification endpoints', async () => {
     const calls = fakeApi({
-      'GET /admin/account/2fa': { enabled: true, recoveryCodesLeft: 8 },
+      'GET /admin/account/2fa': { enabled: true, recoveryCodesLeft: 8, entryName: 'BG Sistemas \u00B7 luisa@bg.es \u00B7 22/11/26' },
       'POST /admin/account/2fa/setup': { secret: 'ABC', otpauthUri: 'otpauth://totp/x' },
       'POST /admin/account/2fa/enable': { recoveryCodes: ['aaaa-bbbb'] },
       'DELETE /admin/account/2fa': '',
@@ -35,7 +35,10 @@ describe('AccountService', () => {
     })
     const service = new AccountService()
 
-    expect(await service.getTwoFactor()).toEqual({ enabled: true, recoveryCodesLeft: 8 })
+    // BGSI-338: name of the entry in the app
+    expect(await service.getTwoFactor()).toEqual({
+      enabled: true, recoveryCodesLeft: 8, entryName: 'BG Sistemas \u00B7 luisa@bg.es \u00B7 22/11/26',
+    })
     expect(await service.setupTwoFactor()).toEqual({ secret: 'ABC', otpauthUri: 'otpauth://totp/x' })
     expect(await service.enableTwoFactor(' 123456 ')).toEqual(['aaaa-bbbb'])
     await service.disableTwoFactor()
