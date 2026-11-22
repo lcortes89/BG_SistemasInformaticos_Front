@@ -86,6 +86,26 @@ import { RouterLink } from 'vue-router'
   .demo-cta__button { width: 100%; text-align: center; }
 }
 
+// BGSI-330: smaller card on mobile (option A): small icon next to the text, thin button under them
+@media (max-width: 560px) {
+  .demo-cta { padding-top: 1.25rem; }
+  .demo-cta__card {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-areas: "icon text" "button button";
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: left;
+  }
+  .demo-cta__icon { grid-area: icon; width: 36px; height: 36px; }
+  .demo-cta__icon svg { width: 18px; height: 18px; }
+  .demo-cta__text { grid-area: text; }
+  .demo-cta__title { font-size: 1rem; line-height: 1.3; }
+  .demo-cta__subtitle { font-size: 0.85rem; }
+  .demo-cta__button { grid-area: button; padding: 0.6rem 1rem; font-size: 0.9rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .demo-cta__button, .demo-cta__button:hover { transition: none; transform: none; }
 }
