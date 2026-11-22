@@ -12,7 +12,7 @@ const props = defineProps({
 const router = useRouter()
 const route = useRoute()
 const {
-  form, errors, isSubmitting, submitError, submit,
+  form, errors, isSubmitting, submitError, submitNotice, submit,
   step, useRecoveryCode, submitCode, backToPassword, toggleRecoveryCode,
 } = useLoginForm(props.authStore)
 
@@ -63,6 +63,7 @@ watch([step, useRecoveryCode], async () => {
 
     <Transition name="slide-fade">
       <p v-if="submitError" class="login-form__alert" role="alert">{{ submitError }}</p>
+      <p v-else-if="submitNotice" class="login-form__notice" role="status">{{ submitNotice }}</p>
     </Transition>
 
     <button type="submit" class="btn btn--primary login-form__submit" :disabled="isSubmitting">
@@ -146,6 +147,15 @@ watch([step, useRecoveryCode], async () => {
     border-radius: var(--radius);
     color: #7f1d1d;
     background: #fee2e2;
+  }
+
+  // BGSI-240: the account exists but its email is not verified yet
+  &__notice {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius);
+    color: #78350f;
+    background: #fffbeb;
   }
 
   &__submit {
