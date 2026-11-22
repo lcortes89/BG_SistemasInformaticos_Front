@@ -223,4 +223,25 @@ const initials = computed(() => props.service.name
   .product__body { padding: 1.25rem; }
   .product__features { grid-template-columns: 1fr; }
 }
+
+// BGSI-330: compact list on mobile (option A): thumbnail on the left, name, short text and actions on the right.
+// It goes after the 760px rule so it wins on phones. Desktop and tablet do not change
+@media (max-width: 560px) {
+  .product { grid-template-columns: 88px minmax(0, 1fr); border-radius: 10px; }
+  .product__media { aspect-ratio: 1 / 1; border-right: 1px solid #eef1f5; border-bottom: 0; }
+  .product__image { padding: 0.4rem; }
+  .product__zoom-hint { display: none; }
+  .product__placeholder { font-size: 1.4rem; }
+  .product__body { gap: 0.4rem; padding: 0.75rem 0.9rem; }
+  .product__brand,
+  .product__block { display: none; }
+  .product__name { margin: 0; font-size: 1.05rem; }
+  .product__description {
+    font-size: 0.85rem; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .product__actions { gap: 0.4rem 0.9rem; margin-top: 0.15rem; }
+  .product__actions .btn { padding: 0.45rem 0.8rem; font-size: 0.8rem; }
+  .product__official { font-size: 0.85rem; }
+}
 </style>

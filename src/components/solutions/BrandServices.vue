@@ -76,6 +76,7 @@ const summary = computed(() => {
 }
 
 @media (max-width: 560px) {
-  .brand-services { padding: 1.25rem; }
+  .brand-services { padding: 1rem; } // BGSI-330
+  .brand-services__grid { gap: 0.75rem; }
 }
 </style>
