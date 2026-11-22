@@ -13,6 +13,7 @@ const props = defineProps({
 
 const {
   view, recoveryCodesLeft, setup, code, recoveryCodes, error, feedback, isBusy,
+  entryName, removedEntryName, newEntryName,
   load, start, confirm, cancelSetup, finish, disable, codesAsText,
 } = useTwoFactorSettings(props.service, props.toQr)
 
@@ -67,6 +68,15 @@ function done() {
 
     <!-- Off -->
     <template v-else-if="view === 'off'">
+      <!-- BGSI-338: the old entry stays in the app; the server cannot delete it -->
+      <div v-if="removedEntryName" class="two-factor__notice two-factor__notice--warn" role="status" data-test="remove-entry">
+        <p><strong>Borra esta entrada de tu app, ya no sirve:</strong></p>
+        <p><code class="two-factor__entry">{{ removedEntryName }}</code></p>
+        <ul>
+          <li><strong>Google Authenticator:</strong> mantén pulsada la entrada y toca la papelera.</li>
+          <li><strong>Microsoft Authenticator:</strong> abre la cuenta, toca el engranaje y elige «Quitar cuenta».</li>
+        </ul>
+      </div>
       <p class="two-factor__text">
         Además de la contraseña, al entrar te pediremos un <strong>código de 6 cifras</strong> de una app de tu móvil
         (Google Authenticator, Microsoft Authenticator...). Así, aunque alguien conozca tu contraseña, no podrá entrar.
@@ -78,6 +88,11 @@ function done() {
 
     <!-- Step 1: QR + first code -->
     <form v-else-if="view === 'setup'" class="admin-form" novalidate @submit.prevent="confirm">
+      <!-- BGSI-338: the name of the new entry, so it can be told apart from old ones -->
+      <div v-if="newEntryName" class="two-factor__notice" data-test="new-entry">
+        <p>Se añadirá a tu app como <code class="two-factor__entry two-factor__entry--new">{{ newEntryName }}</code></p>
+        <p>Si ya tenías otra entrada de BG Sistemas con una fecha anterior, bórrala para no confundirte de código.</p>
+      </div>
       <ol class="two-factor__steps">
         <li>Abre tu app de autenticación y pulsa <strong>«Añadir cuenta»</strong> o <strong>«+»</strong>.</li>
         <li>Escanea este código QR.</li>
@@ -129,6 +144,11 @@ function done() {
         Al entrar te pedimos el código de tu app. Te quedan
         <strong>{{ recoveryCodesLeft }} {{ recoveryCodesLeft === 1 ? 'código' : 'códigos' }} de recuperación</strong>.
       </p>
+      <!-- BGSI-338 -->
+      <p v-if="entryName" class="two-factor__text">
+        En tu app aparece como:<br />
+        <code class="two-factor__entry" data-test="entry-name">{{ entryName }}</code>
+      </p>
       <button type="button" class="admin-form__cancel two-factor__off" :disabled="isBusy" data-test="disable" @click="disable">
         Desactivar
       </button>
@@ -160,6 +180,35 @@ function done() {
   &__feedback { margin: 0; padding: 0.8rem 1rem; border-radius: var(--radius); color: #065f46; background: #ecfdf5; }
   &__main { align-self: flex-start; font: inherit; font-weight: 600; }
   &__off { align-self: flex-start; color: #b91c1c !important; }
+
+  // BGSI-338: name of an entry in the authenticator app
+  &__entry {
+    display: inline-block;
+    margin-top: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--color-navy);
+    background: #f1f5f9;
+    word-break: break-word;
+
+    &--new { outline: 1.5px solid var(--color-orange, #f28c28); }
+  }
+
+  // BGSI-338: blue = information (new entry), amber = action to do (delete the old entry)
+  &__notice {
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius);
+    color: #1e3a8a;
+    background: #eff6ff;
+    line-height: 1.5;
+
+    p { margin: 0 0 0.4rem; }
+    p:last-child { margin-bottom: 0; }
+    ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+
+    &--warn { color: #78350f; background: #fffbeb; }
+  }
 
   &__steps { margin: 0; padding-left: 1.2rem; color: #374151; line-height: 1.6; }
 
