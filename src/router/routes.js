@@ -16,6 +16,8 @@ export const routes = [
   { path: '/admin/nueva-contrasena', name: 'admin-reset-password', component: () => import('@/views/admin/AdminResetPasswordView.vue'), meta: { hideDemoCta: true, hideNav: true } },
   // BGSI-301: link of "change my email" (public: it may be opened in any browser)
   { path: '/admin/confirmar-email', name: 'admin-confirm-email', component: () => import('@/views/admin/AdminConfirmEmailView.vue'), meta: { hideDemoCta: true, hideNav: true } },
+  // BGSI-240: link that verifies the email of a new admin (public: opened from the email)
+  { path: '/admin/verificar-email', name: 'admin-verify-email', component: () => import('@/views/admin/AdminVerifyEmailView.vue'), meta: { hideDemoCta: true, hideNav: true } },
   {
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),

@@ -38,4 +38,14 @@ export default class AuthService {
     const dto = await this.#repo.confirmEmailChange(token)
     return dto.email
   }
+
+  // BGSI-240: opens the link that verifies the email of a new admin
+  async verifyEmail(token) {
+    await this.#repo.verifyEmail(token)
+  }
+
+  // BGSI-240: asks for a new link with the old one (used or expired)
+  async resendVerification(token) {
+    await this.#repo.resendVerification(token)
+  }
 }

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { totp } from './helpers/totp'
+import { activateAdmin } from './helpers/db'
 
 // BGSI-276: two-step verification with the real backend. The test acts as the phone (helpers/totp.js).
 // It never touches the 2FA of the E2E admin: it creates a new admin for itself through the API
@@ -21,6 +22,7 @@ async function createAdmin(request) {
     headers: { ...auth, 'X-Confirm-Token': confirmToken }, data: { email, password: PASSWORD },
   })
   expect(created.status()).toBe(201)
+  activateAdmin(email) // BGSI-240: skip the verification email (see helpers/db.js)
   return email
 }
 

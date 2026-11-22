@@ -137,3 +137,34 @@ describe('useLoginForm', () => {
     })
   })
 })
+
+// BGSI-240: right password, but the new admin has not opened the verification email yet
+describe('useLoginForm with an account not verified', () => {
+  it('shows a notice instead of "wrong credentials"', async () => {
+    const error = Object.assign(new Error('Your account is not verified yet. Check your email'),
+      { status: 401, details: { reason: 'EMAIL_NOT_VERIFIED' } })
+    const fakeStore = { login: vi.fn().mockRejectedValue(error) }
+    const { form, submitError, submitNotice, submit } = useLoginForm(fakeStore)
+    form.email = 'new@bg.es'
+    form.password = 'secret123'
+
+    await submit()
+
+    expect(submitNotice.value).toBe('Tu cuenta aún no está verificada. Revisa tu correo y abre el enlace que te enviamos.')
+    expect(submitError.value).toBeNull()
+  })
+
+  it('hides the notice when the admin tries again', async () => {
+    const error = Object.assign(new Error('x'), { status: 401, details: { reason: 'EMAIL_NOT_VERIFIED' } })
+    const fakeStore = { login: vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce() }
+    const { form, submitNotice, submit } = useLoginForm(fakeStore)
+    form.email = 'new@bg.es'
+    form.password = 'secret123'
+    await submit()
+
+    form.password = 'secret123'
+    await submit()
+
+    expect(submitNotice.value).toBeNull()
+  })
+})

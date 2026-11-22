@@ -86,3 +86,19 @@ describe('AdminLoginForm', () => {
     expect(wrapper.find('#login-password').exists()).toBe(true)
   })
 })
+
+// BGSI-240: right password, but the new admin has not opened the verification email yet
+describe('AdminLoginForm with an account not verified', () => {
+  it('shows the amber notice and not the red alert', async () => {
+    const error = Object.assign(new Error('x'), { status: 401, details: { reason: 'EMAIL_NOT_VERIFIED' } })
+    const { wrapper } = await mountForm({ login: vi.fn().mockRejectedValue(error) })
+    await wrapper.find('#login-email').setValue('new@bg.es')
+    await wrapper.find('#login-password').setValue('secret123')
+
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.find('.login-form__notice').text()).toContain('Tu cuenta aún no está verificada')
+    expect(wrapper.find('.login-form__alert').exists()).toBe(false)
+  })
+})

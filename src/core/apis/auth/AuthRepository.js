@@ -30,4 +30,14 @@ export default class AuthRepository extends BaseRepository {
   async confirmEmailChange(token) {
     return this.post('/confirm-email', { token })
   }
+
+  // BGSI-240: POST /api/auth/verify-email { token } -> 204, or 400 if the link is not valid
+  async verifyEmail(token) {
+    return this.post('/verify-email', { token })
+  }
+
+  // BGSI-240: POST /api/auth/verify-email/resend { token } -> 202 always (it does not tell if the account exists)
+  async resendVerification(token) {
+    return this.post('/verify-email/resend', { token })
+  }
 }
